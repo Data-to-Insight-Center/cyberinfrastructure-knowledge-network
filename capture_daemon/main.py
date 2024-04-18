@@ -24,8 +24,8 @@ if __name__ == '__main__':
 
     topic_list = [NewTopic("request-raw"),
                   NewTopic("request-agg"),
-                  NewTopic("alerts-raw"),
-                  NewTopic("alerts-agg")]
+                  NewTopic("alert-raw"),
+                  NewTopic("alert-agg")]
     admin_client.create_topics(topic_list)
 
     data_entries = []
@@ -57,21 +57,21 @@ if __name__ == '__main__':
         }
 
         producer.produce("request-raw", json.dumps(data), data['server_id'], callback=delivery_callback)
-        producer.poll(0)  # Serve delivery callback
-        tm.sleep(0.5)  # Adjust sleep time as needed to simulate production rate
+        producer.poll(0)
+        tm.sleep(0.1)
 
     # Block until all messages are sent
     producer.poll(10000)
     producer.flush()
 
-    # times = [entry[1] for entry in data_entries]
-    # accuracies = [entry[0] for entry in data_entries]
-    # plt.figure(figsize=(12, 6))
-    # plt.plot(times, accuracies, marker='o', linestyle='-', color='b')
-    # plt.title('Prediction Accuracy Over Time')
-    # plt.xlabel('Time')
-    # plt.ylabel('Prediction Accuracy')
-    # plt.xticks(rotation=45)
-    # plt.tight_layout()
-    # plt.grid(True)
-    # plt.show()
+    times = [entry[1] for entry in data_entries]
+    accuracies = [entry[0] for entry in data_entries]
+    plt.figure(figsize=(12, 6))
+    plt.plot(times, accuracies, marker='o', linestyle='-', color='b')
+    plt.title('Prediction Accuracy Over Time')
+    plt.xlabel('Time')
+    plt.ylabel('Prediction Accuracy')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.grid(True)
+    plt.show()
