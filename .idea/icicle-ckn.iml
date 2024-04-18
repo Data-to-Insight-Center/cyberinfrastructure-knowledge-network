@@ -3,6 +3,14 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/cep_engine/aggregate/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/cep_engine/aggregate/target/archive-tmp" />
+      <excludeFolder url="file://$MODULE_DIR$/cep_engine/aggregate/target/classes" />
+      <excludeFolder url="file://$MODULE_DIR$/cep_engine/aggregate/target/generated-sources" />
+      <excludeFolder url="file://$MODULE_DIR$/cep_engine/aggregate/target/generated-test-sources" />
+      <excludeFolder url="file://$MODULE_DIR$/cep_engine/aggregate/target/maven-archiver" />
+      <excludeFolder url="file://$MODULE_DIR$/cep_engine/aggregate/target/maven-status" />
+      <excludeFolder url="file://$MODULE_DIR$/cep_engine/aggregate/target/test-classes" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.12 (icicle-ckn)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
