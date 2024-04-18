@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  capture_daemon:
+    build: .
+    container_name: capture_daemon
+    depends_on:
+      - broker
+    networks:
+      - ckn
