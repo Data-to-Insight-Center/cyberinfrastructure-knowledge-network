@@ -89,7 +89,7 @@ public class StreamProcessorQoE {
                 .suppress(Suppressed.untilWindowCloses(Suppressed.BufferConfig.unbounded()))
                 .toStream().map((Windowed<String> winKey, CountSumAggregator value) -> {
                     return new KeyValue<>(winKey.key(), process_average(value));
-                }).peek((key, value) -> log.info("Outgoing record - key " + key + " value " + value))
+                }).peek((key, value) -> log.info(String.valueOf(value)))
                 .to(outputTopic, Produced.with(Serdes.String(), averageAggregatorSerde));
 
         // Process each event and filter based on accuracy threshold

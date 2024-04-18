@@ -4,30 +4,31 @@ cd kafka
 docker compose up
 ```
 
+### Build Producer and Produce Events
+```bash
+cd capture-daemon
+docker build -t capture-daemon .
+docker container rm --force capture-daemon || true
+docker run --network=host --name capture-daemon capture-daemon
+```
+
 ### Start Kafka Stream Processor
 ```bash
 cd cep_engine/aggregate
-docker build -t cep_aggregate .
-docker container rm --force cep_aggregate || true
-docker run --network=host --name cep_aggregate cep_aggregate
+docker build -t cep-aggregate .
+docker container rm --force cep-aggregate || true
+docker run --network=host --name cep-aggregate cep-aggregate
 ```
 ```bash
-cd cep_engine/alerts-raw
-docker build -t cep_raw_alert .
-docker container rm --force cep_raw_alert || true
-docker run --network=host --name cep_raw_alert cep_raw_alert
+cd cep_engine/alert-raw
+docker build -t cep-alert-raw .
+docker container rm --force cep-alert-raw || true
+docker run --network=host --name cep-alert-raw cep-alert-raw
 ```
 ```bash
-cd cep_engine/alerts-agg
-docker build -t cep_agg_alert .
-docker container rm --force cep_raw_alert || true
-docker run --network=host --name cep_agg_alert cep_agg_alert
+cd cep_engine/alert-agg
+docker build -t cep-alert-agg .
+docker container rm --force cep-alert-agg || true
+docker run --network=host --name cep-alert-agg cep-alert-agg
 ```
 
-### Build Producer and Produce Events
-```bash
-cd capture_daemon
-docker build -t capture_daemon .
-docker container rm --force capture_daemon || true
-docker run --network=host --name capture_daemon capture_daemon
-```
