@@ -31,7 +31,7 @@ if __name__ == '__main__':
     mean_accuracies = [0.7, 0.4, 0.5, 0.8, 0.2]
 
     start_time = tm.time()
-    while tm.time() - start_time < 100:
+    while tm.time() - start_time < 10000:
         current_time = tm.time() - start_time
         cycle_index = int(current_time // 10) % len(mean_accuracies)
         mean_acc = mean_accuracies[cycle_index]

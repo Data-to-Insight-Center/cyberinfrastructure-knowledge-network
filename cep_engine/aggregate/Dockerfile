@@ -1,4 +1,5 @@
 FROM openjdk:11-jre-slim
+LABEL authors="d2i"
 
 EXPOSE 8080
 

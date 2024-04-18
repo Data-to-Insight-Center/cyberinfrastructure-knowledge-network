@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
-
 public class AlertEvent {
     @Getter @Setter private String server_id;
     @Getter @Setter private String service_id;
@@ -26,6 +24,6 @@ public class AlertEvent {
         this.priority = priority;
         this.metric = metric;
         this.value = value;
-        this.added_time = addedTime;
+        this.added_time = Long.parseLong(String.valueOf(addedTime));
     }
 }
