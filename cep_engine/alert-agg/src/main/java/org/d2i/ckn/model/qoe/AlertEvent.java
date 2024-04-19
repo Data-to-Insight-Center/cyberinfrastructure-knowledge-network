@@ -13,10 +13,10 @@ public class AlertEvent {
     @Getter @Setter private String metric;
     @Getter @Setter private float value;
     @Getter @Setter
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
+//    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
     private long added_time;
 
-    public AlertEvent(String serverId, String serviceId, String clientId, String type, Integer priority, String metric, float value, long addedTime) {
+    public AlertEvent(String serverId, String serviceId, String clientId, String type, Integer priority, String metric, float value, String addedTime) {
         this.server_id = serverId;
         this.service_id = serviceId;
         this.client_id = clientId;
@@ -24,6 +24,6 @@ public class AlertEvent {
         this.priority = priority;
         this.metric = metric;
         this.value = value;
-        this.added_time = Long.parseLong(String.valueOf(addedTime));
+        this.added_time = Long.parseLong(addedTime);
     }
 }
