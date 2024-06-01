@@ -35,5 +35,8 @@ services:
 
 networks:
   ckn:
-    name: ckn
-    driver: bridge
+    external: true
+
+volumes:
+  icicle:
+    external: true

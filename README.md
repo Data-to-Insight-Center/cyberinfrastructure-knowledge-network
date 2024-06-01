@@ -1,30 +1,23 @@
 ### Start Kafka broker
 ```bash
+docker network create ckn
 cd kafka
 docker compose up
 ```
 
-### Build Producer and Produce Events
+### Create Docker volume and mount files
 ```bash
-cd capture-daemon
-docker build -t capture-daemon .
-docker run --network=host --name capture-daemon capture-daemon
+cd power/camera_traps
+docker volume create icicle
+docker build -t camera_traps .
+docker rm -f camera_traps . || true
+docker run --network=ckn --name camera_traps -v icicle:/data camera_traps
 ```
 
-### Start Kafka Stream Processor
+### Create Docker containers to read files and produce events
 ```bash
-cd cep_engine/aggregate
-docker build -t cep-aggregate .
-docker run --network=host --name cep-aggregate cep-aggregate
+cd power/capture_daemon
+docker build -t capture_daemon .
+docker rm -f capture_daemon . || true
+docker run --network=ckn --name capture_daemon -v icicle:/data capture_daemon
 ```
-```bash
-cd cep_engine/alert-raw
-docker build -t cep-alert-raw .
-docker run --network=host --name cep-alert-raw cep-alert-raw
-```
-```bash
-cd cep_engine/alert-agg
-docker build -t cep-alert-agg .
-docker run --network=host --name cep-alert-agg cep-alert-agg
-```
-
