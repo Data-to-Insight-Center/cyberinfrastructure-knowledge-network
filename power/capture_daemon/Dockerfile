@@ -1,17 +1,16 @@
-FROM python:3.8-slim
-LABEL authors="d2i"
+# Dockerfile for capture_daemon
 
-# Set the working directory in the container
+# Use the official Python image from the Docker Hub
+FROM python:3.8-slim
+
+# Set the working directory
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
-COPY . /app
+# Copy the main script to the container
+COPY main.py /app/
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Install watchdog
+RUN pip install watchdog
 
-# Make port 80 available to the world outside this container
-EXPOSE 80
-
-# Run main.py when the container launches
-CMD ["python", "read_from_vol.py"]
+# Command to run the main script
+CMD ["python", "main.py"]
