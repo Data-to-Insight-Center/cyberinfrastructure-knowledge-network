@@ -8,7 +8,7 @@ WORKDIR /app
 COPY main.py /app/
 
 # Install required packages
-RUN pip install watchdog
+RUN pip install -r requirements.txt
 
 # Command to run the main script
 CMD ["python", "main.py"]
