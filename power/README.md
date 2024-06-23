@@ -2,7 +2,7 @@
 cd camera_traps
 docker build -t camera_traps .
 
-cd capture_daemon
+cd ../capture_daemon
 docker build -t capture_daemon .
 
 docker network create cpu_network || true
@@ -15,4 +15,8 @@ docker rm -f capture_daemon || true
 docker run -d --name capture_daemon --network cpu_network -v icicle:/app capture_daemon
 
 docker logs -f capture_daemon
+
+docker network rm cpu_network || true
+docker volume rm icicle || true
+
 ```
