@@ -9,15 +9,8 @@ services:
       - ORACLE_CSV_PATH=/logs/output.csv
       - CKN_LOG_FILE=/logs/ckn.log
       - CKN_KAFKA_BROKER=host.docker.internal:9092
-      - CKN_KAFKA_TOPIC=oracle_events
+      - CKN_KAFKA_TOPIC=oracle-events
       - CAMERA_TRAPS_DEVICE_ID=device_1
-    volumes:
-      - shared-data:/logs:r
 
-volumes:
-  shared-data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /Users/swithana/git/d2i/icicle-ckn/oracle_ckn_daemon
+    volumes:
+      - /Users/swithana/git/d2i/icicle-ckn/oracle_ckn_daemon:/logs:r
