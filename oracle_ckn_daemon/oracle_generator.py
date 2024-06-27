@@ -3,10 +3,11 @@ import time
 from datetime import datetime
 import uuid
 import random
-
+import os
 #
 #This class is used as a stub to generate oracle data for CKN testing.
 #
+ORACLE_EVENTS_FILE = os.getenv('ORACLE_CSV_PATH', '/Users/swithana/git/d2i/icicle-ckn/oracle_ckn_daemon/output.csv')
 
 header = ['image_count', 'UUID', 'image_name', 'image_receiving_timestamp', 'image_scoring_timestamp', 'score_label',
           'score_probability', 'image_store_delete_time', 'image_decision']
@@ -23,12 +24,12 @@ data_template = {
 }
 
 # Open the CSV file for writing
-with open('./output.csv', mode='w', newline='') as file:
+with open(ORACLE_EVENTS_FILE, mode='w', newline='') as file:
     writer = csv.writer(file)
     # writer.writerow(header)  # Write the header
 
     i = 1
-    while True:
+    while i < 10:
         # Update the dynamic parts of the data
         current_time = datetime.utcnow().isoformat() + "Z"
         unique_id = str(uuid.uuid4())
