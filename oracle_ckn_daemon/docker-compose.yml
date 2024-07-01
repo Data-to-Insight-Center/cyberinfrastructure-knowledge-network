@@ -8,7 +8,7 @@ services:
     environment:
       - ORACLE_CSV_PATH=/logs/output.csv
       - CKN_LOG_FILE=/logs/ckn.log
-      - CKN_KAFKA_BROKER=host.docker.internal:9092
+      - CKN_KAFKA_BROKER=<public_ip>:9092
       - CKN_KAFKA_TOPIC=oracle-events
       - CAMERA_TRAPS_DEVICE_ID=device_1
 
