@@ -1,0 +1,34 @@
+{
+  "name": "Neo4jSinkConnectorImageProcessing",
+  "config": {
+    "topics": "oracle-events",
+    "connector.class": "streams.kafka.connect.sink.Neo4jSinkConnector",
+    "errors.retry.timeout": "-1",
+    "errors.retry.delay.max.ms": "1000",
+    "errors.tolerance": "all",
+    "errors.log.enable": true,
+    "errors.log.include.messages": true,
+    "neo4j.server.uri": "bolt://IP:7687",
+    "neo4j.authentication.basic.username": "neo4j",
+    "neo4j.authentication.basic.password": "PWD",
+    "neo4j.topic.cypher.oracle-events": "
+      MERGE (es:EdgeServer {device_id: event.device_id})
+      MERGE (ri:RawImage {UUID: event.UUID})
+      ON CREATE SET
+        ri.image_name = event.image_name,
+        ri.ground_truth = event.ground_truth
+      MERGE (es)-[r:PROCESSED]->(ri)
+      SET r = {
+        image_count: event.image_count,
+        image_receiving_timestamp: datetime(event.image_receiving_timestamp),
+        image_scoring_timestamp: datetime(event.image_scoring_timestamp),
+        model_id: event.model_id,
+        label: event.label,
+        probability: event.probability,
+        image_store_delete_time: datetime(event.image_store_delete_time),
+        image_decision: event.image_decision,
+        ingestion_timestamp: datetime()
+      }
+    "
+  }
+}
