@@ -1,0 +1,25 @@
+CREATE CONSTRAINT edge_server_device_id_unique IF NOT EXISTS
+FOR (es:EdgeServer) REQUIRE es.device_id IS UNIQUE;
+
+CREATE CONSTRAINT raw_image_uuid_unique IF NOT EXISTS
+FOR (ri:RawImage) REQUIRE ri.UUID IS UNIQUE;
+
+
+MERGE (es:EdgeServer {device_id: 1})
+MERGE (ri:RawImage {
+  UUID: "67b83445-2622-50a3-be3b-f7030259576e",
+  name: "/example_images/baby-red-fox.jpg",
+  ground_truth: "animal"
+})
+MERGE (es)<-[r:SERVED_BY]-(ri)
+SET r = {
+  image_count: 2,
+  image_receiving_timestamp: datetime("2024-07-03T20:36:43.081449616+00:00"),
+  image_scoring_timestamp: datetime("2024-07-03T18:56:51.049901"),
+  model_id: "resnet-v2.0-sss",
+  label: "animal",
+  probability: 0.9240000247955322,
+  image_store_delete_time: datetime("2024-07-03T18:56:51.052142827+00:00"),
+  image_decision: "Save",
+  ingestion_timestamp: datetime()
+}
