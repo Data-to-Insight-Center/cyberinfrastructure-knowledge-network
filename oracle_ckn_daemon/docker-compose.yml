@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      - ORACLE_CSV_PATH=/logs/output.csv
+      - ORACLE_CSV_PATH=/logs/oracle_plugin.csv
       - CKN_LOG_FILE=/logs/ckn.log
       - CKN_KAFKA_BROKER=<public_ip>:9092
       - CKN_KAFKA_TOPIC=oracle-events

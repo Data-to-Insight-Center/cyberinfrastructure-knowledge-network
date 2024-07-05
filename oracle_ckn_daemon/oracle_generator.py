@@ -1,69 +1,49 @@
+import json
 import csv
 import time
-from datetime import datetime
 import uuid
+from datetime import datetime, timedelta
 import random
 import os
 #
 #This class is used as a stub to generate oracle data for CKN testing.
 #
-ORACLE_EVENTS_FILE = os.getenv('ORACLE_CSV_PATH', '/Users/swithana/git/d2i/icicle-ckn/oracle_ckn_daemon/output.csv')
+ORACLE_EVENTS_FILE = os.getenv('ORACLE_CSV_PATH', '/Users/swithana/git/d2i/icicle-ckn/oracle_ckn_daemon/oracle_plugin.csv')
 
-header = ['image_count', 'UUID', 'image_name', 'image_receiving_timestamp', 'image_scoring_timestamp', 'score_label',
-          'score_probability', 'image_store_delete_time', 'image_decision']
-data_template = {
-    "image_count": 1,
-    "UUID": "",
-    "image_name": "/example_images/labrador-pup.jpg",
-    "image_receiving_timestamp": "",
-    "image_scoring_timestamp": "",
-    "score_label": "animal",
-    "score_probability": 0.8429999947547913,
-    "image_store_delete_time": "",
-    "image_decision": "Save"
-}
 
-# Open the CSV file for writing
-with open(ORACLE_EVENTS_FILE, mode='w', newline='') as file:
-    writer = csv.writer(file)
-    # writer.writerow(header)  # Write the header
+def generate_entry(index):
+    base_time = datetime.now()
 
-    i = 1
-    while i < 10:
-        # Update the dynamic parts of the data
-        current_time = datetime.utcnow().isoformat() + "Z"
-        unique_id = str(uuid.uuid4())
-        score_probability = round(random.uniform(0.5, 1.0), 6)
+    return {
+        "image_count": index,
+        "UUID": str(uuid.uuid4()),
+        "image_name": f"/example_images/image_{index}.jpg",
+        "ground_truth": random.choice(["animal", "person", "vehicle", "building"]),
+        "image_receiving_timestamp": (base_time + timedelta(minutes=index)).isoformat(),
+        "image_scoring_timestamp": (base_time + timedelta(minutes=index, seconds=30)).isoformat(),
+        "model_id": f"resnet-v{random.randint(1, 3)}.{random.randint(0, 9)}-sss",
+        "label": random.choice(["animal", "person", "vehicle", "building"]),
+        "probability": round(random.uniform(0.7, 0.99), 4),
+        "image_store_delete_time": (base_time + timedelta(minutes=index, seconds=45)).isoformat(),
+        "image_decision": random.choice(["Save", "Delete"])
+    }
 
-        data_template["UUID"] = unique_id
-        data_template["image_count"] = i
-        data_template["image_receiving_timestamp"] = current_time
-        data_template["image_scoring_timestamp"] = current_time
-        data_template["score_probability"] = score_probability
-        data_template["image_store_delete_time"] = current_time
+def write_to_csv(filename, num_entries):
+    fieldnames = ["image_count", "UUID", "image_name", "ground_truth",
+                  "image_receiving_timestamp", "image_scoring_timestamp", "model_id",
+                  "label", "probability", "image_store_delete_time", "image_decision"]
 
-        # increasing the image count by 1
-        i += 1
+    with open(filename, 'w', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
-        # Prepare the row data
-        row = [
-            data_template["image_count"],
-            data_template["UUID"],
-            data_template["image_name"],
-            data_template["image_receiving_timestamp"],
-            data_template["image_scoring_timestamp"],
-            data_template["score_label"],
-            data_template["score_probability"],
-            data_template["image_store_delete_time"],
-            data_template["image_decision"]
-        ]
+        for i in range(num_entries):
+            entry = generate_entry(i + 1)
+            writer.writerow(entry)
+            time.sleep(1)
 
-        # Write the row to the CSV file
-        writer.writerow(row)
-        print(f'Written row to CSV: {row}')
 
-        # Flush the file to ensure data is written
-        file.flush()
+if __name__ == "__main__":
+    number_of_entries = 10  # Change this to generate more or fewer entries
 
-        # Wait for one second
-        time.sleep(1)
+    write_to_csv(ORACLE_EVENTS_FILE, number_of_entries)
+    print(f"Generated {number_of_entries} entries in {ORACLE_EVENTS_FILE}")

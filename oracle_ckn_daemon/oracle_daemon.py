@@ -7,14 +7,16 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from confluent_kafka import Producer, KafkaError
 
-ORACLE_EVENTS_FILE = os.getenv('ORACLE_CSV_PATH', '/Users/swithana/git/d2i/icicle-ckn/oracle_ckn_daemon/output.csv')
+ORACLE_EVENTS_FILE = os.getenv('ORACLE_CSV_PATH', '/Users/swithana/git/d2i/icicle-ckn/oracle_ckn_daemon/oracle_plugin.csv')
 CKN_LOG_FILE = os.getenv('CKN_LOG_FILE', './ckn_daemon.log')
 KAFKA_BROKER = os.getenv('CKN_KAFKA_BROKER', 'localhost:9092')
 KAFKA_TOPIC = os.getenv('CKN_KAFKA_TOPIC', 'oracle-events')
 DEVICE_ID = os.getenv('CAMERA_TRAPS_DEVICE_ID', 'device_1')
 
 
-header = ['image_count', 'UUID', 'image_name', 'image_receiving_timestamp', 'image_scoring_timestamp', 'score_label', 'score_probability', 'image_store_delete_time', 'image_decision']
+header = ["image_count", "UUID", "image_name", "ground_truth",
+                  "image_receiving_timestamp", "image_scoring_timestamp", "model_id",
+                  "label", "probability", "image_store_delete_time", "image_decision"]
 
 
 class OracleEventHandler(FileSystemEventHandler):
