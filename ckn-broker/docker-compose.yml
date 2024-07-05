@@ -49,6 +49,5 @@ services:
       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: "1"
       CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
     volumes:
-      - ./setup-connector.sh:/setup-connector.sh
-      - ./neo4jsink-oracle-events-connector.json:/neo4j-sink-config.json
-    command: [ "sh", "-c", "chmod +x /setup-connector.sh && /setup-connector.sh" ]
+      - ./:/app
+    command: [ "sh", "-c", "chmod +x /app/setup_connector.sh && /app/setup_connector.sh" ]

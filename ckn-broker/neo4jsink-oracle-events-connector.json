@@ -1,5 +1,5 @@
 {
-  "name": "Neo4jSinkConnectorImageProcessing",
+  "name": "Neo4jSinkConnectorCameraTraps",
   "config": {
     "topics": "oracle-events",
     "connector.class": "streams.kafka.connect.sink.Neo4jSinkConnector",
@@ -8,6 +8,10 @@
     "errors.tolerance": "all",
     "errors.log.enable": true,
     "errors.log.include.messages": true,
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "key.converter.schemas.enable": false,
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": false,
     "neo4j.server.uri": "bolt://IP:7687",
     "neo4j.authentication.basic.username": "neo4j",
     "neo4j.authentication.basic.password": "PWD",
@@ -17,7 +21,7 @@
       ON CREATE SET
         ri.image_name = event.image_name,
         ri.ground_truth = event.ground_truth
-      MERGE (es)-[r:PROCESSED]->(ri)
+      MERGE (es)<-[r:SERVED_BY]-(ri)
       SET r = {
         image_count: event.image_count,
         image_receiving_timestamp: datetime(event.image_receiving_timestamp),

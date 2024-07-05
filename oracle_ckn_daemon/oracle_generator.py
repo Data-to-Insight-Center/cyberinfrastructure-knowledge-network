@@ -33,7 +33,7 @@ def write_to_csv(filename, num_entries):
                   "image_receiving_timestamp", "image_scoring_timestamp", "model_id",
                   "label", "probability", "image_store_delete_time", "image_decision"]
 
-    with open(filename, 'w', newline='') as csvfile:
+    with open(filename, 'a', newline='') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         for i in range(num_entries):
