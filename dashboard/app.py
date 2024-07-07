@@ -58,7 +58,7 @@ def consume_messages():
         consumer.close()
 
 def update_log(new_message):
-    log_pane.value += json.dumps(new_message, indent=2) + '\n\n'
+    log_pane.value += json.dumps(new_message) + '\n\n'
     log_pane.param.trigger('value')  # Manually trigger the update to the value property
 
 # Function to update the Bokeh plot
