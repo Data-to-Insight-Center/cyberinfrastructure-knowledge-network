@@ -34,10 +34,7 @@ def generate_entry(index):
 if __name__ == '__main__':
 
     config = {
-        # User-specific properties that you must set
-        'bootstrap.servers': 'localhost:57581',
-
-        # Fixed properties
+        'bootstrap.servers': 'localhost:57581', # Replace with actual Kafka port
         'acks': 'all'
     }
 
