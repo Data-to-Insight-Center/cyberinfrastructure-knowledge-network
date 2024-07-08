@@ -11,33 +11,33 @@ pn.extension()
 
 messages = []
 
-log_pane = pn.widgets.TextAreaInput(value='', height=340, sizing_mode='stretch_width', disabled=True)
+checkbox = pn.widgets.Checkbox(name='Show saved events only')
+log_pane = pn.widgets.TextAreaInput(name='All Events', value='', height=300, sizing_mode='stretch_width', disabled=True)
+alerts_pane = pn.widgets.TextAreaInput(name='Alerts',value='', height=300, sizing_mode='stretch_width', disabled=True)
 
 # ColumnDataSource for the Bokeh plot
 source = ColumnDataSource(data={'time': [], 'probability': []})
-plot = figure(title="Score Probability Over Time", x_axis_type='datetime', height=340, sizing_mode='stretch_width')
+plot = figure(title="Score Probability Over Time", x_axis_type='datetime', height=330, sizing_mode='stretch_width')
 plot.line(x='time', y='probability', source=source, line_width=2)
 plot.xaxis.axis_label = 'Time'
 plot.yaxis.axis_label = 'Score Probability'
 
 def consume_messages():
     config = {
-        'bootstrap.servers': 'localhost:57581',
-        'group.id': 'kafka-python-getting-started',
+        'bootstrap.servers': 'localhost:54622',
+        'group.id': 'oracle-events',
         'auto.offset.reset': 'earliest'
     }
 
     consumer = Consumer(config)
-    consumer.subscribe(["accuracy"])
+    consumer.subscribe(["oracle-events"])
 
     try:
-        print("Starting Kafka consumer...")
         while True:
             msg = consumer.poll(1.0)
             if msg is not None:
                 if msg.error():
                     if msg.error().code() == KafkaError._PARTITION_EOF:
-                        # End of partition event
                         print(f"Reached end of partition: {msg.topic()} [{msg.partition()}] at offset {msg.offset()}")
                     elif msg.error():
                         print(f"Consumer error: {msg.error()}")
@@ -58,16 +58,20 @@ def consume_messages():
         consumer.close()
 
 def update_log(new_message):
-    log_pane.value += json.dumps(new_message) + '\n\n'
+    log_pane.value += json.dumps(new_message) + '\n'
     log_pane.param.trigger('value')  # Manually trigger the update to the value property
 
-# Function to update the Bokeh plot
 def update_plot(new_message):
     try:
         new_data = {
             'time': [datetime.strptime(new_message["image_scoring_timestamp"], '%Y-%m-%dT%H:%M:%S.%f')],
-            'probability': [new_message["probability"]]
+            'probability': [float(new_message["probability"])]
         }
+
+        for key in source.data.keys():
+            if key not in new_data:
+                new_data[key] = source.data[key][-1:]
+
         pn.state.execute(lambda: source.stream(new_data, rollover=200))
     except Exception as e:
         print(f"Error updating plot: {e}")
@@ -82,14 +86,13 @@ threading.Thread(target=consume_messages, daemon=True).start()
 # Create the FastListTemplate
 template = pn.template.FastListTemplate(
     title="Cyberinfrastructure Knowledge Network",
-    sidebar=[],
+    sidebar=[checkbox],
     main=[
-        pn.Column(log_pane, sizing_mode='stretch_width'),
+        pn.Row(pn.Column(log_pane, sizing_mode='stretch_width'),
+        pn.Column(alerts_pane, sizing_mode='stretch_width')),
         plot,
     ],
-    theme="dark",
-    accent_base_color="#DC143C",
-    header_background="#DC143C",
+    accent="#800000"
 )
 
 # Serve the template
