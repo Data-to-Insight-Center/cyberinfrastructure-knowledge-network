@@ -82,6 +82,15 @@ class OracleEventHandler(FileSystemEventHandler):
             label = score.get("label")
             probability = score.get("probability")
 
+
+            # # Extract the label with max probability
+            # max_label = None
+            # max_probability = None
+            # if scores:
+            #     max_score = max(scores, key=lambda x: x.get("probability", 0))
+            #     max_label = max_score.get("label")
+            #     max_probability = max_score.get("probability")
+
             # Generate the event
             event = {
                 "image_count": image_count,
