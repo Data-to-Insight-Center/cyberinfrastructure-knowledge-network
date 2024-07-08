@@ -25,7 +25,7 @@ plot.yaxis.axis_label = 'Score Probability'
 def consume_messages():
     config = {
         'bootstrap.servers': 'localhost:54622',
-        'group.id': 'oracle-events',
+        'group.id': 'ckn-analytics-dashboard',
         'auto.offset.reset': 'earliest'
     }
 
@@ -85,14 +85,14 @@ threading.Thread(target=consume_messages, daemon=True).start()
 
 # Create the FastListTemplate
 template = pn.template.FastListTemplate(
-    title="Cyberinfrastructure Knowledge Network",
+    title="CKN Analytics Dashboard",
     sidebar=[checkbox],
     main=[
         pn.Row(pn.Column(log_pane, sizing_mode='stretch_width'),
         pn.Column(alerts_pane, sizing_mode='stretch_width')),
         plot,
     ],
-    accent="#800000"
+    accent="#990000"
 )
 
 # Serve the template
