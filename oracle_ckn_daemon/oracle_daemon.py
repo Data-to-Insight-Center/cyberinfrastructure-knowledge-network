@@ -76,20 +76,21 @@ class OracleEventHandler(FileSystemEventHandler):
             image_scoring_timestamp = value.get("image_scoring_timestamp")
             image_store_delete_time = value.get("image_store_delete_time", value.get("image_delete_time"))
             image_decision = value.get("image_decision")
+            model_id = value.get("model_id")
 
-            # Extract the first score (assuming there's at least one)
-            score = value.get("score", [{}])[0]
-            label = score.get("label")
-            probability = score.get("probability")
+            # Extract the label with max probability for event processing.
+            scores = value.get("score", [])
+            if scores:
+                highest_score = max(scores, key=lambda x: x["probability"])
+                label = highest_score["label"]
+                probability = highest_score["probability"]
 
-
-            # # Extract the label with max probability
-            # max_label = None
-            # max_probability = None
-            # if scores:
-            #     max_score = max(scores, key=lambda x: x.get("probability", 0))
-            #     max_label = max_score.get("label")
-            #     max_probability = max_score.get("probability")
+                # Flatten the scores component as a JSON string for storing.
+                flattened_scores = json.dumps(scores)
+            else:
+                label = None
+                probability = 0
+                flattened_scores = None
 
             # Generate the event
             event = {
@@ -99,11 +100,12 @@ class OracleEventHandler(FileSystemEventHandler):
                 "ground_truth": ground_truth,
                 "image_receiving_timestamp": image_receiving_timestamp,
                 "image_scoring_timestamp": image_scoring_timestamp,
-                "model_id": "resnet-v2.6-sss",  # Assuming model_id is fixed as per the example
+                "model_id": model_id,
                 "label": label,
                 "probability": probability,
                 "image_store_delete_time": image_store_delete_time,
-                "image_decision": image_decision
+                "image_decision": image_decision,
+                "flattened_scores": flattened_scores
             }
             self.produce_event(event)
 
