@@ -5,6 +5,23 @@ CREATE CONSTRAINT raw_image_uuid_unique IF NOT EXISTS
 FOR (ri:RawImage) REQUIRE ri.UUID IS UNIQUE;
 
 
+# recreate the input json
+MATCH (es:EdgeServer)<-[r:SERVED_BY]-(ri:RawImage)
+RETURN {
+  image_count: r.image_count,
+  UUID: ri.UUID,
+  image_name: ri.image_name,
+  ground_truth: ri.ground_truth,
+  image_receiving_timestamp: toString(r.image_receiving_timestamp),
+  image_scoring_timestamp: toString(r.image_scoring_timestamp),
+  model_id: r.model_id,
+  flattened_scores: r.scores,
+  image_store_delete_time: toString(r.image_store_delete_time),
+  image_decision: r.image_decision,
+  device_id: es.device_id
+} AS event
+
+# example ingestion query
 MERGE (es:EdgeServer {device_id: 1})
 MERGE (ri:RawImage {
   UUID: "67b83445-2622-50a3-be3b-f7030259576e",
@@ -17,8 +34,7 @@ SET r = {
   image_receiving_timestamp: datetime("2024-07-03T20:36:43.081449616+00:00"),
   image_scoring_timestamp: datetime("2024-07-03T18:56:51.049901"),
   model_id: "resnet-v2.0-sss",
-  label: "animal",
-  probability: 0.9240000247955322,
+  scores: "[{"label": "vehicle", "probability": 0.08139999955892563}]"
   image_store_delete_time: datetime("2024-07-03T18:56:51.052142827+00:00"),
   image_decision: "Save",
   ingestion_timestamp: datetime()
