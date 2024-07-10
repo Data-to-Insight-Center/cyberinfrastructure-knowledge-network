@@ -27,8 +27,7 @@
         image_receiving_timestamp: datetime(event.image_receiving_timestamp),
         image_scoring_timestamp: datetime(event.image_scoring_timestamp),
         model_id: event.model_id,
-        label: event.label,
-        probability: event.probability,
+        scores: event.flattened_scores,
         image_store_delete_time: datetime(event.image_store_delete_time),
         image_decision: event.image_decision,
         ingestion_timestamp: datetime()
