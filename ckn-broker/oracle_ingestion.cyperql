@@ -15,7 +15,7 @@ RETURN {
   image_receiving_timestamp: toString(r.image_receiving_timestamp),
   image_scoring_timestamp: toString(r.image_scoring_timestamp),
   model_id: r.model_id,
-  flattened_scores: r.scores,
+  scores: r.scores,
   image_store_delete_time: toString(r.image_store_delete_time),
   image_decision: r.image_decision,
   device_id: es.device_id
