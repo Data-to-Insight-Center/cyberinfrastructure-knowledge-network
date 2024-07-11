@@ -72,7 +72,7 @@ class OracleEventHandler(FileSystemEventHandler):
                     data = json.load(file)
                     break
             except json.JSONDecodeError:
-                logging.info("File not complete. Waiting for the file to be completely written")
+                logging.debug("File not complete. Waiting for the file to be completely written")
                 time.sleep(1)
 
         # Process each entry in the JSON data
