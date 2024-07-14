@@ -5,19 +5,23 @@ import panel as pn
 from confluent_kafka import Consumer
 from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource
-import datetime
-from dateutil import parser
+import os
 
 pn.extension(sizing_mode="stretch_width")
+CKN_KAFKA_BROKER = os.getenv('CKN_KAFKA_BROKER', 'localhost:9092')
+DASHBOARD_GROUP_ID = os.getenv('DASHBOARD_GROUP_ID', 'ckn-analytics-dashboard')
+CKN_KAFKA_OFFSET = os.getenv('CKN_KAFKA_OFFSET', 'earliest')
+ORACLE_EVENTS_TOPIC = os.getenv('ORACLE_EVENTS_TOPIC', 'oracle-events')
+ORACLE_ALERTS_TOPIC = os.getenv('ORACLE_ALERTS_TOPIC', 'oracle-alerts')
 
 # Create a lock for thread-safe updates
 event_lock = threading.Lock()
 
 def create_consumer():
     return Consumer({
-        'bootstrap.servers': '129.114.35.150:9092',
-        'group.id': f'ckn-analytics-dashboard-{random.randint(1, 1000)}',
-        'auto.offset.reset': 'earliest'
+        'bootstrap.servers': CKN_KAFKA_BROKER,
+        'group.id': DASHBOARD_GROUP_ID,
+        'auto.offset.reset': CKN_KAFKA_OFFSET
     })
 
 alert_stream = pn.pane.JSON()
@@ -28,6 +32,24 @@ source = ColumnDataSource(data=event_dict)
 def consume_topic(topic_name, update_function):
     consumer = create_consumer()
     consumer.subscribe([topic_name])
+
+
+source = ColumnDataSource(data={'time': [], 'probability': []})
+plot = figure(title="Score Probability Over Time", x_axis_type='datetime', height=330, sizing_mode='stretch_width')
+plot.line(x='time', y='probability', source=source, line_width=2)
+plot.xaxis.axis_label = 'Time'
+plot.yaxis.axis_label = 'Score Probability'
+
+# Function to consume messages from Kafka
+def consume_messages():
+    config = {
+        'bootstrap.servers': CKN_KAFKA_BROKER,
+        'group.id': DASHBOARD_GROUP_ID,
+        'auto.offset.reset': CKN_KAFKA_OFFSET
+    }
+
+    consumer = Consumer(config)
+    consumer.subscribe([ORACLE_EVENTS_TOPIC])
 
     while True:
         msg = consumer.poll(1.0)
