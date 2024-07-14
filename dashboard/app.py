@@ -12,8 +12,8 @@ streaming_component = pn.pane.JSON()
 checkbox = pn.widgets.Checkbox(name='Show saved events only')
 
 CKN_KAFKA_BROKER = os.getenv('CKN_KAFKA_BROKER', 'localhost:9092')
-DASHBOARD_GROUP_ID = os.getenv('CKN_KAFKA_GROUP_ID', 'ckn-analytics-dashboard')
-KAFKA_OFFSET = os.getenv('CKN_KAFKA_OFFSET', 'earliest')
+DASHBOARD_GROUP_ID = os.getenv('DASHBOARD_GROUP_ID', 'ckn-analytics-dashboard')
+CKN_KAFKA_OFFSET = os.getenv('CKN_KAFKA_OFFSET', 'earliest')
 ORACLE_EVENTS_TOPIC = os.getenv('ORACLE_EVENTS_TOPIC', 'oracle-events')
 ORACLE_ALERTS_TOPIC = os.getenv('ORACLE_ALERTS_TOPIC', 'oracle-alerts')
 
@@ -29,7 +29,7 @@ def consume_messages():
     config = {
         'bootstrap.servers': CKN_KAFKA_BROKER,
         'group.id': DASHBOARD_GROUP_ID,
-        'auto.offset.reset': KAFKA_OFFSET
+        'auto.offset.reset': CKN_KAFKA_OFFSET
     }
 
     consumer = Consumer(config)
