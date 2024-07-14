@@ -4,11 +4,19 @@ import panel as pn
 from confluent_kafka import Consumer
 from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource
+import os
 
 pn.extension(sizing_mode="stretch_width")
 
 streaming_component = pn.pane.JSON()
 checkbox = pn.widgets.Checkbox(name='Show saved events only')
+
+CKN_KAFKA_BROKER = os.getenv('CKN_KAFKA_BROKER', 'localhost:9092')
+DASHBOARD_GROUP_ID = os.getenv('CKN_KAFKA_GROUP_ID', 'ckn-analytics-dashboard')
+KAFKA_OFFSET = os.getenv('CKN_KAFKA_OFFSET', 'earliest')
+ORACLE_EVENTS_TOPIC = os.getenv('ORACLE_EVENTS_TOPIC', 'oracle-events')
+ORACLE_ALERTS_TOPIC = os.getenv('ORACLE_ALERTS_TOPIC', 'oracle-alerts')
+
 
 source = ColumnDataSource(data={'time': [], 'probability': []})
 plot = figure(title="Score Probability Over Time", x_axis_type='datetime', height=330, sizing_mode='stretch_width')
@@ -19,13 +27,13 @@ plot.yaxis.axis_label = 'Score Probability'
 # Function to consume messages from Kafka
 def consume_messages():
     config = {
-        'bootstrap.servers': 'localhost:9092',
-        'group.id': 'ckn-analytics-dashboard',
-        'auto.offset.reset': 'earliest'
+        'bootstrap.servers': CKN_KAFKA_BROKER,
+        'group.id': DASHBOARD_GROUP_ID,
+        'auto.offset.reset': KAFKA_OFFSET
     }
 
     consumer = Consumer(config)
-    consumer.subscribe(["oracle-alerts"])
+    consumer.subscribe([ORACLE_EVENTS_TOPIC])
 
     while True:
         msg = consumer.poll(1.0)
