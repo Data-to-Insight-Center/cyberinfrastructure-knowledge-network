@@ -7,13 +7,20 @@ import panel as pn
 from confluent_kafka import Consumer
 from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource
+import os
 
 pn.extension(sizing_mode="stretch_width")
 
+CKN_KAFKA_BROKER = os.getenv('CKN_KAFKA_BROKER', 'localhost:9092')
+DASHBOARD_GROUP_ID = os.getenv('DASHBOARD_GROUP_ID', 'ckn-analytics-dashboard')
+CKN_KAFKA_OFFSET = os.getenv('CKN_KAFKA_OFFSET', 'earliest')
+ORACLE_EVENTS_TOPIC = os.getenv('ORACLE_EVENTS_TOPIC', 'oracle-events')
+ORACLE_ALERTS_TOPIC = os.getenv('ORACLE_ALERTS_TOPIC', 'oracle-alerts')
+
 CONFIG = {
-    'bootstrap.servers': '129.114.35.150:9092',
-    'group.id': f'ckn-analytics-dashboard-{random.randint(1, 1000)}',
-    'auto.offset.reset': 'earliest'
+    'bootstrap.servers': CKN_KAFKA_BROKER,
+    'group.id': DASHBOARD_GROUP_ID,
+    'auto.offset.reset': CKN_KAFKA_OFFSET
 }
 
 def create_consumer():
@@ -42,8 +49,8 @@ def update_event_stream(event):
     xs.append(event["image_receiving_timestamp"])
     ys.append(event["probability"])
 
-threading.Thread(target=consume_topic, args=("oracle-alerts", update_alert_stream), daemon=True).start()
-threading.Thread(target=consume_topic, args=("oracle-events", update_event_stream), daemon=True).start()
+threading.Thread(target=consume_topic, args=(ORACLE_ALERTS_TOPIC, update_alert_stream), daemon=True).start()
+threading.Thread(target=consume_topic, args=(ORACLE_EVENTS_TOPIC, update_event_stream), daemon=True).start()
 
 alerts_card = pn.Card(alert_stream, title="Alerts")
 events_card = pn.Card(event_stream, title="Events", collapsed=True)
