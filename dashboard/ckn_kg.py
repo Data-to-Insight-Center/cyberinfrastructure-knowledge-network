@@ -52,7 +52,6 @@ class CKNKnowledgeGraph():
             return pd.DataFrame()
 
         df = pd.DataFrame(alerts)
-        df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
 
         return df
 

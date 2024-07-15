@@ -15,14 +15,14 @@
     "neo4j.server.uri": "bolt://IP:7687",
     "neo4j.authentication.basic.username": "neo4j",
     "neo4j.authentication.basic.password": "PWD",
-    "neo4j.topic.cypher.oracle-events": "
+    "neo4j.topic.cypher.oracle-alerts": ",
         MERGE (alert:ALERT {UUID: randomUUID()})
         SET alert.alert_name = event.alert_name,
         alert.priority = event.priority,
         alert.description = event.description,
         alert.source_topic = event.source_topic,
         alert.timestamp = datetime({epochMillis: event.timestamp}),
-        alert.event_data = event.event_data
+        alert.event_data = apoc.convert.toJson(event.event_data)
     "
   }
 }
