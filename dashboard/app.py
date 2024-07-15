@@ -1,6 +1,8 @@
+import asyncio
 import json
 import random
 import threading
+import numpy as np
 import panel as pn
 from confluent_kafka import Consumer
 from bokeh.plotting import figure
@@ -14,14 +16,13 @@ CONFIG = {
     'auto.offset.reset': 'earliest'
 }
 
-# Create a separate consumer for each topic to avoid potential issues with sharing a single consumer instance
 def create_consumer():
     return Consumer(CONFIG)
 
 alert_stream = pn.pane.JSON()
 event_stream = pn.pane.JSON()
+xs, ys = [], []
 
-# General function to consume messages from Kafka
 def consume_topic(topic_name, update_function):
     consumer = create_consumer()
     consumer.subscribe([topic_name])
@@ -38,28 +39,33 @@ def update_alert_stream(event):
 
 def update_event_stream(event):
     event_stream.object = json.dumps(event, indent=2)
+    xs.append(event["image_receiving_timestamp"])
+    ys.append(event["probability"])
 
-# Start Kafka consumers in separate threads
 threading.Thread(target=consume_topic, args=("oracle-alerts", update_alert_stream), daemon=True).start()
 threading.Thread(target=consume_topic, args=("oracle-events", update_event_stream), daemon=True).start()
 
 alerts_card = pn.Card(alert_stream, title="Alerts")
-events_card = pn.Card(event_stream, title="Events")
+events_card = pn.Card(event_stream, title="Events", collapsed=True)
 checkbox = pn.widgets.Checkbox(name='Show saved events only')
 
-source = ColumnDataSource(data={'time': [], 'probability': []})
-plot = figure(title="Score Probability Over Time", x_axis_type='datetime', height=330, sizing_mode='stretch_width')
-plot.line(x='time', y='probability', source=source, line_width=2)
-plot.xaxis.axis_label = 'Time'
-plot.yaxis.axis_label = 'Score Probability'
+p = figure(sizing_mode='stretch_width', title='Probability Over Time')
+cds = ColumnDataSource(data={'x': xs, 'y': ys})
+p.line('x', 'y', source=cds)
 
-# Create the FastListTemplate
+def stream():
+    if xs and ys:
+        cds.stream({'x': [xs[-1]], 'y': [ys[-1]]})
+
+cb = pn.state.add_periodic_callback(stream, 100)
+
+bk_pane = pn.pane.Bokeh(p)
+
 template = pn.template.FastListTemplate(
     title="CKN Analytics Dashboard",
-    main=[alerts_card, events_card, plot],
+    main=[alerts_card, events_card, bk_pane],
     logo="https://www.iu.edu/images/brand/brand-expression/iu-trident-promo.jpg",
     accent="#990000"
 )
 
-# Serve the template
 template.servable()
