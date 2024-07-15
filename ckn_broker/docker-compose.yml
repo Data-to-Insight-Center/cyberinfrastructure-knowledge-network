@@ -15,6 +15,11 @@ services:
       - zookeeper
     ports:
       - "9092:9092"
+    healthcheck:
+      test: kafka-topics --bootstrap-server broker:9092 --list
+      interval: 30s
+      timeout: 10s
+      retries: 3
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -52,3 +57,27 @@ services:
       - ./:/app
     command: [ "sh", "-c", "chmod +x /app/setup_connector.sh && /app/setup_connector.sh" ]
 
+  oracle-alert-processor:
+    image: iud2i/ckn-cameratraps-acc-alert:v0.0.1
+    depends_on:
+      broker:
+        condition: service_healthy
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=broker:29092
+      - ORACLE_ACC_CRITICAL_THRESHOLD=0.5
+      - ORACLE_INPUT_TOPIC=oracle-events
+      - ORACLE_ACC_ALERT_TOPIC=oracle-alerts
+      - APP_ID=ckn-camera-traps-oracle-processor
+
+  oracle-aggr-processor:
+    image: iud2i/ckn-cameratraps-agg:v0.0.1
+    depends_on:
+      broker:
+        condition: service_healthy
+    environment:
+      - CKN_BROKERS=broker:29092
+        # Size of the tumbling window in minutes
+      - CKN_ORACLE_WINDOW_TIME=1
+      - ORACLE_INPUT_TOPIC=oracle-events
+      - ORACLE_AGG_ALERT_TOPIC=oracle-aggregated
+      - APP_ID=ckn-camera-traps-oracle-aggregator
