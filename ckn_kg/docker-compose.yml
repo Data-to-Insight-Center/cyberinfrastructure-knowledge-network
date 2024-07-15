@@ -35,9 +35,9 @@ services:
       - "8502:8502"
 
     environment:
-      CKN_KG_URI: bolt://localhost:7687
-      CKN_KG_USER: neo4j
-      CKN_KG_PWD: pwd
+      - CKN_KG_URI=bolt://localhost:7687
+      - CKN_KG_USER=neo4j
+      - CKN_KG_PWD=pwd
 
 volumes:
   neo4j_data:
