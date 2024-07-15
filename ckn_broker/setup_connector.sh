@@ -20,6 +20,7 @@ echo "Kafka Connect is ready!"
 
 echo "Creating Neo4j Sink Connector"
 curl -X POST -H "Content-Type: application/json" --data @/app/neo4jsink-oracle-events-connector.json http://localhost:8083/connectors
+curl -X POST -H "Content-Type: application/json" --data @/app/neo4jsink-oracle-alerts-connector.json http://localhost:8083/connectors
 
 echo "Connector setup completed"
 
