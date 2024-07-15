@@ -52,14 +52,3 @@ services:
       - ./:/app
     command: [ "sh", "-c", "chmod +x /app/setup_connector.sh && /app/setup_connector.sh" ]
 
-  ckn-dashboard:
-    image: iud2i/ckn-analytics-dashboard:latest
-    depends_on:
-      - kafka-connect
-    ports:
-      - "8052:8052"
-    environment:
-      CKN_KG_URI: bolt://localhost:7687
-      CKN_KG_USER: neo4j
-      CKN_KG_PWD: pwd
-

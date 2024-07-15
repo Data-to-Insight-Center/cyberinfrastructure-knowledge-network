@@ -24,6 +24,17 @@ services:
       timeout: 5s
       retries: 5
 
+  ckn-dashboard:
+    image: iud2i/ckn-analytics-dashboard:latest
+    depends_on:
+      - neo4j
+    ports:
+      - "8052:8052"
+    environment:
+      CKN_KG_URI: bolt://localhost:7687
+      CKN_KG_USER: neo4j
+      CKN_KG_PWD: pwd
+
 volumes:
   neo4j_data:
   neo4j_logs:
