@@ -8,9 +8,11 @@ services:
     environment:
       - ORACLE_CSV_PATH=/logs/image_mapping_final.json
       - CKN_LOG_FILE=/logs/ckn.log
-      - CKN_KAFKA_BROKER=<public_ip>:9092
+      - CKN_KAFKA_BROKER=localhost:9092
       - CKN_KAFKA_TOPIC=oracle-events
       - CAMERA_TRAPS_DEVICE_ID=device_1
+      - USER_ID=swithana
+      - EXPERIMENT_ID=experiment_1
 
     volumes:
-      - /Users/swithana/git/d2i/icicle-ckn/oracle_ckn_daemon:/logs:r
+      - /Users/swithana/git/icicle/camera-traps/releases/0.3.3/oracle_plugin_dir:/logs:r

@@ -16,12 +16,18 @@
     "neo4j.authentication.basic.username": "neo4j",
     "neo4j.authentication.basic.password": "PWD",
     "neo4j.topic.cypher.oracle-events": "
-      MERGE (es:EdgeServer {device_id: event.device_id})
+      MERGE (device:EdgeDevice {device_id: event.device_id})
+      MERGE (ex:Experiment {experiment_id: event.experiment_id}) ON CREATE SET ex.start_time = timestamp()
+      MERGE (user:User {user_id: event.user_id})
+      MERGE (user)<-[exr:SUBMITTED_BY]-(ex) ON CREATE SET exr.submitted_time = timestamp()
+      MERGE (device)<-[dex:EXECUTED_ON]-(ex) ON CREATE SET dex.submitted_time = timestamp()
+      MERGE (model:Model {model_id: event.model_id})
+      MERGE (model)<-[mdex:USED_BY]-(ex) ON CREATE SET mdex.start_time = timestamp()
       MERGE (ri:RawImage {UUID: event.UUID})
       ON CREATE SET
         ri.image_name = event.image_name,
         ri.ground_truth = event.ground_truth
-      MERGE (es)<-[r:SERVED_BY]-(ri)
+      MERGE (ex)<-[r:PROCESSED_BY]-(ri)
       SET r = {
         image_count: event.image_count,
         image_receiving_timestamp: datetime(event.image_receiving_timestamp),

@@ -1,9 +1,17 @@
-CREATE CONSTRAINT edge_server_device_id_unique IF NOT EXISTS
-FOR (es:EdgeServer) REQUIRE es.device_id IS UNIQUE;
+CREATE CONSTRAINT edge_device_id_unique IF NOT EXISTS
+FOR (es:EdgeDevice) REQUIRE es.device_id IS UNIQUE;
 
 CREATE CONSTRAINT raw_image_uuid_unique IF NOT EXISTS
 FOR (ri:RawImage) REQUIRE ri.UUID IS UNIQUE;
 
+CREATE CONSTRAINT model_id_unique IF NOT EXISTS
+FOR (md:Model) REQUIRE md.model_id IS UNIQUE;
+
+CREATE CONSTRAINT experiment_uuid_unique IF NOT EXISTS
+FOR (ex:Experiment) REQUIRE ex.experiment_id IS UNIQUE;
+
+CREATE CONSTRAINT user_id_unique IF NOT EXISTS
+FOR (user:User) REQUIRE user.user_id IS UNIQUE;
 
 # recreate the input json
 MATCH (es:EdgeServer)<-[r:SERVED_BY]-(ri:RawImage)
