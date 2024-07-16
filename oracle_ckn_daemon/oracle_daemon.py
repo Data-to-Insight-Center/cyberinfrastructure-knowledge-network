@@ -1,4 +1,3 @@
-import csv
 import logging
 import time
 import json
@@ -14,22 +13,21 @@ CKN_LOG_FILE = os.getenv('CKN_LOG_FILE', './ckn_daemon.log')
 KAFKA_BROKER = os.getenv('CKN_KAFKA_BROKER', 'localhost:9092')
 KAFKA_TOPIC = os.getenv('CKN_KAFKA_TOPIC', 'oracle-events')
 DEVICE_ID = os.getenv('CAMERA_TRAPS_DEVICE_ID', 'device_1')
-
-header = ["image_count", "UUID", "image_name", "ground_truth",
-          "image_receiving_timestamp", "image_scoring_timestamp", "model_id",
-          "label", "probability", "image_store_delete_time", "image_decision"]
-
+USER_ID = os.getenv('USER_ID', 'swithana')
+EXPERIMENT_ID = os.getenv('EXPERIMENT_ID', 'tapis-exp-3442334')
 
 class OracleEventHandler(FileSystemEventHandler):
     """
     Event handler class to handle events received from the Oracle plugin through the output.json.
     """
 
-    def __init__(self, file_path, producer, topic, device_id):
+    def __init__(self, file_path, producer, topic, device_id, experiment_id, user_id):
         self.file_path = file_path
         self.producer = producer
         self.topic = topic
         self.device_id = device_id
+        self.experiment_id = experiment_id
+        self.user_id = user_id
         self.processed_images = set()
 
     def on_deleted(self, event):
@@ -42,20 +40,6 @@ class OracleEventHandler(FileSystemEventHandler):
         if event.src_path == self.file_path:
             logging.debug(f"File {self.file_path} modified.")
             self.read_json_events()
-
-    def read_csv_lines(self):
-        """
-        CSV reader for csv files.
-        :return:
-        """
-        logging.debug(f"Reading new image data from {self.file_path}")
-        with open(self.file_path, mode='r') as file:
-            reader = csv.DictReader(file, fieldnames=header)
-            for line_number, row in enumerate(reader, start=1):
-                if line_number not in self.processed_images:
-                    self.processed_images.add(line_number)
-                    logging.debug(f"New row: {row}")  # or process the row as needed
-                    self.produce_event(row)
 
     def read_json_events(self):
         """
@@ -136,6 +120,8 @@ class OracleEventHandler(FileSystemEventHandler):
         try:
             # add the device id
             event['device_id'] = self.device_id
+            event['experiment_id'] = self.experiment_id
+            event['user_id'] = self.user_id
             logging.info(f"New oracle event: {event}")
             row_json = json.dumps(event)
 
@@ -165,7 +151,7 @@ def setup_logging():
 
     # Logs all INFO, DEBUG and ERROR to the CKN_LOG_FILE
     file_handler = logging.FileHandler(CKN_LOG_FILE)
-    file_handler.setLevel(logging.DEBUG)
+    file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(log_formatter)
     root_logger.addHandler(file_handler)
 
@@ -218,7 +204,7 @@ if __name__ == "__main__":
 
     # Start the event handler for listening to the file modifications.
     event_handler = OracleEventHandler(file_path=ORACLE_EVENTS_FILE, producer=producer, topic=KAFKA_TOPIC,
-                                       device_id=DEVICE_ID)
+                                       device_id=DEVICE_ID, experiment_id=EXPERIMENT_ID, user_id=USER_ID)
     observer = Observer()
     observer.schedule(event_handler, path=os.path.dirname(ORACLE_EVENTS_FILE), recursive=False)
 
