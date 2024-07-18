@@ -31,6 +31,7 @@ class OracleEventHandler(FileSystemEventHandler):
         self.experiment_id = experiment_id
         self.user_id = user_id
         self.processed_images = set()
+        self.stop_daemon = False
 
     def on_deleted(self, event):
         pass
@@ -61,14 +62,12 @@ class OracleEventHandler(FileSystemEventHandler):
                 logging.debug("File not complete. Waiting for the file to be completely written")
                 time.sleep(1)
 
-        keep_running = True
-
         # Process each entry in the JSON data
         for key, value in data.items():
 
             # shutdown signal received from oracle. process the rest of the images and exit.
             if key == EXPERIMENT_END_SIGNAL:
-                keep_running = False
+                self.stop_daemon = True
 
             # if the full image processing workflow is not yet completed, don't read the json
             if "image_decision" not in value:
@@ -121,9 +120,9 @@ class OracleEventHandler(FileSystemEventHandler):
             self.produce_event(event)
 
         # shut down if the signal was received
-        if keep_running is False:
+        if self.stop_daemon:
             logging.info("Shutdown signal from Oracle received... Shutting down CKN Daemon.")
-            sys.exit()
+            sys.exit(0)
 
 
     def produce_event(self, event):
@@ -227,7 +226,7 @@ if __name__ == "__main__":
     observer.start()
 
     try:
-        while True:
+        while not event_handler.stop_daemon:
             time.sleep(1)
     except KeyboardInterrupt:
         observer.stop()
