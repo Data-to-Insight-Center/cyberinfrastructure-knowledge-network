@@ -1,4 +1,5 @@
 import logging
+import sys
 import time
 import json
 import os
@@ -12,9 +13,10 @@ ORACLE_EVENTS_FILE = os.getenv('ORACLE_CSV_PATH',
 CKN_LOG_FILE = os.getenv('CKN_LOG_FILE', './ckn_daemon.log')
 KAFKA_BROKER = os.getenv('CKN_KAFKA_BROKER', 'localhost:9092')
 KAFKA_TOPIC = os.getenv('CKN_KAFKA_TOPIC', 'oracle-events')
-DEVICE_ID = os.getenv('CAMERA_TRAPS_DEVICE_ID', 'device_1')
+DEVICE_ID = os.getenv('CAMERA_TRAPS_DEVICE_ID', 'macbook-M1Max')
 USER_ID = os.getenv('USER_ID', 'swithana')
-EXPERIMENT_ID = os.getenv('EXPERIMENT_ID', 'tapis-exp-3442334')
+EXPERIMENT_ID = os.getenv('EXPERIMENT_ID', 'tapis-exp6-3442334')
+EXPERIMENT_END_SIGNAL = os.getenv('EXPERIMENT_END_SIGNAL', '6e153711-9823-4ee6-b608-58e2e801db51')
 
 class OracleEventHandler(FileSystemEventHandler):
     """
@@ -59,8 +61,15 @@ class OracleEventHandler(FileSystemEventHandler):
                 logging.debug("File not complete. Waiting for the file to be completely written")
                 time.sleep(1)
 
+        keep_running = True
+
         # Process each entry in the JSON data
         for key, value in data.items():
+
+            # shutdown signal received from oracle. process the rest of the images and exit.
+            if key == EXPERIMENT_END_SIGNAL:
+                keep_running = False
+
             # if the full image processing workflow is not yet completed, don't read the json
             if "image_decision" not in value:
                 continue
@@ -110,6 +119,12 @@ class OracleEventHandler(FileSystemEventHandler):
                 "flattened_scores": flattened_scores
             }
             self.produce_event(event)
+
+        # shut down if the signal was received
+        if keep_running is False:
+            logging.info("Shutdown signal from Oracle received... Shutting down CKN Daemon.")
+            sys.exit()
+
 
     def produce_event(self, event):
         """

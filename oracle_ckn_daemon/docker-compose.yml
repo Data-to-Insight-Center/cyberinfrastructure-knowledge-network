@@ -13,6 +13,8 @@ services:
       - CAMERA_TRAPS_DEVICE_ID=device_1
       - USER_ID=swithana
       - EXPERIMENT_ID=experiment_1
+      - EXPERIMENT_END_SIGNAL = 6e153711-9823-4ee6-b608-58e2e801db51
+
 
     volumes:
       - /Users/swithana/git/icicle/camera-traps/releases/0.3.3/oracle_plugin_dir:/logs:r
