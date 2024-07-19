@@ -1,0 +1,21 @@
+[server]
+headless = true
+port=8501
+enableCORS = false
+enableWebsocketCompression = false
+maxUploadSize = 200
+server.maxMessageSize = 200
+
+[browser]
+gatherUsageStats = false
+
+[client]
+displayEnabled = true
+
+[global]
+# Set this to true to show more detailed error messages.
+#developmentMode = true
+
+[logger]
+# Log errors and warnings to the terminal
+level = "debug"

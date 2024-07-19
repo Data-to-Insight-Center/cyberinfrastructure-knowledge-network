@@ -1,13 +1,13 @@
 import streamlit as st
 
-from llm_nodes import execute_graphQA
-from llm_graph import execute_llm_graph
+from qa_tool import execute_graphQA
+from llm_graph import run_langraph
 import time
 def get_llm_response(query):
     if query is None:
         answer = "How can I help you today?"
     else:
-        answer = execute_graphQA(query)
+        answer = run_langraph(query)
     for word in answer.split():
         yield word + " "
         time.sleep(0.05)
@@ -33,7 +33,7 @@ if prompt := st.chat_input("What is up?"):
 
 # Display assistant response in chat message container
 with st.chat_message("assistant"):
-    response = st.write(get_llm_response(prompt))
+    response = st.write_stream(get_llm_response(prompt))
 
 # Add assistant response to chat history
 st.session_state.messages.append({"role": "assistant", "content": response})
