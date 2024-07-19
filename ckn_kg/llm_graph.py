@@ -8,6 +8,31 @@ from typing import Annotated, Literal, Sequence, TypedDict
 from langchain_core.pydantic_v1 import BaseModel, Field
 from util import graph, llm, top_k_results
 
+database_or_llm_prompt = """ You are assessing if the provided question can be answered by
+    a database about models, experiments users and images (which you have access to) or this should be directed to a generic search
+     Give a binary score 'yes' or 'no'. 'Yes' the query is can be answered via the database """
+class CheckDBOrLLM(BaseModel):
+    """Binary score for hallucination present in generation answer."""
+
+    binary_score: str = Field(
+        description="Query needs to be directed to the database, 'yes' or 'no'"
+    )
+
+router_llm = llm.with_structured_output(CheckDBOrLLM)
+
+rounter_prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", database_or_llm_prompt),
+        ("human", "Schema: {schema} Question: {question}"),
+    ]
+)
+
+router = rounter_prompt | router_llm
+
+generation_test_system = """You are a grader assessing whether a given result from a graph database aligns with the question asked. 
+     Give a binary score 'yes' or 'no'. 'Yes' the result answers the question  """
+
+
 class CypherGenerator(BaseModel):
     cypher_query: str = Field(
         description="Syntactically correct cypher query ready for execution"
@@ -35,6 +60,22 @@ Try and convert datetime when returning.
 Here's an example:
 MATCH (u:User {{user_id: 'swithana'}})-[r:SUBMITTED_BY]-(e:Experiment)
 RETURN e, datetime({{epochMillis: e.start_time}}) AS start_time
+
+
+To get information about images executed in an experiement on a device, use this as
+an example:
+
+MATCH (img:RawImage)-[r2:PROCESSED_BY]-(e:Experiment)-[r:EXECUTED_ON]-(d:EdgeDevice) 
+RETURN img
+
+You can calculate the average probability of an experiment using this example:
+MATCH (u:User)-[r:SUBMITTED_BY]-(e:Experiment)-[p:PROCESSED_BY]-(i:RawImage)
+WITH p, apoc.convert.fromJsonList(p.scores) AS scores
+UNWIND scores AS score
+WITH p, MAX(toFloat(score.probability)) AS max_probability
+RETURN avg(max_probability) AS average_max_probability
+
+
 """
 
 
@@ -91,7 +132,9 @@ answer_grader_prompt = ChatPromptTemplate.from_messages(
 answer_grader = answer_grader_prompt | answer_grader_llm
 
 
-answer_generator_template = """You are tasked with generating a response to the question using the context information available in query that was run on a knowledge graph. Keep the output structured if possible. Don't use bold, underline or other text altering stuff. Just plain text. 
+answer_generator_template = """You are tasked with generating a response to the question using 
+the context information available in query that was run on a knowledge graph. Keep the output structured if possible.
+ Don't use bold, underline or other text altering stuff. Just plain text. 
 
 question: 
 {question}
@@ -116,6 +159,35 @@ class GraphState(TypedDict):
     query_response: str
     cypher_generation: str
 
+
+def ask_llm(state):
+    question = state["question"]
+    simple_prompt = ChatPromptTemplate.from_template("Answer this question: {question}")
+    simple_chain = simple_prompt | llm | StrOutputParser()
+    result = simple_chain.invoke({"question": question})
+    return {"question": question, "generated_answer": result}
+
+def decide_llm_or_db(state):
+    """
+    Test if the cypher query is correct
+    :param state:
+    :return:
+    """
+    question = state["question"]
+    print("---DECIDING IF DB CAN ANSWER QUESTION ---")
+    score = router.invoke({"schema": graph.get_structured_schema, "question": question})
+    grade = score.binary_score
+    print(f'Grade: {grade}')
+    if grade == "yes":
+        # correct query generated
+        print(
+            "---DECISION: QUESTION CAN BE ANSWERED VIA DB---"
+        )
+        return "cypher"
+    else:
+        # Not correct query, regenerate
+        print("---DECISION: QUESTION CANNOT BE ANSWERED BY DB---")
+        return "llm"
 
 def generate_cypher(state):
     """
@@ -185,6 +257,8 @@ def generate_human_response(state):
 workflow = StateGraph(GraphState)
 
 # Define the nodes
+# workflow.add_node("ask_system", decide_llm_or_db)  # retrieve
+workflow.add_node("ask_llm", ask_llm)  # retrieve
 workflow.add_node("generate_cypher", generate_cypher)  # retrieve
 workflow.add_node("execute_query", execute_query)  # grade documents
 workflow.add_node("gen_human_response", generate_human_response)  # grade documents
@@ -193,10 +267,19 @@ workflow.add_node("gen_human_response", generate_human_response)  # grade docume
 # workflow.add_node("transform_query", transform_query)  # transform_query
 
 # Build graph
-workflow.add_edge(START, "generate_cypher")
+# workflow.add_edge(START, "generate_cypher")
 workflow.add_edge("generate_cypher", "execute_query")
 workflow.add_edge("execute_query", "gen_human_response")
 workflow.add_edge("gen_human_response", END)
+workflow.add_edge("ask_llm", END)
+workflow.add_conditional_edges(
+    START,
+    decide_llm_or_db,
+    {
+        "cypher": "generate_cypher",
+        "llm": "ask_llm",
+    },
+)
 # workflow.add_conditional_edges(
 #     "generate_cypher",
 #     decide_retrieve,
