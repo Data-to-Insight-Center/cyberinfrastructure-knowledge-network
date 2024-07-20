@@ -1,8 +1,6 @@
 from datetime import datetime
-
 from neo4j import GraphDatabase
 import pandas as pd
-
 
 class CKNKnowledgeGraph():
     def __init__(self, ckn_uri, ckn_user, ckn_pwd):
@@ -53,6 +51,15 @@ class CKNKnowledgeGraph():
 
         df = pd.DataFrame(alerts)
 
+        # Convert Neo4j DateTime to pandas datetime
+        df['timestamp'] = df['timestamp'].apply(self.convert_to_datetime)
+
+        # Reorder the columns
+        df = df[['timestamp', 'alert_name', 'priority', 'source_topic', 'description', 'UUID', 'event_data']]
+
+        # Set timestamp as index
+        df.set_index('timestamp', inplace=True)
+
         return df
 
     def convert_to_datetime(self, neo4j_datetime):
@@ -61,6 +68,3 @@ class CKNKnowledgeGraph():
             neo4j_datetime.hour, neo4j_datetime.minute, int(neo4j_datetime.second),
             int(neo4j_datetime.nanosecond / 1000), tzinfo=neo4j_datetime.tzinfo
         )
-
-
-
