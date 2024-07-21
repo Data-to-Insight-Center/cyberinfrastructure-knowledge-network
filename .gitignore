@@ -2,3 +2,4 @@
 /env/
 ckn_daemon.log
 dashboard/.env
+dashboard/__pycache__/ckn_kg.cpython-38.pyc
