@@ -2,8 +2,7 @@ from datetime import datetime
 from neo4j import GraphDatabase
 import pandas as pd
 
-
-class CKNKnowledgeGraph():
+class CKNKnowledgeGraph:
 
     def __init__(self, ckn_uri, ckn_user, ckn_pwd):
         self.driver = GraphDatabase.driver(ckn_uri, auth=(ckn_user, ckn_pwd))
@@ -12,36 +11,49 @@ class CKNKnowledgeGraph():
     def close(self):
         self.session.close()
 
-    def get_statistics(self):
+    def get_statistics(self, experiment_ids=None, device_ids=None, user_ids=None, date_range=None, image_decision='Saved'):
+        def generate_clause(clause_type, values):
+            if values:
+                return f"{clause_type} IN {values}"
+            return "true"  # Always true if no values are provided
+
+        date_range_clause = (f"p.image_scoring_timestamp >= datetime('{date_range[0].isoformat()}') "
+                             f"AND p.image_scoring_timestamp <= datetime('{date_range[1].isoformat()}')" if date_range else "true")
+        experiment_clause = generate_clause("e.experiment_id", experiment_ids)
+        device_clause = generate_clause("d.device_id", device_ids)
+        user_clause = generate_clause("u.user_id", user_ids)
+
         queries = {
-            "average_probability":
-            """
+            "average_probability": f"""
                 MATCH (u:User)-[r:SUBMITTED_BY]-(e:Experiment)-[p:PROCESSED_BY]-(i:RawImage)
                 WITH p, apoc.convert.fromJsonList(p.scores) AS scores
                 UNWIND scores AS score
                 WITH p, MAX(toFloat(score.probability)) AS max_probability
-                RETURN avg(max_probability) AS value
+                WHERE {date_range_clause} AND {experiment_clause} AND {device_clause} AND {user_clause}
+                RETURN round(avg(max_probability)*100) AS value
+                """,
+            "user_count": f"""
+                MATCH (u:User)-[r:SUBMITTED_BY]->(e:Experiment)-[p:PROCESSED_BY]->(i:RawImage)-[:EXECUTED_ON]->(d:EdgeDevice)
+                WHERE {date_range_clause} AND {experiment_clause} AND {device_clause} AND {user_clause}
+                RETURN count(DISTINCT u) AS value
             """,
-            "user_count":
-            """
-                MATCH (u:User)
-                RETURN count(u) AS value
+            "image_count": f"""
+                MATCH (i:RawImage)-[p:PROCESSED_BY]->(e:Experiment)-[:EXECUTED_ON]->(d:EdgeDevice)
+                WHERE {date_range_clause} AND {experiment_clause} AND {device_clause} AND {user_clause}
+                RETURN count(DISTINCT i) AS value
             """,
-            "image_count":
-            """
-                MATCH (i:RawImage)
-                RETURN count(i) AS value
-            """,
-            "device_count":
-            """
-                MATCH (d:EdgeDevice)
-                RETURN count(d) AS value
+            "device_count": f"""
+                MATCH (d:EdgeDevice)-[:EXECUTED_ON]->(e:Experiment)-[p:PROCESSED_BY]->(i:RawImage)
+                WHERE {date_range_clause} AND {experiment_clause} AND {device_clause} AND {user_clause}
+                RETURN count(DISTINCT d) AS value
             """
         }
+
         results = {}
         with self.session.begin_transaction() as tx:
             for key, query in queries.items():
-                result = tx.run(query).single()
+                final_query = query
+                result = tx.run(final_query, image_decision=image_decision).single()
                 results[key] = result["value"] if result else 0
         return results
 
