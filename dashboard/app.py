@@ -5,10 +5,10 @@ import panel as pn
 import pandas as pd
 import datetime as dt
 from bokeh.plotting import figure
-
 from dotenv import load_dotenv
 from ckn_kg import CKNKnowledgeGraph
 from panel.viewable import Viewable, Viewer
+
 pn.extension("tabulator", sizing_mode="stretch_width")
 
 load_dotenv()
@@ -39,31 +39,39 @@ class CKNAnalytics(Viewer):
         experiment_options = self.ckn_kg.fetch_distinct_experiment_id()
         self.exp_widget = pn.widgets.Select(value=experiment_options[0], options=experiment_options)
         self.date_widget = pn.widgets.DatetimeRangePicker(value=(dt.date(2024, 7, 18), dt.date(2024, 7, 19)))
-        self.button = pn.widgets.Button(name="Update Plot")
-        self.button.on_click(self.update_plot)
+        self.button = pn.widgets.Button(name="Query")
+        self.button.on_click(self.update_plot_data)
 
-        
+        self.raw_data = self.ckn_kg.get_exp_info_raw(self.exp_widget.value)
+        self.raw_data_table = pn.widgets.Tabulator(self.raw_data, pagination="local", page_size=8)
+
         self.accuracy_trend_df = self.ckn_kg.fetch_accuracy_trend(self.date_widget.value, self.exp_widget.value)
         self.accuracy_trend_df['image_scoring_timestamp'] = pd.to_datetime(self.accuracy_trend_df['image_scoring_timestamp'])
 
         self.p = figure(title='Accuracy Trend', x_axis_type='datetime', height=300, sizing_mode="stretch_width")
-        self.p.line(self.accuracy_trend_df['image_scoring_timestamp'], self.accuracy_trend_df['probability'], line_width=2)
+        self.line_renderer = self.p.line(self.accuracy_trend_df['image_scoring_timestamp'], self.accuracy_trend_df['probability'], line_width=2)
         
-        plot = pn.Column(pn.Row(self.exp_widget, self.date_widget, self.button), self.p)
+        self.plot_data = pn.Column(pn.Row(self.exp_widget, self.date_widget, self.button), pn.Row(self.p, self.raw_data_table))
 
         self.template = pn.template.FastListTemplate(
             title="CKN Analytics Dashboard",
-            main=[plot, self.exp_info_table, self.alerts_info_table],
+            main=[self.plot_data, self.exp_info_table, self.alerts_info_table],
             accent="#990000"
         )
         
-    def update_plot(self, *_):
-        accuracy_trend_df = self.ckn_kg.fetch_accuracy_trend(self.date_widget.value, self.exp_widget.value, *_)
+    def update_plot_data(self, *_):
+        accuracy_trend_df = self.ckn_kg.fetch_accuracy_trend(self.date_widget.value, self.exp_widget.value)
         accuracy_trend_df['image_scoring_timestamp'] = pd.to_datetime(accuracy_trend_df['image_scoring_timestamp'])
         
-        self.p.renderers = []  # Clear existing renderers
-        self.p.line(accuracy_trend_df['image_scoring_timestamp'], accuracy_trend_df['probability'], line_width=2)
+        # Update the Bokeh figure
+        self.line_renderer.data_source.data = {
+            'x': accuracy_trend_df['image_scoring_timestamp'],
+            'y': accuracy_trend_df['probability']
+        }
 
+        # Update the Tabulator table
+        self.raw_data = self.ckn_kg.get_exp_info_raw(self.exp_widget.value)
+        self.raw_data_table.value = self.raw_data
     
     def __panel__(self) -> Viewable:
         return self.template

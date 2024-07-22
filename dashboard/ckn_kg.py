@@ -1,5 +1,6 @@
 from datetime import datetime
 from neo4j import GraphDatabase
+import neo4j
 import pandas as pd
 
 
@@ -172,19 +173,36 @@ class CKNKnowledgeGraph:
         query = """
         MATCH (e:Experiment {experiment_id: '""" + experiment_id + """'})-[r:PROCESSED_BY]-(img:RawImage)
         RETURN {
+            image_scoring_timestamp: r.image_scoring_timestamp, 
+            ingestion_timestamp: r.ingestion_timestamp, 
+            image_store_delete_time: r.image_store_delete_time, 
+            model_id: r.model_id, 
             image_count: r.image_count, 
             image_decision: r.image_decision, 
-            image_scoring_timestamp: r.image_scoring_timestamp, 
-            image_store_delete_time: r.image_store_delete_time, 
-            ingestion_timestamp: r.ingestion_timestamp, 
-            model_id: r.model_id, 
             scores: r.scores
         } AS processed_by_detail
         """
         result = self.session.run(query)
         records = [record["processed_by_detail"] for record in result]
 
-        df = pd.DataFrame(records)
+        df = pd.DataFrame(records, columns=[
+            "image_scoring_timestamp", 
+            "ingestion_timestamp", 
+            "image_store_delete_time", 
+            "model_id", 
+            "image_count", 
+            "image_decision", 
+            "scores"
+        ])
+        
+        # Convert Neo4j DateTime objects to Python datetime objects
+        date_columns = ["image_scoring_timestamp", "image_store_delete_time", "ingestion_timestamp"]
+        for col in date_columns:
+            if col in df.columns:
+                df[col] = df[col].apply(self.convert_to_native)
+
+        df.columns = ["Score Time", "Ingestion Time", "Delete Time", "Model", "Images", "Decision", "Scores"]
+        df.set_index("Score Time", inplace=True)
         return df
 
     def get_user_info(self, user_id):
@@ -270,3 +288,9 @@ class CKNKnowledgeGraph:
                         int(neo4j_datetime.second),
                         int(neo4j_datetime.nanosecond / 1000),
                         tzinfo=neo4j_datetime.tzinfo)
+
+    def convert_to_native(self, dt):
+        """Convert Neo4j DateTime to Python native datetime"""
+        if isinstance(dt, neo4j.time.DateTime):
+            return dt.to_native()
+        return dt
