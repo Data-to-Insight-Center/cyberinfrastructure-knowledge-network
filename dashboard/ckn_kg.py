@@ -325,8 +325,8 @@ class CKNKnowledgeGraph:
             'timestamp', 'alert_name', 'priority', 'source_topic',
             'description', 'UUID', 'event_data'
         ]]
-        df.set_index('timestamp', inplace=True)
-
+        df.columns = ['Timestamp', 'Alert Name', 'Priority', 'Source Topic', 'Description', 'UUID', 'Event Data']
+        df.set_index('Timestamp', inplace=True)
         return df
 
     def convert_to_datetime(self, neo4j_datetime):
