@@ -35,7 +35,7 @@ class CKNKnowledgeGraph:
 
         queries = {
             "average_probability":
-            f"""
+                f"""
                 MATCH (u:User)-[r:SUBMITTED_BY]-(e:Experiment)-[p:PROCESSED_BY]-(i:RawImage)
                 WITH p, apoc.convert.fromJsonList(p.scores) AS scores
                 UNWIND scores AS score
@@ -44,19 +44,19 @@ class CKNKnowledgeGraph:
                 RETURN round(avg(max_probability)*100) AS value
                 """,
             "user_count":
-            f"""
+                f"""
                 MATCH (u:User)
                 WHERE {date_range_clause} AND {experiment_clause} AND {device_clause} AND {user_clause}
                 RETURN count(u) AS value
             """,
             "image_count":
-            f"""
+                f"""
                 MATCH (i:RawImage)-[p:PROCESSED_BY]->(e:Experiment)-[:EXECUTED_ON]->(d:EdgeDevice)
                 WHERE {date_range_clause} AND {experiment_clause} AND {device_clause} AND {user_clause}
                 RETURN count(DISTINCT i) AS value
             """,
             "device_count":
-            f"""
+                f"""
                 MATCH (d:EdgeDevice)-[:EXECUTED_ON]->(e:Experiment)-[p:PROCESSED_BY]->(i:RawImage)
                 WHERE {date_range_clause} AND {experiment_clause} AND {device_clause} AND {user_clause}
                 RETURN count(DISTINCT d) AS value
@@ -72,21 +72,31 @@ class CKNKnowledgeGraph:
                 results[key] = result["value"] if result else 0
         return results
 
-    def get_experiment_info(self):
-        query = """
-        MATCH (e:Experiment {experiment_id: "tapis-exp5-3442334"})
-        OPTIONAL MATCH (e)-[sb:SUBMITTED_BY]->(u:User)
-        OPTIONAL MATCH (e)-[eo:EXECUTED_ON]->(ed:EdgeDevice)
-        OPTIONAL MATCH (e)-[ub:USED_BY]->(m:Model)
-        OPTIONAL MATCH (ri:RawImage)-[pb:PROCESSED_BY]->(e)
-        RETURN e, 
-            collect(DISTINCT {user: u, submitted_time: sb.submitted_time}) AS submitted_by,
-            collect(DISTINCT {edge_device: ed, executed_time: eo.submitted_time}) AS executed_on,
-            collect(DISTINCT {model: m, used_start_time: ub.start_time}) AS used_by,
-            collect(DISTINCT {raw_image: ri, processed_by: pb}) AS processed_images"""
+    def get_experiment_info_for_user(self, user_id):
+        query = f"""
+                MATCH (e:Experiment)-[r:PROCESSED_BY]-(img:RawImage)
+                MATCH (e)-[:SUBMITTED_BY]-(u:User {{user_id: '{user_id}' }})
+                MATCH (e)-[:USED_BY]-(m:Model)
+                MATCH (e)-[:EXECUTED_ON]-(d:EdgeDevice)
+                WITH e.experiment_id AS experimentId, e.start_time AS startTime, COUNT(img) AS NumberOfRawImages, COLLECT(r) AS relationships, u.user_id AS userId, m.model_id AS modelId, d.device_id AS deviceId
+                UNWIND relationships AS r
+                WITH experimentId, startTime, NumberOfRawImages, COUNT(CASE WHEN r.image_decision = 'Save' THEN 1 END) AS NumberOfSavedImages, relationships, userId, modelId, deviceId
+                UNWIND relationships AS r
+                WITH experimentId, startTime, NumberOfRawImages, NumberOfSavedImages, userId, modelId, deviceId, apoc.convert.fromJsonList(r.scores) AS scores
+                UNWIND scores AS score
+                WITH experimentId, startTime, NumberOfRawImages, NumberOfSavedImages, userId, modelId, deviceId, toFloat(score.probability) AS probability
+                RETURN experimentId, userId, modelId, deviceId, AVG(probability)*100 AS average_accuracy, startTime, NumberOfRawImages, NumberOfSavedImages
+                """
 
         result = self.session.run(query)
-        return [record.data() for record in result]
+
+        records = [record.data() for record in result]
+        df = pd.DataFrame(records)
+        df.columns = ["Experiment", "User", "Model", "Device", "Accuracy [%]", "Start Time", "Total Images",
+                      "Saved Images"]
+        df['Start Time'] = pd.to_datetime(df['Start Time'], unit='ms')  # Convert to datetime
+        df.set_index("Experiment", inplace=True)  # Set experiment_id as the index
+        return df
 
     def fetch_accuracy_trend(self, date_range, experiment_id, image_saved=True):
         start_date, end_date = date_range
@@ -144,7 +154,7 @@ class CKNKnowledgeGraph:
 
         return experiment_ids
 
-    def get_exp_info(self):
+    def get_all_exp_info(self):
         query = f"""
         MATCH (e:Experiment)-[r:PROCESSED_BY]-(img:RawImage)
         MATCH (e)-[:SUBMITTED_BY]-(u:User)
@@ -159,12 +169,13 @@ class CKNKnowledgeGraph:
         WITH experimentId, startTime, NumberOfRawImages, NumberOfSavedImages, userId, modelId, deviceId, toFloat(score.probability) AS probability
         RETURN experimentId, userId, modelId, deviceId, AVG(probability)*100 AS average_accuracy, startTime, NumberOfRawImages, NumberOfSavedImages
         """
-            
+
         result = self.session.run(query)
-        
+
         records = [record.data() for record in result]
         df = pd.DataFrame(records)
-        df.columns = ["Experiment", "User", "Model", "Device", "Accuracy [%]", "Start Time", "Total Images", "Saved Images"]
+        df.columns = ["Experiment", "User", "Model", "Device", "Accuracy [%]", "Start Time", "Total Images",
+                      "Saved Images"]
         df['Start Time'] = pd.to_datetime(df['Start Time'], unit='ms')  # Convert to datetime
         df.set_index("Experiment", inplace=True)  # Set experiment_id as the index
         return df
@@ -173,6 +184,8 @@ class CKNKnowledgeGraph:
         query = """
         MATCH (e:Experiment {experiment_id: '""" + experiment_id + """'})-[r:PROCESSED_BY]-(img:RawImage)
         RETURN {
+            image_name: img.image_name,
+            ground_truth: img.ground_truth, 
             image_scoring_timestamp: r.image_scoring_timestamp, 
             ingestion_timestamp: r.ingestion_timestamp, 
             image_store_delete_time: r.image_store_delete_time, 
@@ -186,23 +199,41 @@ class CKNKnowledgeGraph:
         records = [record["processed_by_detail"] for record in result]
 
         df = pd.DataFrame(records, columns=[
-            "image_scoring_timestamp", 
-            "ingestion_timestamp", 
-            "image_store_delete_time", 
-            "model_id", 
-            "image_count", 
-            "image_decision", 
+            "image_name",
+            "ground_truth",
+            "image_scoring_timestamp",
+            "ingestion_timestamp",
+            "image_store_delete_time",
+            "model_id",
+            "image_count",
+            "image_decision",
             "scores"
         ])
-        
+
         # Convert Neo4j DateTime objects to Python datetime objects
         date_columns = ["image_scoring_timestamp", "image_store_delete_time", "ingestion_timestamp"]
         for col in date_columns:
             if col in df.columns:
                 df[col] = df[col].apply(self.convert_to_native)
 
-        df.columns = ["Score Time", "Ingestion Time", "Delete Time", "Model", "Images", "Decision", "Scores"]
+        df.columns = ["Image", "Ground Truth", "Score Time", "Ingestion Time", "Delete Time", "Model", "Images", "Decision", "Scores"]
         df.set_index("Score Time", inplace=True)
+        return df
+
+    def fetch_experiments(self, user_id):
+        query = f"""
+        MATCH (u:User {{user_id: '{user_id}' }})<-[:SUBMITTED_BY]-(e:Experiment)-[:EXECUTED_ON]->(d:EdgeDevice),
+      (e)-[:USED_BY]->(m:Model)
+        RETURN e.experiment_id AS experiment_id,
+       e.start_time AS timestamp,
+       d.device_id AS device_id,
+       m.model_id AS model_id
+        """
+        result = self.session.run(query)
+        records = result.data()
+        df = pd.DataFrame(records)
+        df = df[['experiment_id', 'timestamp', 'device_id', 'model_id']]
+        df.set_index('timestamp', inplace=True)
         return df
 
     def get_user_info(self, user_id):
@@ -218,8 +249,27 @@ class CKNKnowledgeGraph:
         result = self.session.run(query)
         records = result.data()
         df = pd.DataFrame(records)
-        df = df[['timestamp', 'exp_id', 'device_id', 'average_probability']]
+        df = df[['timestamp', 'exp_id', 'device_id', 'average_accuracy']]
         df.set_index('timestamp', inplace=True)
+
+        return df
+
+    def experiment_info(self, user_id):
+        query = """
+        MATCH (u:User {user_id: '""" + user_id + """'})-[:SUBMITTED_BY]-(e:Experiment)-[r:PROCESSED_BY {image_decision: 'Save'}]-(img:RawImage)
+        MATCH (e)-[:EXECUTED_ON]-(d:EdgeDevice)
+        WITH e, d, r, e.experiment_id AS exp_id, e.start_time AS timestamp, d.device_id AS device_id, apoc.convert.fromJsonList(r.scores) AS scores
+        UNWIND scores AS score
+        WITH e, d, r, exp_id, timestamp, device_id, toFloat(score.probability) AS probability
+        RETURN timestamp, exp_id, device_id, AVG(probability) AS average_probability, r.image_decision AS image_decision
+        """
+
+        result = self.session.run(query)
+        records = result.data()
+        df = pd.DataFrame(records)
+        df = df[['timestamp', 'exp_id', 'device_id', 'average_probability']]
+        df.columns = ['Timestamp', 'Experiment ID', 'Device ID', 'Average Accuracy']
+        df.set_index('Timestamp', inplace=True)
 
         return df
 
