@@ -36,7 +36,7 @@ if selected_user:
 
 if selected_user:
     with col1:
-        st.subheader(f"Experiment detais for user: {selected_user}")
+        st.subheader(f"Experiment details for user: {selected_user}")
         exp_summary_user = kg.get_experiment_info_for_user(selected_user)
         st.write(exp_summary_user)
 
