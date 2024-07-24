@@ -30,11 +30,11 @@ class CKNAnalytics(Viewer):
         self.experiment_options = self.ckn_kg.fetch_distinct_experiment_id()
 
         self.exp_info = self.ckn_kg.get_exp_info()
-        self.exp_info_table = pn.widgets.Tabulator(self.exp_info, pagination="local", page_size=5,
+        self.exp_info_table = pn.widgets.Tabulator(self.exp_info, pagination="local", page_size=20,
                                                    header_filters={"Experiment": True, "User": True, "Model": True, "Device": True})
         
         self.alerts_info = self.ckn_kg.fetch_alerts()
-        self.alerts_info_table = pn.Card(pn.widgets.Tabulator(self.alerts_info, pagination="local", page_size=5, header_filters=True), title="Alerts")
+        self.alerts_info_table = pn.widgets.Tabulator(self.alerts_info, pagination="local", page_size=20, header_filters=True)
 
         experiment_options = self.ckn_kg.fetch_distinct_experiment_id()
         self.exp_widget = pn.widgets.Select(value=experiment_options[0], options=experiment_options)
@@ -51,11 +51,17 @@ class CKNAnalytics(Viewer):
         self.p = figure(title='Accuracy Trend', x_axis_type='datetime', height=300, sizing_mode="stretch_width")
         self.line_renderer = self.p.line(self.accuracy_trend_df['image_scoring_timestamp'], self.accuracy_trend_df['probability'], line_width=2)
         
-        self.plot_data = pn.Column(pn.Row(self.exp_widget, self.date_widget, self.button), pn.Row(self.p, self.raw_data_table))
+        self.plot_data = pn.Column(pn.Row(self.exp_widget, self.date_widget, self.button), 
+                                   pn.Row(self.p), 
+                                   pn.Row(self.raw_data_table))
+        
+        self.tabs = pn.Tabs(('Home', self.plot_data),
+                            ('Experiments', self.exp_info_table),
+                            ('Alerts', self.alerts_info_table))
 
         self.template = pn.template.FastListTemplate(
             title="CKN Analytics Dashboard",
-            main=[self.plot_data, self.exp_info_table, self.alerts_info_table],
+            main=[self.tabs],
             accent="#990000"
         )
         
