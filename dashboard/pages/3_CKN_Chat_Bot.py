@@ -1,15 +1,40 @@
 import streamlit as st
 from llm_graph import run_langraph
-
+from collections import deque
 import time
+
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = deque(maxlen=3)
+
+
 def get_llm_response(query):
+    """
+    Generates the LLM response and streams the output.
+    """
     if query is None:
         answer = "How can I help you today?"
     else:
-        answer = run_langraph(query)
+        answer = run_langraph(query, format_chat_history(st.session_state.chat_history))
+        st.session_state.chat_history.append({"human": query, "agent": answer})
     for word in answer.split(" "):
         yield word + " "
         time.sleep(0.05)
+
+
+def format_chat_history(deque_obj):
+    """
+    Formats the chat_history removing escape characters and flattening the queue.
+    :param deque_obj: Chat history as a limited queue
+    :return: flattened chat history
+    """
+    if not deque_obj:
+        return ""
+
+    flattened_entries = []
+    for entry in deque_obj:
+        for k, v in entry.items():
+            flattened_entries.append(f"{k}: {v}")
+    return ", ".join(flattened_entries)
 
 
 st.set_page_config(

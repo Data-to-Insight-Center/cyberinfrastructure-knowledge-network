@@ -82,7 +82,7 @@ RETURN avg(max_probability) AS average_max_probability
 generation_prompt = ChatPromptTemplate.from_messages(
     [
         ("system", sysprompt),
-        ("human", "Only return the cypher query for the question: \n {question} \n Schema: {schema}.",
+        ("human", "History of the conversation so far: {chat_history} \n Only return the cypher query for the question: \n {question} \n Schema: {schema}.",
         ),
     ]
 )
@@ -158,6 +158,7 @@ class GraphState(TypedDict):
     generated_answer: str
     query_response: str
     cypher_generation: str
+    chat_history: str
 
 
 def ask_llm(state):
@@ -195,12 +196,13 @@ def generate_cypher(state):
     """
     print("---GENERATING CYPHER QUERY---")
     user_question = state["question"]
+    chat_history = state["chat_history"]
     cypher_generation = state["cypher_generation"]
 
     if cypher_generation is not None:
         user_question = user_question + " Previously generated cypher was wrong which was: " + cypher_generation
 
-    cypher_gen_result = cypher_generator.invoke({"schema": graph.get_structured_schema, "question": user_question})
+    cypher_gen_result = cypher_generator.invoke({"chat_history": chat_history, "schema": graph.get_structured_schema, "question": user_question})
     generated_cypher = cypher_gen_result.cypher_query
     print(state)
     return {"cypher_generation": generated_cypher, "question": user_question}
@@ -294,9 +296,9 @@ app = workflow.compile()
 
 from pprint import pprint
 
-def run_langraph(query):
+def run_langraph(query, chat_history):
     try:
-        inputs = {"question": query}
+        inputs = {"question": query, "chat_history": chat_history}
         for output in app.stream(inputs):
             for key, value in output.items():
                 # Node
