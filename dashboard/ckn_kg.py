@@ -75,13 +75,15 @@ class CKNKnowledgeGraph:
     def get_experiment_info_for_user(self, user_id):
         query = f"""
                 MATCH (e:Experiment)-[r:PROCESSED_BY]-(img:RawImage)
-                MATCH (e)-[:SUBMITTED_BY]-(u:User {{user_id: '{user_id}' }})
+                MATCH (e)-[:SUBMITTED_BY]-(u:User {{user_id: '{user_id}'}})
                 MATCH (e)-[:USED_BY]-(m:Model)
                 MATCH (e)-[:EXECUTED_ON]-(d:EdgeDevice)
                 WITH e.experiment_id AS experimentId, e.start_time AS startTime, COUNT(img) AS NumberOfRawImages, COLLECT(r) AS relationships, u.user_id AS userId, m.model_id AS modelId, d.device_id AS deviceId
                 UNWIND relationships AS r
                 WITH experimentId, startTime, NumberOfRawImages, COUNT(CASE WHEN r.image_decision = 'Save' THEN 1 END) AS NumberOfSavedImages, relationships, userId, modelId, deviceId
                 UNWIND relationships AS r
+                WITH experimentId, startTime, NumberOfRawImages, NumberOfSavedImages, userId, modelId, deviceId, r
+                WHERE r.image_decision = 'Save'
                 WITH experimentId, startTime, NumberOfRawImages, NumberOfSavedImages, userId, modelId, deviceId, apoc.convert.fromJsonList(r.scores) AS scores
                 UNWIND scores AS score
                 WITH experimentId, startTime, NumberOfRawImages, NumberOfSavedImages, userId, modelId, deviceId, toFloat(score.probability) AS probability
@@ -118,6 +120,26 @@ class CKNKnowledgeGraph:
 
         df = pd.DataFrame(records, columns=["image_scoring_timestamp", "probability"])
         df = df.sort_values(by='image_scoring_timestamp')
+
+        return df
+
+    def fetch_accuracy_for_experiment(self, experiment_id):
+        query = f"""
+        MATCH (ri:RawImage)-[pb:PROCESSED_BY]-(e:Experiment {{experiment_id: '{experiment_id}'}})
+        WHERE pb.image_decision = 'Save'
+        WITH pb, pb.image_scoring_timestamp AS image_scoring_timestamp, apoc.convert.fromJsonList(pb.scores) AS scores
+        UNWIND scores AS score
+        RETURN pb.image_scoring_timestamp AS image_scoring_timestamp, score.probability AS probability
+        """
+
+        result = self.session.run(query)
+        records = [
+            (self.convert_to_datetime(record["image_scoring_timestamp"]), record["probability"])
+            for record in result
+        ]
+
+        df = pd.DataFrame(records, columns=["Timestamp", "Accuracy"])
+        df = df.sort_values(by='Timestamp')
 
         return df
 
@@ -216,7 +238,8 @@ class CKNKnowledgeGraph:
             if col in df.columns:
                 df[col] = df[col].apply(self.convert_to_native)
 
-        df.columns = ["Image", "Ground Truth", "Score Time", "Ingestion Time", "Delete Time", "Model", "Images", "Decision", "Scores"]
+        df.columns = ["Image", "Ground Truth", "Score Time", "Ingestion Time", "Delete Time", "Model", "Images",
+                      "Decision", "Scores"]
         df.set_index("Score Time", inplace=True)
         return df
 

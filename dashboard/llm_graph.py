@@ -9,7 +9,8 @@ from langchain_core.pydantic_v1 import BaseModel, Field
 from util import graph, llm, top_k_results
 
 database_or_llm_prompt = """ You are assessing if the provided question can be answered by
-    a database about models, experiments users and images (which you have access to) or this should be directed to a generic search
+    a database about models, experiments users and images (which you have access to) or this should be directed to a generic search.
+    If you are unsure or needs more context, this can be answered by the database. So say yes. 
      Give a binary score 'yes' or 'no'. 'Yes' the query is can be answered via the database """
 class CheckDBOrLLM(BaseModel):
     """Binary score for hallucination present in generation answer."""
@@ -29,7 +30,7 @@ rounter_prompt = ChatPromptTemplate.from_messages(
 
 router = rounter_prompt | router_llm
 
-generation_test_system = """You are a grader assessing whether a given result from a graph database aligns with the question asked. 
+generation_test_system = """You are a grader assessing whether a given result from a graph database aligns with the question asked.  
      Give a binary score 'yes' or 'no'. 'Yes' the result answers the question  """
 
 
