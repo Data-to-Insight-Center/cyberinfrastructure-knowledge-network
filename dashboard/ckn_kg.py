@@ -273,7 +273,7 @@ class CKNKnowledgeGraph:
     def fetch_profile_runs(self, application_name):
             query = f"""
             MATCH (app:Application {{name: '{application_name}' }})-[data:PROFILED_BY]->(prof:Profiling) 
-            RETURN prof.uuid as profile_run
+            RETURN DISTINCT prof.uuid as profile_run
             """
             result = self.session.run(query)
             records = result.data()

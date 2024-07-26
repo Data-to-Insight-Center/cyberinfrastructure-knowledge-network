@@ -14,7 +14,7 @@ producer = Producer(**kafka_conf)
 
 # Define the event data as a dictionary
 event_data = {
-    "uuid": "d832d303-4e0e-4abb-af35-dc89eb962ec1",
+    "uuid": "3455s-4e0e-4abb-af35-dc89eb962ec1",
     "application_name": "cg.c",
     "program_location": "/mnt/d/workspace/ud-masters/benchmarks/NPB3.3-SER-C/CG/cg.c",
     "loop_id": "main#3",
