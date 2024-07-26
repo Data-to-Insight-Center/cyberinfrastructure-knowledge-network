@@ -3,6 +3,7 @@ import pandas as pd
 import os
 import streamlit as st
 from dotenv import load_dotenv
+import plotly.express as px
 
 load_dotenv()
 
@@ -13,32 +14,31 @@ NEO4J_PWD = os.getenv('NEO4J_PWD', 'neo4jpwd')
 kg = CKNKnowledgeGraph(NEO4J_URI, NEO4J_USER, NEO4J_PWD)
 
 st.set_page_config(
-    page_title="Compiler Optimization",
-    page_icon="💻",
+    page_title="Camera Traps Experiments",
+    page_icon="📸",
     layout="wide")
 
-st.header("Compiler Optimization Events")
+st.header("Camera Traps Experiments")
+st.sidebar.header("Camera Traps Analytics")
 
-alerts = kg.fetch_alerts()
+application = kg.fetch_distinct_compiler_applications()
 
-# Filter by topic
-topic_filter = st.sidebar.multiselect("Select Topic", options=alerts['Source Topic'].unique(), default=alerts['Source Topic'].unique())
+# Create three columns
+col1, col2 = st.columns(2)
 
-# Filter by priority
-priority_filter = st.sidebar.multiselect("Select Priority", options=alerts['Priority'].unique(), default=alerts['Priority'].unique())
+# Display DataFrames in columns
+with col1:
+    selected_application = st.selectbox("Select application", application)
+    st.write("#")
 
+if selected_application:
+    profile_runs = kg.fetch_profile_runs(selected_application)
+    with col2:
+        selected_profile_run = st.selectbox("Select Profile Run", profile_runs['profile_run'])
+        st.write("#")
 
-# date_range = st.sidebar.date_input("Select Date Range", value=(min_date, max_date), min_value=min_date, max_value=max_date)
-
-# start_date = pd.to_datetime(date_range[0])
-# end_date = pd.to_datetime(date_range[1])
-
-# Apply Filters
-filtered_df = alerts[
-    (alerts['Source Topic'].isin(topic_filter)) &
-    (alerts['Priority'].isin(priority_filter))
-    # (alerts.index >= start_date) &
-    # (alerts.index <= end_date)
-]
-
-st.write(filtered_df)
+# Load user-specific data
+if selected_profile_run:
+    st.subheader(f"Profile data")
+    profile_info = kg.fetch_profile_run_info(selected_profile_run)
+    st.write(profile_info)

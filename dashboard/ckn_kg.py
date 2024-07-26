@@ -154,6 +154,17 @@ class CKNKnowledgeGraph:
 
         return users
 
+    def fetch_distinct_compiler_applications(self):
+            query = """
+            MATCH (app:Application)
+            RETURN DISTINCT app.name AS application_name
+            """
+
+            result = self.session.run(query)
+            applications = [record["application_name"] for record in result]
+
+            return applications
+
     def fetch_distinct_devices(self):
         query = """
         MATCH (d:EdgeDevice)
@@ -258,6 +269,29 @@ class CKNKnowledgeGraph:
         df = df[['experiment_id', 'timestamp', 'device_id', 'model_id']]
         df.set_index('timestamp', inplace=True)
         return df
+
+    def fetch_profile_runs(self, application_name):
+            query = f"""
+            MATCH (app:Application {{name: '{application_name}' }})-[data:OPTIMIZED_BY]->(opt:Optimization) 
+            RETURN opt.uuid as profile_run
+            """
+            result = self.session.run(query)
+            records = result.data()
+            df = pd.DataFrame(records)
+            return df
+
+    def fetch_profile_run_info(self, optimization_id):
+            query = f"""
+            MATCH (app:Application)-[data:OPTIMIZED_BY]->(opt:Optimization {{uuid: '{optimization_id}' }}) 
+            RETURN 
+            data.Number_of_Loads as num_loads, data.Number_of_Statements as num_statements,
+            opt.uuid as profile_run
+            """
+            result = self.session.run(query)
+            records = result.data()
+            df = pd.DataFrame(records)
+            df = df[['num_loads', 'num_statements', 'profile_run']]
+            return df
 
     def get_user_info(self, user_id):
         query = """
