@@ -16,8 +16,8 @@ FOR (user:User) REQUIRE user.user_id IS UNIQUE;
 CREATE CONSTRAINT compiler_app_id IF NOT EXISTS
 FOR (app:Application) REQUIRE app.name IS UNIQUE;
 
-CREATE CONSTRAINT compiler_optimizer IF NOT EXISTS
-FOR (opt:Optimization) REQUIRE opt.uuid IS UNIQUE;
+CREATE CONSTRAINT compiler_profiler IF NOT EXISTS
+FOR (opt:Profiling) REQUIRE opt.uuid IS UNIQUE;
 
 # recreate the input json
 MATCH (es:EdgeServer)<-[r:SERVED_BY]-(ri:RawImage)

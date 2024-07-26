@@ -14,12 +14,12 @@ NEO4J_PWD = os.getenv('NEO4J_PWD', 'neo4jpwd')
 kg = CKNKnowledgeGraph(NEO4J_URI, NEO4J_USER, NEO4J_PWD)
 
 st.set_page_config(
-    page_title="Camera Traps Experiments",
+    page_title="Compiler profiling application",
     page_icon="📸",
     layout="wide")
 
-st.header("Camera Traps Experiments")
-st.sidebar.header("Camera Traps Analytics")
+st.header("Compiler profiling application")
+st.sidebar.header("Compiler profiling application")
 
 application = kg.fetch_distinct_compiler_applications()
 
@@ -39,6 +39,6 @@ if selected_application:
 
 # Load user-specific data
 if selected_profile_run:
-    st.subheader(f"Profile data")
+    st.subheader(f"Profiler data")
     profile_info = kg.fetch_profile_run_info(selected_profile_run)
     st.write(profile_info)

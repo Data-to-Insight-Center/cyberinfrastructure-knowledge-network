@@ -15,35 +15,36 @@
     "neo4j.server.uri": "bolt://IP:7687",
     "neo4j.authentication.basic.username": "neo4j",
     "neo4j.authentication.basic.password": "PWD",
-    "neo4j.topic.cypher.compiler-data": ",
-  MERGE (app:Application {name: event.application_name, location: event.program_location})
-  MERGE (opt:Optimization {uuid: event.uuid})
-  MERGE (app)-[:OPTIMIZED_BY {
-    DataSize: event.DataSize,
-    Number_of_Iterations: event.Number_of_Iterations,
-    total_of_Iterations: event.total_of_Iterations,
-    Number_of_Loads: event.Number_of_Loads,
-    Number_of_Stores: event.Number_of_Stores,
-    Number_of_Instructions: event.Number_of_Instructions,
-    Number_of_Statements: event.Number_of_Statements,
-    Loopness_Level: event.Loopness_Level,
-    No_of_Bits_per_iteration: event.No_of_Bits_per_iteration,
-    No_of_Times_a_Data_Type_Changed: event.No_of_Times_a_Data_Type_Changed,
-    No_of_Integer_Operation_Type: event.No_of_Integer_Operation_Type,
-    No_of_Float_Operation_Type: event.No_of_Float_Operation_Type,
-    No_of_Double_Operation_Type: event.No_of_Double_Operation_Type,
-    No_of_Long_Double_Operation: event.No_of_Long_Double_Operation,
-    No_of_Long_Operation: event.No_of_Long_Operation,
-    No_of_Short_Operation: event.No_of_Short_Operation,
-    Big_O_Notation: event.Big_O_Notation,
-    No_of_*: event.No_of_*,
-    No_of_-: event.No_of_-,
-    No_of_+: event.No_of_+,
-    No_of_Function_Calls_Side_effect_Free: event.No_of_Function_Calls_Side_effect_Free,
-    Data_dependence_Free: event.Data_dependence_Free,
-    Ratio_of_Reduction_Statements: event.Ratio_of_Reduction_Statements,
-    Ratio_of_Flow_Dependences_Remaining: event.Ratio_of_Flow_Dependences_Remaining
-  }]->(opt)
+    "neo4j.topic.cypher.compiler-data": "
+      MERGE (app:Application {name: event.application_name, location: event.program_location})
+      MERGE (prof:Profiling {uuid: event.uuid}) ON CREATE SET prof.start_time = timestamp()
+      MERGE (app)-[:PROFILED_BY {
+        timestamp: datetime(),
+        DataSize: event.DataSize,
+        Number_of_Iterations: event.Number_of_Iterations,
+        total_of_Iterations: event.total_of_Iterations,
+        Number_of_Loads: event.Number_of_Loads,
+        Number_of_Stores: event.Number_of_Stores,
+        Number_of_Instructions: event.Number_of_Instructions,
+        Number_of_Statements: event.Number_of_Statements,
+        Loopness_Level: event.Loopness_Level,
+        No_of_Bits_per_iteration: event.No_of_Bits_per_iteration,
+        No_of_Times_a_Data_Type_Changed: event.No_of_Times_a_Data_Type_Changed,
+        No_of_Integer_Operation_Type: event.No_of_Integer_Operation_Type,
+        No_of_Float_Operation_Type: event.No_of_Float_Operation_Type,
+        No_of_Double_Operation_Type: event.No_of_Double_Operation_Type,
+        No_of_Long_Double_Operation: event.No_of_Long_Double_Operation,
+        No_of_Long_Operation: event.No_of_Long_Operation,
+        No_of_Short_Operation: event.No_of_Short_Operation,
+        No_of_multiplication: event.No_of_multiplication,
+        No_of_substraction: event.No_of_substraction,
+        No_of_addition: event.No_of_addition,
+        Big_O_Notation: event.Big_O_Notation,
+        No_of_Function_Calls_Side_effect_Free: event.No_of_Function_Calls_Side_effect_Free,
+        Data_dependence_Free: event.Data_dependence_Free,
+        Ratio_of_Reduction_Statements: event.Ratio_of_Reduction_Statements,
+        Ratio_of_Flow_Dependences_Remaining: event.Ratio_of_Flow_Dependences_Remaining
+      }]->(prof)
     "
   }
 }
