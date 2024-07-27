@@ -40,7 +40,7 @@ def format_chat_history(deque_obj):
 st.set_page_config(
     page_title="CKN Chat Bot",
     page_icon="🤖",
-    layout="wide")
+    layout="centered")
 
 st.header("CKN Analytics Bot")
 
