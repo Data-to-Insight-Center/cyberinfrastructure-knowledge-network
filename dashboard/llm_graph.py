@@ -67,14 +67,14 @@ Match (exp:Experiment {{experiment_id: `d2i-exp-3442334`}})-[r:USED]-(m:Model)-[
 return mc
 
 To get information about a modelCard from a model you can use:
-MATCH (m:Model {{model_id: '33232113' }})-[r2:AI_MODEL]-(mc:ModelCard) return mc
+MATCH (m:Model {{model_id: '33232113' }})-[r2:USED]-(mc:ModelCard) return mc
 
 Only use the relationship [:VERSION_OF] to get similar ModelCards. 
 
 You can compare test accuracy and other model attributes across model cards using this:
 MATCH 
-  (mc1:ModelCard {{external_id: 'example_1'}})-[r:AI_MODEL]-(m1:Model), 
-  (mc2:ModelCard {{external_id: 'example_2'}})-[r2:AI_MODEL]-(m2:Model) 
+  (mc1:ModelCard {{external_id: 'example_1'}})-[r:USED]-(m1:Model), 
+  (mc2:ModelCard {{external_id: 'example_2'}})-[r2:USED]-(m2:Model) 
 WITH 
   m1, m2, 
   CASE 
@@ -95,6 +95,8 @@ WITH p, apoc.convert.fromJsonList(p.scores) AS scores
 UNWIND scores AS score
 WITH p, MAX(toFloat(score.probability)) AS max_probability
 RETURN avg(max_probability) AS average_max_probability
+
+external_id in certain nodes refer to the node ids. These must be returned with results. 
 
 """
 
