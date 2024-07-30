@@ -76,14 +76,13 @@ UNWIND scores AS score
 WITH p, MAX(toFloat(score.probability)) AS max_probability
 RETURN avg(max_probability) AS average_max_probability
 
-
 """
 
 
 generation_prompt = ChatPromptTemplate.from_messages(
     [
         ("system", sysprompt),
-        ("human", "History of the conversation so far: {chat_history} \n Only return the cypher query for the question: \n {question} \n Schema: {schema}.",
+        ("human", "History of the conversation so far: {chat_history}\n Only return the cypher query for the question: \n {question} \n Schema: {schema}.",
         ),
     ]
 )
@@ -136,6 +135,7 @@ answer_grader = answer_grader_prompt | answer_grader_llm
 answer_generator_template = """You are tasked with generating a response to the question using 
 the context information available in query that was run on a knowledge graph. Keep the output structured if possible.
  Don't use bold, underline or other text altering stuff. Just plain text. 
+ Do not return the embeddings specially in the ModelCard information. 
 
 question: 
 {question}

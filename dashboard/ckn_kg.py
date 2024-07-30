@@ -76,7 +76,7 @@ class CKNKnowledgeGraph:
         query = f"""
                 MATCH (e:Experiment)-[r:PROCESSED_BY]-(img:RawImage)
                 MATCH (e)-[:SUBMITTED_BY]-(u:User {{user_id: '{user_id}'}})
-                MATCH (e)-[:USED_BY]-(m:Model)
+                MATCH (e)-[:USED]-(m:Model)
                 MATCH (e)-[:EXECUTED_ON]-(d:EdgeDevice)
                 WITH e.experiment_id AS experimentId, e.start_time AS startTime, COUNT(img) AS NumberOfRawImages, COLLECT(r) AS relationships, u.user_id AS userId, m.model_id AS modelId, d.device_id AS deviceId
                 UNWIND relationships AS r
@@ -191,7 +191,7 @@ class CKNKnowledgeGraph:
         query = f"""
         MATCH (e:Experiment)-[r:PROCESSED_BY]-(img:RawImage)
         MATCH (e)-[:SUBMITTED_BY]-(u:User)
-        MATCH (e)-[:USED_BY]-(m:Model)
+        MATCH (e)-[:USED]-(m:Model)
         MATCH (e)-[:EXECUTED_ON]-(d:EdgeDevice)
         WITH e.experiment_id AS experimentId, e.start_time AS startTime, COUNT(img) AS NumberOfRawImages, COLLECT(r) AS relationships, u.user_id AS userId, m.model_id AS modelId, d.device_id AS deviceId
         UNWIND relationships AS r
@@ -257,7 +257,7 @@ class CKNKnowledgeGraph:
     def fetch_experiments(self, user_id):
         query = f"""
         MATCH (u:User {{user_id: '{user_id}' }})<-[:SUBMITTED_BY]-(e:Experiment)-[:EXECUTED_ON]->(d:EdgeDevice),
-      (e)-[:USED_BY]->(m:Model)
+      (e)-[:USED]->(m:Model)
         RETURN e.experiment_id AS experiment_id,
        e.start_time AS timestamp,
        d.device_id AS device_id,
@@ -373,12 +373,12 @@ class CKNKnowledgeGraph:
         MATCH (e:Experiment {experiment_id: "tapis-exp5-3442334"})
         OPTIONAL MATCH (e)-[sb:SUBMITTED_BY]->(u:User)
         OPTIONAL MATCH (e)-[eo:EXECUTED_ON]->(ed:EdgeDevice)
-        OPTIONAL MATCH (e)-[ub:USED_BY]->(m:Model)
+        OPTIONAL MATCH (e)-[ub:USED]->(m:Model)
         OPTIONAL MATCH (ri:RawImage)-[pb:PROCESSED_BY]->(e)
         RETURN e, 
             collect(DISTINCT {user: u, submitted_time: sb.submitted_time}) AS submitted_by,
             collect(DISTINCT {edge_device: ed, executed_time: eo.submitted_time}) AS executed_on,
-            collect(DISTINCT {model: m, used_start_time: ub.start_time}) AS used_by,
+            collect(DISTINCT {model: m, used_start_time: ub.start_time}) AS used,
             collect(DISTINCT {raw_image: ri, processed_by: pb}) AS processed_images
         LIMIT $limit
         """
