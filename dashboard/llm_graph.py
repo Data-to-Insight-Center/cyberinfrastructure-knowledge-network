@@ -62,6 +62,26 @@ Here's an example:
 MATCH (u:User {{user_id: 'swithana'}})-[r:SUBMITTED_BY]-(e:Experiment)
 RETURN e, datetime({{epochMillis: e.start_time}}) AS start_time
 
+To get information about the ModelCard from the experiment use:
+Match (exp:Experiment {{experiment_id: `d2i-exp-3442334`}})-[r:USED]-(m:Model)-[r2:AI_MODEL]-(mc:ModelCard)
+return mc
+
+To get information about a modelCard from a model you can use:
+MATCH (m:Model {{model_id: '33232113' }})-[r2:AI_MODEL]-(mc:ModelCard) return mc
+
+Only use the relationship [:VERSION_OF] to get similar ModelCards. 
+
+You can compare test accuracy and other model attributes across model cards using this:
+MATCH 
+  (mc1:ModelCard {{external_id: 'example_1'}})-[r:AI_MODEL]-(m1:Model), 
+  (mc2:ModelCard {{external_id: 'example_2'}})-[r2:AI_MODEL]-(m2:Model) 
+WITH 
+  m1, m2, 
+  CASE 
+    WHEN m1.test_accuracy > m2.test_accuracy THEN m1 
+    ELSE m2 
+  END AS highest_accuracy_model
+RETURN highest_accuracy_model
 
 To get information about images executed in an experiement on a device, use this as
 an example:
