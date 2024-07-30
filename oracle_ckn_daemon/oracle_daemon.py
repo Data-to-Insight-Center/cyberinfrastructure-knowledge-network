@@ -176,14 +176,14 @@ def setup_logging():
     root_logger.addHandler(console_handler)
 
 
-def test_ckn_broker_connection(configuration, timeout=10):
+def test_ckn_broker_connection(configuration, timeout=10, num_tries=5):
     """
     Checks if the CKN broker is up and running.
     :param bootstrap_servers: CKN broker hosts
     :param timeout: seconds to wait for the admin client to connect
     :return:
     """
-    while True:
+    for i in range(num_tries):
         try:
             admin_client = AdminClient(configuration)
             # Access the topics, if not successful wait
@@ -192,9 +192,8 @@ def test_ckn_broker_connection(configuration, timeout=10):
         except Exception as e:
             logging.info(f"CKN broker not available yet: {e}. Retrying in 5 seconds...")
             time.sleep(5)
-
-
-
+    logging.info(f"Could not connect to the CKN broker...")
+    return False
 
 if __name__ == "__main__":
     setup_logging()
@@ -209,8 +208,15 @@ if __name__ == "__main__":
     kafka_conf = {'bootstrap.servers': KAFKA_BROKER, 'log_level': 0}
 
     logging.info("Connecting to the CKN broker at %s", KAFKA_BROKER)
+
     # Wait for CKN broker to be available
-    test_ckn_broker_connection(kafka_conf)
+    ckn_broker_available = test_ckn_broker_connection(kafka_conf)
+
+    if not ckn_broker_available:
+        logging.info(f"Shutting down CKN Daemon due to broker not being available")
+        sys.exit(1)
+
+    # Successful connection to CKN broker
     logging.info("Successfully connected to the CKN broker at %s", KAFKA_BROKER)
 
     # Initialize the Kafka producer
