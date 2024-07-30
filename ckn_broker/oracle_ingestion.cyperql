@@ -19,6 +19,14 @@ FOR (app:Application) REQUIRE app.name IS UNIQUE;
 CREATE CONSTRAINT compiler_profiler IF NOT EXISTS
 FOR (opt:Profiling) REQUIRE opt.uuid IS UNIQUE;
 
+CREATE VECTOR INDEX `modelEmbeddings` IF NOT EXISTS
+FOR (m:ModelCard)
+ON m.embedding
+OPTIONS {indexConfig: {
+ `vector.dimensions`: 1536,
+ `vector.similarity_function`: 'cosine'
+}}
+
 # recreate the input json
 MATCH (es:EdgeServer)<-[r:SERVED_BY]-(ri:RawImage)
 RETURN {
