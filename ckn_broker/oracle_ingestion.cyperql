@@ -28,15 +28,11 @@ FOR (ai:AIModel) REQUIRE ai.external_id IS UNIQUE;
 CREATE CONSTRAINT datasheet_id IF NOT EXISTS
 FOR (ds:Datasheet) REQUIRE ds.external_id IS UNIQUE;
 
-
-
-
-
 CREATE VECTOR INDEX `modelEmbeddings` IF NOT EXISTS
 FOR (m:ModelCard)
 ON m.embedding
 OPTIONS {indexConfig: {
- `vector.dimensions`: 1536,
+ `vector.dimensions`: 300,
  `vector.similarity_function`: 'cosine'
 }}
 
