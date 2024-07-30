@@ -19,6 +19,19 @@ FOR (app:Application) REQUIRE app.name IS UNIQUE;
 CREATE CONSTRAINT compiler_profiler IF NOT EXISTS
 FOR (opt:Profiling) REQUIRE opt.uuid IS UNIQUE;
 
+CREATE CONSTRAINT modelcard_id IF NOT EXISTS
+FOR (mc:ModelCard) REQUIRE mc.external_id IS UNIQUE;
+
+CREATE CONSTRAINT ai_model_id IF NOT EXISTS
+FOR (ai:AIModel) REQUIRE ai.external_id IS UNIQUE;
+
+CREATE CONSTRAINT datasheet_id IF NOT EXISTS
+FOR (ds:Datasheet) REQUIRE ds.external_id IS UNIQUE;
+
+
+
+
+
 CREATE VECTOR INDEX `modelEmbeddings` IF NOT EXISTS
 FOR (m:ModelCard)
 ON m.embedding
