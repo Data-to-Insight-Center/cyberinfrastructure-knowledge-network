@@ -22,7 +22,7 @@
       MERGE (user)<-[exr:SUBMITTED_BY]-(ex) ON CREATE SET exr.submitted_time = timestamp()
       MERGE (device)<-[dex:EXECUTED_ON]-(ex) ON CREATE SET dex.submitted_time = timestamp()
       MERGE (model:Model {model_id: event.model_id})
-      MERGE (model)<-[mdex:USED_BY]-(ex) ON CREATE SET mdex.start_time = timestamp()
+      MERGE (model)<-[mdex:USED]-(ex) ON CREATE SET mdex.start_time = timestamp()
       MERGE (ri:RawImage {UUID: event.UUID})
       ON CREATE SET
         ri.image_name = event.image_name,
