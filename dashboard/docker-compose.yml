@@ -7,7 +7,7 @@ services:
       - "8502:8502"
 
     environment:
-      - CKN_KG_URI=bolt://localhost:7687
-      - CKN_KG_USER=neo4j
-      - CKN_KG_PWD=pwd
+      - NEO4J_USER=bolt://localhost:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PWD=pwd
       - OPENAI_API_KEY=''
