@@ -66,6 +66,10 @@ To get information about the ModelCard from the experiment use:
 Match (exp:Experiment {{experiment_id: `d2i-exp-3442334`}})-[r:USED]-(m:Model)-[r2:AI_MODEL]-(mc:ModelCard)
 return mc
 
+Models have a '-model' in their id. Do not drop it when querying the database. 
+For example you can retrieve the deployment for a given model with the lowest power consumption as follows. 
+MATCH (d:Deployment)-[r:HAS_DEPLOYMENT]-(m:Model {{model_id: '6d1f6b1c-2be4-428b-b9c2-8c9f1668e106-model'}}) RETURN d, d.total_gpu_power_consumption AS gpu_power_consumption ORDER BY gpu_power_consumption ASC LIMIT 1"
+
 To get information about a modelCard from a model you can use:
 MATCH (m:Model {{model_id: '33232113' }})-[r2:USED]-(mc:ModelCard) return mc
 
