@@ -28,6 +28,9 @@ FOR (ai:AIModel) REQUIRE ai.external_id IS UNIQUE;
 CREATE CONSTRAINT datasheet_id IF NOT EXISTS
 FOR (ds:Datasheet) REQUIRE ds.external_id IS UNIQUE;
 
+CREATE CONSTRAINT deployment_id IF NOT EXISTS
+FOR (depl:Deployment) REQUIRE depl.deployment_id IS UNIQUE;
+
 CREATE VECTOR INDEX `modelEmbeddings` IF NOT EXISTS
 FOR (m:ModelCard)
 ON m.embedding

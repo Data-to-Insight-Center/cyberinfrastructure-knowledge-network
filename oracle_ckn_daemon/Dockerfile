@@ -1,8 +1,9 @@
-FROM --platform=linux/amd64 python:3.9-slim
+FROM python:3.9-slim
 
 WORKDIR /app
 
 COPY oracle_daemon.py /app/
+COPY power_processor.py /app/
 COPY requirements.txt /app/
 
 RUN pip install -r /app/requirements.txt

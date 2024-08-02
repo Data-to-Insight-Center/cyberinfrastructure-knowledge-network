@@ -1,0 +1,45 @@
+{
+  "plugin power summary report": [
+    {
+      "plugin": "image_generating_plugin",
+      "cpu_power_consumption": 2.6314074074074068,
+      "gpu_power_consumption": 0.07603703703703703
+    },
+    {
+      "plugin": "power_monitor_plugin",
+      "cpu_power_consumption": 2.5915555555555554,
+      "gpu_power_consumption": 0.07137037037037038
+    },
+    {
+      "plugin": "image_scoring_plugin",
+      "cpu_power_consumption": 2.5690384615384616,
+      "gpu_power_consumption": 0.08219230769230768
+    }
+  ],
+  "pid power summary report": [
+    {
+      "pid": 806556,
+      "plugin_name": "image_generating_plugin",
+      "start_time": "2024-07-31 17:15:26",
+      "end_time": "2024-07-31 17:16:26",
+      "cpu_power_consumption": 2.6314074074074068,
+      "gpu_power_consumption": 0.07603703703703703
+    },
+    {
+      "pid": 807037,
+      "plugin_name": "power_monitor_plugin",
+      "start_time": "2024-07-31 17:15:26",
+      "end_time": "2024-07-31 17:16:26",
+      "cpu_power_consumption": 2.5915555555555554,
+      "gpu_power_consumption": 0.07137037037037038
+    },
+    {
+      "pid": 806782,
+      "plugin_name": "image_scoring_plugin",
+      "start_time": "2024-07-31 17:15:30",
+      "end_time": "2024-07-31 17:16:26",
+      "cpu_power_consumption": 2.5690384615384616,
+      "gpu_power_consumption": 0.08219230769230768
+    }
+  ]
+}

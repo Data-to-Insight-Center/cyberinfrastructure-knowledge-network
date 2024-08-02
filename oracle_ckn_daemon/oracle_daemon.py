@@ -7,6 +7,7 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from confluent_kafka import Producer, KafkaError
 from confluent_kafka.admin import AdminClient
+from power_processor import PowerProcessor
 
 ORACLE_EVENTS_FILE = os.getenv('ORACLE_CSV_PATH',
                                '/Users/swithana/git/icicle/camera-traps/releases/0.3.3/oracle_plugin_dir/image_mapping_final.json')
@@ -15,8 +16,14 @@ KAFKA_BROKER = os.getenv('CKN_KAFKA_BROKER', 'localhost:9092')
 KAFKA_TOPIC = os.getenv('CKN_KAFKA_TOPIC', 'oracle-events')
 DEVICE_ID = os.getenv('CAMERA_TRAPS_DEVICE_ID', 'macbook-M1Max')
 USER_ID = os.getenv('USER_ID', 'swithana')
-EXPERIMENT_ID = os.getenv('EXPERIMENT_ID', 'tapis-exp6-3442334')
+EXPERIMENT_ID = os.getenv('EXPERIMENT_ID', 'tapis-exp38')
 EXPERIMENT_END_SIGNAL = os.getenv('EXPERIMENT_END_SIGNAL', '6e153711-9823-4ee6-b608-58e2e801db51')
+
+POWER_SUMMARY_FILE = os.getenv('POWER_SUMMARY_FILE', '/Users/swithana/git/icicle/camera-traps/releases/0.3.3/power_output_dir/power_summary_report.json')
+POWER_SUMMARY_TOPIC = os.getenv('POWER_SUMMARY_TOPIC', 'cameratraps-power-summary')
+POWER_SUMMARY_TIMOUT = os.getenv('POWER_SUMMARY_TIMOUT', 10)
+POWER_SUMMARY_MAX_TRIES = os.getenv('POWER_SUMMARY_TIMOUT', 5)
+
 
 class OracleEventHandler(FileSystemEventHandler):
     """
@@ -62,12 +69,13 @@ class OracleEventHandler(FileSystemEventHandler):
                 logging.debug("File not complete. Waiting for the file to be completely written")
                 time.sleep(1)
 
+        shutdown_signal = False
         # Process each entry in the JSON data
         for key, value in data.items():
 
-            # shutdown signal received from oracle. process the rest of the images and exit.
+            # shutdown signal received from oracle. process the rest of the images you haven't processed and exit.
             if key == EXPERIMENT_END_SIGNAL:
-                self.stop_daemon = True
+                shutdown_signal = True
 
             # if the full image processing workflow is not yet completed, don't read the json
             if "image_decision" not in value:
@@ -120,10 +128,9 @@ class OracleEventHandler(FileSystemEventHandler):
             self.produce_event(event)
 
         # shut down if the signal was received
-        if self.stop_daemon:
+        if shutdown_signal:
             logging.info("Shutdown signal from Oracle received... Shutting down CKN Daemon.")
-            sys.exit(0)
-
+            self.stop_daemon = True
 
     def produce_event(self, event):
         """
@@ -140,7 +147,7 @@ class OracleEventHandler(FileSystemEventHandler):
             row_json = json.dumps(event)
 
             # send the event
-            self.producer.produce(self.topic, key=DEVICE_ID, value=row_json)
+            self.producer.produce(self.topic, key=EXPERIMENT_ID, value=row_json)
 
             # add line to the processed set only if the produce succeeds
             self.processed_images.add(event['UUID'])
@@ -214,7 +221,7 @@ if __name__ == "__main__":
 
     if not ckn_broker_available:
         logging.info(f"Shutting down CKN Daemon due to broker not being available")
-        sys.exit(1)
+        sys.exit(0)
 
     # Successful connection to CKN broker
     logging.info("Successfully connected to the CKN broker at %s", KAFKA_BROKER)
@@ -235,6 +242,13 @@ if __name__ == "__main__":
         while not event_handler.stop_daemon:
             time.sleep(1)
     except KeyboardInterrupt:
-        observer.stop()
+        logging.info("Keyboard interrupt received. Stopping the oracle observer.")
 
+    # wait for oracle thread to finish
+    observer.stop()
     observer.join()
+
+    # Experiment is shutting down. Streaming power information before shutting down.
+    power_processor = PowerProcessor(POWER_SUMMARY_FILE, producer, POWER_SUMMARY_TOPIC, EXPERIMENT_ID, POWER_SUMMARY_MAX_TRIES, POWER_SUMMARY_TIMOUT)
+    power_processor.process_summary_events()
+    logging.info("Power summary processed. Exiting the CKN Daemon...")

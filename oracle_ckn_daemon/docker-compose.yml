@@ -6,15 +6,19 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      - ORACLE_CSV_PATH=/logs/image_mapping_final.json
-      - CKN_LOG_FILE=/logs/ckn.log
+      - ORACLE_CSV_PATH=/oracle_logs/image_mapping_final.json
+      - CKN_LOG_FILE=/oracle_logs/ckn.log
       - CKN_KAFKA_BROKER=localhost:9092
       - CKN_KAFKA_TOPIC=oracle-events
-      - CAMERA_TRAPS_DEVICE_ID=device_1
+      - CAMERA_TRAPS_DEVICE_ID=sachith-macbook
       - USER_ID=swithana
-      - EXPERIMENT_ID=experiment_1
-      - EXPERIMENT_END_SIGNAL = 6e153711-9823-4ee6-b608-58e2e801db51
-
+      - EXPERIMENT_ID=tapis-docker-power-test1
+      - EXPERIMENT_END_SIGNAL=6e153711-9823-4ee6-b608-58e2e801db51
+      - POWER_SUMMARY_FILE=/power_logs/power_summary_report.json
+      - POWER_SUMMARY_TOPIC=cameratraps-power-summary
+      - POWER_SUMMARY_TIMOUT=10
+      - POWER_SUMMARY_MAX_TRIES=5
 
     volumes:
-      - /Users/swithana/git/icicle/camera-traps/releases/0.3.3/oracle_plugin_dir:/logs:r
+      - /Users/swithana/git/icicle/camera-traps/releases/0.3.3/oracle_plugin_dir:/oracle_logs:r
+      - /Users/swithana/git/icicle/camera-traps/releases/0.3.3/power_output_dir:/power_logs
