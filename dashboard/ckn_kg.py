@@ -187,6 +187,33 @@ class CKNKnowledgeGraph:
 
         return experiment_ids
 
+    def get_exp_deployment_info(self, experiment_id):
+            query = """
+            MATCH (exp:Experiment {experiment_id: '""" + experiment_id + """'})-[:DEPLOYMENT_INFO]->(d:Deployment)
+            RETURN exp.experiment_id as Experiment, d
+            """
+            result = self.session.run(query)
+            records = [record.data() for record in result]
+
+            if records is not None:
+                deployments = []
+                for record in records:
+                    deployment_info = record.get("d", {})
+                    deployment_info.update({
+                        "Experiment": record.get("Experiment")
+                    })
+                    deployments.append(deployment_info)
+
+                df = pd.DataFrame(deployments)
+                if df.empty:
+                    return None
+
+                df['Start Time'] = pd.to_datetime(df['start_time'], unit='ms')
+                df['End Time'] = pd.to_datetime(df['end_time'], unit='ms')
+                return df
+            else:
+                return None
+
     def get_all_exp_info(self):
         query = f"""
         MATCH (e:Experiment)-[r:PROCESSED_BY]-(img:RawImage)

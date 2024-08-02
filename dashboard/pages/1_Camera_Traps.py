@@ -61,6 +61,49 @@ if selected_user:
         exp_summary_user = kg.get_experiment_info_for_user(selected_user)
         st.write(exp_summary_user)
 
+
+def show_power_info(deployment_info):
+    if deployment_info is None:
+        st.write("No deployment info found for the experiment.")
+    else:
+        st.markdown("##### Power information")
+        total_cpu = round(deployment_info['total_cpu_power_consumption'][0], 3)
+        total_gpu = round(deployment_info['total_gpu_power_consumption'][0], 3)
+        end_timestamp = str(deployment_info['End Time'][0].strftime('%Y-%m-%d %H:%M:%S'))
+        end_date, end_time = end_timestamp.split(' ')
+
+        col10, col11, col12, col13 = st.columns(4)
+        # col11.write("Start Time:", deployment_info['Start Time'][0])
+        col10.metric(label="End Date", value=end_date)
+        col11.metric(label="End time", value=end_time)
+        col12.metric(label="Total CPU (W)", value=total_cpu)
+        col13.metric(label="Total GPU (W)", value=total_gpu)
+
+        # Showing the plugin information separately
+        plugin_metrics = deployment_info.drop(
+            columns=["Experiment", "start_time", "end_time", "deployment_id", "Start Time", "End Time",
+                     "total_cpu_power_consumption", "total_gpu_power_consumption"])
+
+        plugins = []
+        for column in plugin_metrics.columns:
+            if "cpu_power_consumption" in column or "gpu_power_consumption" in column:
+                plugin_name = column.split('_plugin_')[0].replace('_', ' ').capitalize()
+                if "cpu_power_consumption" in column:
+                    cpu_power = plugin_metrics[column][0]
+                    gpu_power = plugin_metrics[column.replace('cpu_power_consumption', 'gpu_power_consumption')][0]
+                else:
+                    continue
+
+                plugins.append({
+                    "Plugin Name": plugin_name,
+                    "Total CPU Consumption (W)": round(cpu_power, 3),
+                    "Total GPU Consumption (W)": round(gpu_power, 3)
+                })
+        plugins_df = pd.DataFrame(plugins)
+        plugins_df.set_index("Plugin Name", inplace=True)
+        st.dataframe(plugins_df)
+
+
 # Load user-specific data
 if selected_experiment:
     with col2:
@@ -68,8 +111,16 @@ if selected_experiment:
         # fig = px.line(accuracy_trend, x='Timestamp', y='Accuracy', title='Accuracy of saved images')
         # st.plotly_chart(fig)
 
+        # Display experiment summary
         display_experiment_indicators(selected_experiment, exp_summary_user)
 
-        st.subheader(f"Experiment data")
+        # Display experiment raw data
+        st.markdown("##### Experiment data")
         experiment_info = kg.get_exp_info_raw(selected_experiment)
         st.write(experiment_info)
+
+        # Display deployment information
+        deployment_info = kg.get_exp_deployment_info(selected_experiment)
+
+        show_power_info(deployment_info)
+
