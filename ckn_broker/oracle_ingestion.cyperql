@@ -25,6 +25,9 @@ FOR (mc:ModelCard) REQUIRE mc.external_id IS UNIQUE;
 CREATE CONSTRAINT ai_model_id IF NOT EXISTS
 FOR (ai:AIModel) REQUIRE ai.external_id IS UNIQUE;
 
+CREATE CONSTRAINT model_id IF NOT EXISTS
+FOR (m:Model) REQUIRE m.model_id IS UNIQUE;
+
 CREATE CONSTRAINT datasheet_id IF NOT EXISTS
 FOR (ds:Datasheet) REQUIRE ds.external_id IS UNIQUE;
 
