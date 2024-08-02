@@ -1,0 +1,33 @@
+{
+  "name": "Neo4jSinkConnectorPowerSummary",
+  "config": {
+    "topics": "cameratraps-power-summary",
+    "connector.class": "streams.kafka.connect.sink.Neo4jSinkConnector",
+    "errors.retry.timeout": "-1",
+    "errors.retry.delay.max.ms": "1000",
+    "errors.tolerance": "all",
+    "errors.log.enable": true,
+    "errors.log.include.messages": true,
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "key.converter.schemas.enable": false,
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": false,
+    "neo4j.server.uri": "bolt://IP:7687",
+    "neo4j.authentication.basic.username": "neo4j",
+    "neo4j.authentication.basic.password": "PWD",
+    "neo4j.topic.cypher.cameratraps-power-summary": "
+        MERGE (e:Experiment {experiment_id: event.experiment_id})
+        MERGE (d:Deployment {deployment_id: event.experiment_id})
+        SET d.image_generating_plugin_cpu_power_consumption = event.image_generating_plugin_cpu_power_consumption,
+        d.image_generating_plugin_gpu_power_consumption = event.image_generating_plugin_gpu_power_consumption,
+        d.power_monitor_plugin_cpu_power_consumption = event.power_monitor_plugin_cpu_power_consumption,
+        d.power_monitor_plugin_gpu_power_consumption = event.power_monitor_plugin_gpu_power_consumption,
+        d.image_scoring_plugin_cpu_power_consumption = event.image_scoring_plugin_cpu_power_consumption,
+        d.image_scoring_plugin_gpu_power_consumption = event.image_scoring_plugin_gpu_power_consumption,
+        d.total_cpu_power_consumption = event.total_cpu_power_consumption,
+        d.total_gpu_power_consumption = event.total_gpu_power_consumption,
+        d.end_time = timestamp()
+        MERGE (e)-[:DEPLOYMENT_INFO]->(d)
+    "
+  }
+}
