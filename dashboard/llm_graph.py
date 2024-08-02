@@ -162,6 +162,7 @@ answer_generator_template = """You are tasked with generating a response to the 
 the context information available in query that was run on a knowledge graph. Keep the output structured if possible.
  Don't use bold, underline or other text altering stuff. Just plain text. 
  Do not return the embeddings specially in the ModelCard information. 
+ for start time and end times convert to human readable timestamps. These are EDT. 
 
 question: 
 {question}

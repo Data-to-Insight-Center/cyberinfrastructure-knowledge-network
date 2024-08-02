@@ -63,6 +63,11 @@ if selected_user:
 
 
 def show_power_info(deployment_info):
+    """
+    Retrieve and show power information for a given experiment.
+    :param deployment_info:
+    :return:
+    """
     if deployment_info is None:
         st.write("No deployment info found for the experiment.")
     else:
@@ -107,10 +112,6 @@ def show_power_info(deployment_info):
 # Load user-specific data
 if selected_experiment:
     with col2:
-        # accuracy_trend = kg.fetch_accuracy_for_experiment(selected_experiment)
-        # fig = px.line(accuracy_trend, x='Timestamp', y='Accuracy', title='Accuracy of saved images')
-        # st.plotly_chart(fig)
-
         # Display experiment summary
         display_experiment_indicators(selected_experiment, exp_summary_user)
 
@@ -121,6 +122,5 @@ if selected_experiment:
 
         # Display deployment information
         deployment_info = kg.get_exp_deployment_info(selected_experiment)
-
         show_power_info(deployment_info)
 

@@ -435,6 +435,29 @@ class CKNKnowledgeGraph:
         df.set_index('Timestamp', inplace=True)
         return df
 
+    def get_result_query(self, query, parameters):
+        with self.driver.session() as session:
+            result = session.run(query, parameters).single()
+        return result
+
+    def get_model_card_ids(self):
+        """
+        Get all the model card IDs
+        :return:
+        """
+        query = """
+             MATCH (mc:ModelCard)
+             RETURN mc.external_id as model_card_id
+             """
+        result = self.session.run(query)
+        records = [record["model_card_id"] for record in result]
+
+        if not records:
+            return pd.DataFrame()
+
+        df = pd.DataFrame(records, columns=['Model Card ID'])
+        return df
+
     def convert_to_datetime(self, neo4j_datetime):
         return datetime(neo4j_datetime.year,
                         neo4j_datetime.month,
