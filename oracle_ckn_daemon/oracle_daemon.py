@@ -23,6 +23,7 @@ POWER_SUMMARY_FILE = os.getenv('POWER_SUMMARY_FILE', '/Users/swithana/git/icicle
 POWER_SUMMARY_TOPIC = os.getenv('POWER_SUMMARY_TOPIC', 'cameratraps-power-summary')
 POWER_SUMMARY_TIMOUT = os.getenv('POWER_SUMMARY_TIMOUT', 10)
 POWER_SUMMARY_MAX_TRIES = os.getenv('POWER_SUMMARY_TIMOUT', 5)
+ENABLE_POWER_MONITORING = os.getenv('ENABLE_POWER_MONITORING', "false")
 
 
 class OracleEventHandler(FileSystemEventHandler):
@@ -248,7 +249,8 @@ if __name__ == "__main__":
     observer.stop()
     observer.join()
 
-    # Experiment is shutting down. Streaming power information before shutting down.
-    power_processor = PowerProcessor(POWER_SUMMARY_FILE, producer, POWER_SUMMARY_TOPIC, EXPERIMENT_ID, POWER_SUMMARY_MAX_TRIES, POWER_SUMMARY_TIMOUT)
-    power_processor.process_summary_events()
-    logging.info("Power summary processed. Exiting the CKN Daemon...")
+    if ENABLE_POWER_MONITORING != 'false':
+        # Experiment is shutting down. Streaming power information before shutting down.
+        power_processor = PowerProcessor(POWER_SUMMARY_FILE, producer, POWER_SUMMARY_TOPIC, EXPERIMENT_ID, POWER_SUMMARY_MAX_TRIES, POWER_SUMMARY_TIMOUT)
+        power_processor.process_summary_events()
+        logging.info("Power summary processed. Exiting the CKN Daemon...")
