@@ -42,6 +42,10 @@ OPTIONS {indexConfig: {
  `vector.similarity_function`: 'cosine'
 }}
 
+CREATE FULLTEXT INDEX mcFullIndex FOR (n:ModelCard) ON EACH
+[n.name, n.short_description, n.full_description, n.keywords, n.author]
+
+
 # recreate the input json
 MATCH (es:EdgeServer)<-[r:SERVED_BY]-(ri:RawImage)
 RETURN {
