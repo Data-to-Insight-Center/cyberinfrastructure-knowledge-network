@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  reader:
+  ckn-daemon:
     build:
       context: .
       dockerfile: Dockerfile
@@ -20,4 +20,4 @@ services:
 
     volumes:
       - /Users/swithana/git/icicle/camera-traps/releases/0.3.3/oracle_plugin_dir:/oracle_logs:r
-      - /Users/swithana/git/icicle/camera-traps/releases/0.3.3/power_output_dir:/power_logs
+      - /Users/swithana/git/icicle/camera-traps/releases/0.3.3/power_output_dir:/power_logs:r
