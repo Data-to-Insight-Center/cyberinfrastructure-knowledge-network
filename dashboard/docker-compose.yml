@@ -11,3 +11,4 @@ services:
       - NEO4J_USER=neo4j
       - NEO4J_PWD=pwd
       - OPENAI_API_KEY=''
+      - PATRA_SERVER=''
