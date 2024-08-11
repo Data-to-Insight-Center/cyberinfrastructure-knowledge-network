@@ -63,12 +63,10 @@ MATCH (u:User {{user_id: 'swithana'}})-[r:SUBMITTED_BY]-(e:Experiment)
 RETURN e, datetime({{epochMillis: e.start_time}}) AS start_time
 
 To get information about the ModelCard from the experiment use:
-Match (exp:Experiment {{experiment_id: `d2i-exp-3442334`}})-[r:USED]-(m:Model)-[r2:AI_MODEL]-(mc:ModelCard)
+Match (exp:Experiment {{experiment_id: `d2i-exp-3442334`}})-[r:USED]-(m:Model)-[r2:USED]-(mc:ModelCard)
 return mc
 
 Models have a '-model' in their id. Do not drop it when querying the database. 
-For example you can retrieve the deployment for a given model with the lowest power consumption as follows. 
-MATCH (d:Deployment)-[r:HAS_DEPLOYMENT]-(m:Model {{model_id: '6d1f6b1c-2be4-428b-b9c2-8c9f1668e106-model'}}) RETURN d, d.total_gpu_power_consumption AS gpu_power_consumption ORDER BY gpu_power_consumption ASC LIMIT 1"
 
 To get information about a modelCard from a model you can use:
 MATCH (m:Model {{model_id: '33232113' }})-[r2:USED]-(mc:ModelCard) return mc
@@ -93,12 +91,13 @@ an example:
 MATCH (img:RawImage)-[r2:PROCESSED_BY]-(e:Experiment)-[r:EXECUTED_ON]-(d:EdgeDevice) 
 RETURN img
 
-You can calculate the average probability of an experiment using this example:
-MATCH (u:User)-[r:SUBMITTED_BY]-(e:Experiment)-[p:PROCESSED_BY]-(i:RawImage)
-WITH p, apoc.convert.fromJsonList(p.scores) AS scores
-UNWIND scores AS score
-WITH p, MAX(toFloat(score.probability)) AS max_probability
-RETURN avg(max_probability) AS average_max_probability
+To get deployment information about model deployments you can use deployment node.
+For deployment location, you can use the location field in EdgeDevice. 
+Example: to find models deployed in raspi-3 device types in ohio-zoo location you can use:
+match (m:Model)-[:HAS_DEPLOYMENT]-(depl:Deployment)-[:DEPLOYED_IN]-(device:EdgeDevice {{location:'ohio-zoo', device_type: 'raspi3'}})
+ return m, depl.device_type, depl.average_accuracy, device.location, device.device_id
+
+available model types for Model are [convolutional neural network, large language model, foundational model]. These are case sensitive.
 
 external_id in certain nodes refer to the node ids. These must be returned with results. 
 

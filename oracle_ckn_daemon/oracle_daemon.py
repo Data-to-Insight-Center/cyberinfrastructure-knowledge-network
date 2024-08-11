@@ -14,9 +14,9 @@ ORACLE_EVENTS_FILE = os.getenv('ORACLE_CSV_PATH',
 CKN_LOG_FILE = os.getenv('CKN_LOG_FILE', './ckn_daemon.log')
 KAFKA_BROKER = os.getenv('CKN_KAFKA_BROKER', 'localhost:9092')
 KAFKA_TOPIC = os.getenv('CKN_KAFKA_TOPIC', 'oracle-events')
-DEVICE_ID = os.getenv('CAMERA_TRAPS_DEVICE_ID', 'macbook-M1Max')
-USER_ID = os.getenv('USER_ID', 'swithana')
-EXPERIMENT_ID = os.getenv('EXPERIMENT_ID', 'tapis-exp38')
+DEVICE_ID = os.getenv('CAMERA_TRAPS_DEVICE_ID', 'iu-edge-server-cib')
+USER_ID = os.getenv('USER_ID', 'jstubbs')
+EXPERIMENT_ID = os.getenv('EXPERIMENT_ID', 'googlenet-iu-animal-classification')
 EXPERIMENT_END_SIGNAL = os.getenv('EXPERIMENT_END_SIGNAL', '6e153711-9823-4ee6-b608-58e2e801db51')
 
 POWER_SUMMARY_FILE = os.getenv('POWER_SUMMARY_FILE', '/Users/swithana/git/icicle/camera-traps/releases/0.3.3/power_output_dir/power_summary_report.json')
