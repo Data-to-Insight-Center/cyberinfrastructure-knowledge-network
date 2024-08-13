@@ -137,6 +137,7 @@ if selected_experiment:
 
         # dropping the model from the dataframe
         experiment_info = experiment_info.drop(columns=['Model'])
+        experiment_info = experiment_info.drop(columns=['Delete Time'])
 
         # show model and device information
         show_model_device_info(model_id, selected_experiment)

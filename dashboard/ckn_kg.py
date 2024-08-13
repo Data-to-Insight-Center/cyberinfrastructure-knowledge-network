@@ -285,7 +285,7 @@ class CKNKnowledgeGraph:
 
         df.columns = ["Image", "Ground Truth", "Score Time", "Ingestion Time", "Delete Time", "Model",
                       "Decision", "Scores"]
-        df.set_index("Score Time", inplace=True)
+        df.set_index("Ingestion Time", inplace=True)
         return df
 
     def fetch_experiments(self, user_id):
