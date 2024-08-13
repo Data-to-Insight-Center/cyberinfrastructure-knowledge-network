@@ -39,6 +39,18 @@ def display_experiment_indicators(experiment_id, experiment_df):
     col3.metric(label="Average Accuracy [%]", value=average_accuracy)
     col4.metric(label="Saved / Deleted Images", value=f"{saved_images} / {deleted_images}")
 
+def show_model_device_info(model_id, experiment_id):
+    col1, col2 = st.columns(2)
+    # get model information
+    model_name = kg.get_mode_name_version(model_id)
+    if model_name is None:
+        model_name = "BioCLIP:1.0"
+    # get device information
+    device_info = kg.get_device_type(experiment_id)
+
+    col1.metric(label="Model:", value=model_name)
+    col2.metric(label="Device Type:", value=device_info)
+
 
 
 # Create three columns
@@ -115,9 +127,18 @@ if selected_experiment:
         # Display experiment summary
         display_experiment_indicators(selected_experiment, exp_summary_user)
 
+        # get the experiment details for the selected experiment
+        experiment_info = kg.get_exp_info_raw(selected_experiment)
+        # extracting model id
+        model_id = experiment_info['Model'].iloc[0]
+        # dropping the model from the dataframe
+        experiment_info = experiment_info.drop(columns=['Model'])
+
+        # show model and device information
+        show_model_device_info(model_id, selected_experiment)
+
         # Display experiment raw data
         st.markdown("##### Experiment data")
-        experiment_info = kg.get_exp_info_raw(selected_experiment)
         st.write(experiment_info)
 
         # Display deployment information

@@ -155,15 +155,15 @@ class CKNKnowledgeGraph:
         return users
 
     def fetch_distinct_compiler_applications(self):
-            query = """
+        query = """
             MATCH (app:Application)
             RETURN DISTINCT app.name AS application_name
             """
 
-            result = self.session.run(query)
-            applications = [record["application_name"] for record in result]
+        result = self.session.run(query)
+        applications = [record["application_name"] for record in result]
 
-            return applications
+        return applications
 
     def fetch_distinct_devices(self):
         query = """
@@ -188,31 +188,31 @@ class CKNKnowledgeGraph:
         return experiment_ids
 
     def get_exp_deployment_info(self, experiment_id):
-            query = """
+        query = """
             MATCH (exp:Experiment {experiment_id: '""" + experiment_id + """'})-[:DEPLOYMENT_INFO]->(d:Deployment)
             RETURN exp.experiment_id as Experiment, d
             """
-            result = self.session.run(query)
-            records = [record.data() for record in result]
+        result = self.session.run(query)
+        records = [record.data() for record in result]
 
-            if records is not None:
-                deployments = []
-                for record in records:
-                    deployment_info = record.get("d", {})
-                    deployment_info.update({
-                        "Experiment": record.get("Experiment")
-                    })
-                    deployments.append(deployment_info)
+        if records is not None:
+            deployments = []
+            for record in records:
+                deployment_info = record.get("d", {})
+                deployment_info.update({
+                    "Experiment": record.get("Experiment")
+                })
+                deployments.append(deployment_info)
 
-                df = pd.DataFrame(deployments)
-                if df.empty:
-                    return None
-
-                df['Start Time'] = pd.to_datetime(df['start_time'], unit='ms')
-                df['End Time'] = pd.to_datetime(df['end_time'], unit='ms')
-                return df
-            else:
+            df = pd.DataFrame(deployments)
+            if df.empty:
                 return None
+
+            df['Start Time'] = pd.to_datetime(df['start_time'], unit='ms')
+            df['End Time'] = pd.to_datetime(df['end_time'], unit='ms')
+            return df
+        else:
+            return None
 
     def get_all_exp_info(self):
         query = f"""
@@ -240,6 +240,15 @@ class CKNKnowledgeGraph:
         df.set_index("Experiment", inplace=True)  # Set experiment_id as the index
         return df
 
+    def get_device_type(self, experiment_id):
+        query = """
+        MATCH (n:EdgeDevice)<-[:EXECUTED_ON]-(exp:Experiment {experiment_id: '""" + experiment_id + """'}) RETURN n.device_type as device_type
+        """
+
+        result = self.session.run(query)
+        device_type = result.single()["device_type"]
+        return device_type
+
     def get_exp_info_raw(self, experiment_id):
         query = """
         MATCH (e:Experiment {experiment_id: '""" + experiment_id + """'})-[r:PROCESSED_BY]-(img:RawImage)
@@ -247,10 +256,9 @@ class CKNKnowledgeGraph:
             image_name: img.image_name,
             ground_truth: img.ground_truth, 
             image_scoring_timestamp: r.image_scoring_timestamp, 
+            model_id: r.model_id, 
             ingestion_timestamp: r.ingestion_timestamp, 
             image_store_delete_time: r.image_store_delete_time, 
-            model_id: r.model_id, 
-            image_count: r.image_count, 
             image_decision: r.image_decision, 
             scores: r.scores
         } AS processed_by_detail
@@ -265,7 +273,6 @@ class CKNKnowledgeGraph:
             "ingestion_timestamp",
             "image_store_delete_time",
             "model_id",
-            "image_count",
             "image_decision",
             "scores"
         ])
@@ -276,7 +283,7 @@ class CKNKnowledgeGraph:
             if col in df.columns:
                 df[col] = df[col].apply(self.convert_to_native)
 
-        df.columns = ["Image", "Ground Truth", "Score Time", "Ingestion Time", "Delete Time", "Model", "Images",
+        df.columns = ["Image", "Ground Truth", "Score Time", "Ingestion Time", "Delete Time", "Model",
                       "Decision", "Scores"]
         df.set_index("Score Time", inplace=True)
         return df
@@ -298,17 +305,17 @@ class CKNKnowledgeGraph:
         return df
 
     def fetch_profile_runs(self, application_name):
-            query = f"""
+        query = f"""
             MATCH (app:Application {{name: '{application_name}' }})-[data:PROFILED_BY]->(prof:Profiling) 
             RETURN DISTINCT prof.uuid as profile_run
             """
-            result = self.session.run(query)
-            records = result.data()
-            df = pd.DataFrame(records)
-            return df
+        result = self.session.run(query)
+        records = result.data()
+        df = pd.DataFrame(records)
+        return df
 
     def fetch_profile_run_info(self, profile_id):
-            query = f"""
+        query = f"""
             MATCH (app:Application)-[rel:PROFILED_BY]->(opt:Profiling {{uuid: '{profile_id}' }}) 
             RETURN 
             rel.loop_id AS loop_id,
@@ -337,10 +344,10 @@ class CKNKnowledgeGraph:
               rel.Ratio_of_Reduction_Statements AS Ratio_of_Reduction_Statements,
               rel.Ratio_of_Flow_Dependences_Remaining AS Ratio_of_Flow_Dependences_Remaining
             """
-            result = self.session.run(query)
-            records = result.data()
-            df = pd.DataFrame(records)
-            return df
+        result = self.session.run(query)
+        records = result.data()
+        df = pd.DataFrame(records)
+        return df
 
     def get_user_info(self, user_id):
         query = """
@@ -439,6 +446,20 @@ class CKNKnowledgeGraph:
         with self.driver.session() as session:
             result = session.run(query, parameters).single()
         return result
+
+    def get_mode_name_version(self, model_id):
+        """
+            Get model information.
+        """
+        query = """
+            MATCH (m:Model {model_id: '""" + model_id + """'}) 
+            RETURN m.name + ':' + m.version AS name_version
+        """
+        result = self.session.run(query)
+        name_version = result.single()["name_version"]
+
+        # Returning the 'name:version' string
+        return name_version
 
     def get_model_card_ids(self):
         """
