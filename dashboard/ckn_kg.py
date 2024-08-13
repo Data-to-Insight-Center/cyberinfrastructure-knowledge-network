@@ -73,32 +73,48 @@ class CKNKnowledgeGraph:
         return results
 
     def get_experiment_info_for_user(self, user_id):
-        query = f"""
-                MATCH (e:Experiment)-[r:PROCESSED_BY]-(img:RawImage)
-                MATCH (e)-[:SUBMITTED_BY]-(u:User {{user_id: '{user_id}'}})
-                MATCH (e)-[:USED]-(m:Model)
-                MATCH (e)-[:EXECUTED_ON]-(d:EdgeDevice)
-                WITH e.experiment_id AS experimentId, e.start_time AS startTime, COUNT(img) AS NumberOfRawImages, COLLECT(r) AS relationships, u.user_id AS userId, m.model_id AS modelId, d.device_id AS deviceId
-                UNWIND relationships AS r
-                WITH experimentId, startTime, NumberOfRawImages, COUNT(CASE WHEN r.image_decision = 'Save' THEN 1 END) AS NumberOfSavedImages, relationships, userId, modelId, deviceId
-                UNWIND relationships AS r
-                WITH experimentId, startTime, NumberOfRawImages, NumberOfSavedImages, userId, modelId, deviceId, r
-                WHERE r.image_decision = 'Save'
-                WITH experimentId, startTime, NumberOfRawImages, NumberOfSavedImages, userId, modelId, deviceId, apoc.convert.fromJsonList(r.scores) AS scores
-                UNWIND scores AS score
-                WITH experimentId, startTime, NumberOfRawImages, NumberOfSavedImages, userId, modelId, deviceId, toFloat(score.probability) AS probability
-                RETURN experimentId, userId, modelId, deviceId, AVG(probability)*100 AS average_accuracy, startTime, NumberOfRawImages, NumberOfSavedImages
-                """
+        query_experiment_info = f"""
+            MATCH (e:Experiment)-[:SUBMITTED_BY]-(u:User {{user_id: '{user_id}'}})
+            MATCH (e)-[:USED]-(m:Model)
+            MATCH (e)-[:EXECUTED_ON]-(d:EdgeDevice)
+            MATCH (e)-[r:PROCESSED_BY]-(img:RawImage)
+            WITH e.experiment_id AS experimentId, e.start_time AS startTime, COUNT(img) AS NumberOfRawImages, 
+                 u.user_id AS userId, m.model_id AS modelId, d.device_id AS deviceId
+            RETURN experimentId, userId, modelId, deviceId, startTime, NumberOfRawImages
+            """
 
-        result = self.session.run(query)
+        query_save_accuracy = f"""
+            MATCH (u:User {{user_id: '{user_id}'}})<-[:SUBMITTED_BY]-(ex:Experiment)-[r:PROCESSED_BY]-(ri:RawImage)
+            WHERE r.image_decision = 'Save'
+            WITH ex, ri, r,
+            apoc.convert.fromJsonList(r.scores) AS scoresList
+            WITH ex, ri, r, 
+            REDUCE(maxProb = 0, score IN scoresList | 
+                    CASE WHEN score.probability > maxProb THEN score.probability ELSE maxProb END) AS accuracy
+            RETURN ex.experiment_id as experimentId, avg(accuracy)*100 AS average_accuracy, count(ri) as num_saved_images
+            """
 
-        records = [record.data() for record in result]
-        df = pd.DataFrame(records)
-        df.columns = ["Experiment", "User", "Model", "Device", "Accuracy [%]", "Start Time", "Total Images",
-                      "Saved Images"]
-        df['Start Time'] = pd.to_datetime(df['Start Time'], unit='ms')  # Convert to datetime
-        df.set_index("Experiment", inplace=True)  # Set experiment_id as the index
-        return df
+        # get experiment info
+        result = self.session.run(query_experiment_info)
+        experiment_info_records = [record.data() for record in result]
+        df_experiment_info = pd.DataFrame(experiment_info_records)
+
+        # calculate accuracy per experiment
+        result = self.session.run(query_save_accuracy)
+        save_accuracy_records = [record.data() for record in result]
+        df_save_accuracy = pd.DataFrame(save_accuracy_records)
+
+        df_combined = pd.merge(df_experiment_info, df_save_accuracy, on='experimentId')
+        print(df_combined)
+        # Rename columns as per your requirement
+        df_combined.columns = ["Experiment", "User", "Model", "Device", "Start Time", "Total Images", "Accuracy [%]",
+                               "Saved Images"]
+
+        # Convert Start Time to datetime
+        df_combined['Start Time'] = pd.to_datetime(df_combined['Start Time'], unit='ms')
+
+        df_combined.set_index("Experiment", inplace=True)
+        return df_combined
 
     def fetch_accuracy_trend(self, date_range, experiment_id, image_saved=True):
         start_date, end_date = date_range
