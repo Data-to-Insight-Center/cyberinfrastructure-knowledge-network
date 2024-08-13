@@ -43,8 +43,10 @@ def show_model_device_info(model_id, experiment_id):
     col1, col2 = st.columns(2)
     # get model information
     model_name = kg.get_mode_name_version(model_id)
+
     if model_name is None:
         model_name = "BioCLIP:1.0"
+
     # get device information
     device_info = kg.get_device_type(experiment_id)
 
@@ -129,8 +131,10 @@ if selected_experiment:
 
         # get the experiment details for the selected experiment
         experiment_info = kg.get_exp_info_raw(selected_experiment)
+
         # extracting model id
         model_id = experiment_info['Model'].iloc[0]
+
         # dropping the model from the dataframe
         experiment_info = experiment_info.drop(columns=['Model'])
 
