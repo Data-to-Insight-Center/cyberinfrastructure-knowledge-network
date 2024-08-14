@@ -61,13 +61,13 @@ col1, col2= st.columns(2)
 # Display DataFrames in columns
 with col1:
     selected_user = st.selectbox("Select User", users)
-    st.write("#")
+    st.write(" ")
 
 if selected_user:
     experiments = kg.fetch_experiments(selected_user)
     with col2:
         selected_experiment = st.selectbox("Select Experiment", experiments['experiment_id'])
-        st.write("#")
+        st.write(" ")
 
 if selected_user:
     with col1:
