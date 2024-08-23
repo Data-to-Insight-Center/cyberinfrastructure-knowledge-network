@@ -1,7 +1,0 @@
-langgraph
-langchain
-python-dotenv~=1.0.1
-streamlit~=1.36.0
-langchain-community
-langchainhub
-langchain_openai
