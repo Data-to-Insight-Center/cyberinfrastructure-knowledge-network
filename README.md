@@ -1,4 +1,4 @@
-# CKN Camera-traps 
+# Cyberinfrastucture Knowledge Network (CKN)
 
 This repository contains the components and the setup to run CKN for TAPIS Camera Traps application.   
 
