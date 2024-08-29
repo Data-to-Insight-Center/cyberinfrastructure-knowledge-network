@@ -4,4 +4,4 @@ ckn_daemon.log
 dashboard/.env
 dashboard/__pycache__/ckn_kg.cpython-38.pyc
 .DS_Store
-/ckn/
+.ckn/
