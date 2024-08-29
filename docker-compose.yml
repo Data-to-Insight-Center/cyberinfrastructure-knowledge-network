@@ -49,7 +49,7 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_CREATE_TOPICS: ${TOPICS}
     env_file:
-      - config.yaml
+      - config.yml
 
   kafka-connect:
     image: confluentinc/cp-kafka-connect:latest
@@ -116,7 +116,7 @@ services:
       - OPENAI_API_KEY=''
       - PATRA_SERVER=''
     env_file:
-      - config.yaml
+      - config.yml
 
 volumes:
   neo4j_data:

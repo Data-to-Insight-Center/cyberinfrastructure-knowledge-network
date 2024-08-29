@@ -12,9 +12,9 @@
     "key.converter.schemas.enable": false,
     "value.converter": "org.apache.kafka.connect.json.JsonConverter",
     "value.converter.schemas.enable": false,
-    "neo4j.server.uri": "bolt://IP:7687",
-    "neo4j.authentication.basic.username": "neo4j",
-    "neo4j.authentication.basic.password": "PWD",
+    "neo4j.server.uri": "uri",
+    "neo4j.authentication.basic.username": "username",
+    "neo4j.authentication.basic.password": "password",
     "neo4j.topic.cypher.oracle-alerts": ",
         MERGE (alert:ALERT {UUID: randomUUID()})
         SET alert.alert_name = event.alert_name,
