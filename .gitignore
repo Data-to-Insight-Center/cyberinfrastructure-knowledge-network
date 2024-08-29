@@ -3,6 +3,7 @@
 
 # Virtual environment
 env/
+.venv/
 
 # Log files
 ckn_daemon.log
