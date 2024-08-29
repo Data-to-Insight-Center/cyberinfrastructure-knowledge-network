@@ -1,1 +1,2 @@
 IP_ADDRESS: 127.0.0.1
+TOPICS: "oracle-events:1:1,oracle-alerts:1:1,oracle-aggregated:1:1,compiler-data:1:1,compiler-optimization:1:1,cameratraps-power-summary:1:1"
