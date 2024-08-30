@@ -9,11 +9,11 @@ producer = Producer(conf)
 
 # Event data
 event = {
-    "device_id": "device_123",
-    "experiment_id": "experiment_456",
-    "user_id": "user_789",
-    "model_id": "model_101112",
-    "UUID": "uuid_131415",
+    "device_id": "example_device",
+    "experiment_id": "example_experiment",
+    "user_id": "example_user",
+    "model_id": "example_model",
+    "UUID": "example__uuid",
     "image_name": "sample_image.png",
     "ground_truth": "cat",
     "image_count": 1,
@@ -21,11 +21,11 @@ event = {
     "image_scoring_timestamp": "2024-08-30T12:35:56.789Z",
     "image_store_delete_time": "2024-09-30T12:34:56.789Z",
     "image_decision": "Save",
-    "flattened_scores": json.dumps([
-        {"label": "cat", "probability": 0.95},
-        {"label": "dog", "probability": 0.05}
-    ])
+    "flattened_scores": json.dumps(
+        [{"label": "cat", "probability": 0.95}, {"label": "dog", "probability": 0.05}]
+    ),
 }
+
 
 # Callback for delivery reports
 def delivery_report(err, msg):
