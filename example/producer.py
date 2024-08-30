@@ -2,7 +2,7 @@ from confluent_kafka import Producer
 import json
 
 # Configuration
-conf = {"bootstrap.servers": "127.0.0.1:9092"}
+conf = {"bootstrap.servers": "localhost:9092"}
 
 # Create Producer instance
 producer = Producer(conf)

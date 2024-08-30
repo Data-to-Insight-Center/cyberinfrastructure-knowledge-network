@@ -10,4 +10,5 @@ up: network
 
 # Bring down services
 down:
+	docker network rm ckn-network
 	docker-compose down
