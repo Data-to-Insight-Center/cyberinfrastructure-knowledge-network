@@ -1,2 +1,1 @@
 confluent-kafka
-neo4j
