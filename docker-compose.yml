@@ -37,6 +37,7 @@ services:
     image: confluentinc/cp-kafka:latest
     depends_on:
       - zookeeper
+      - neo4j
     ports:
       - "9092:9092"
     healthcheck:
@@ -59,6 +60,7 @@ services:
     image: confluentinc/cp-kafka-connect:latest
     depends_on:
       - broker
+      - neo4j
     ports:
       - "8083:8083"
     environment:
@@ -90,7 +92,7 @@ services:
     ports:
       - "8502:8502"
     environment:
-      - NEO4J_URI=bolt://localhost:7687
+      - NEO4J_URI=bolt://neo4j:7687
       - NEO4J_USER=neo4j
       - NEO4J_PWD=PWD_HERE
       - OPENAI_API_KEY=''

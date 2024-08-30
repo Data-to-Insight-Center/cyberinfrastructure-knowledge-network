@@ -25,7 +25,7 @@ For additional stream processing capabilities, visit the [CKN Stream Processors 
 
 ## Quickstart
 ```bash
-docker-compose up
+make up
 ```
 
 ## Plugins
