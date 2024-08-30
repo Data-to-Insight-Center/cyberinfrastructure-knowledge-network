@@ -53,7 +53,7 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_CREATE_TOPICS: ${TOPICS}
     env_file:
-      - config.yml
+      - .env
     networks:
       - ckn-network
 
@@ -126,10 +126,10 @@ services:
       - OPENAI_API_KEY=''
       - PATRA_SERVER=''
     env_file:
-      - config.yml
+      - .env
     networks:
       - ckn-network
 
 networks:
   ckn-network:
-    driver: bridge
+    external: True

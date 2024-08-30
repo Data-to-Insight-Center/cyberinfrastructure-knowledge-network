@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Load the configuration from config.yml
-config_file="../config.yml"
+# Load the configuration from .env file
+config_file="../.env"
 NEO4J_URI=$(grep 'NEO4J_URI' $config_file | awk '{print $2}')
 NEO4J_USER=$(grep 'NEO4J_USER' $config_file | awk '{print $2}')
 NEO4J_PWD=$(grep 'NEO4J_PWD' $config_file | awk '{print $2}')

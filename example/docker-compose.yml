@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  producer:
+    build: .
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=PLAINTEXT://broker:29092,PLAINTEXT_HOST://127.0.0.1:9092
+    networks:
+      - ckn-network
+
+networks:
+  ckn-network:
+    external: True
