@@ -36,7 +36,7 @@ def delivery_report(err, msg):
     if err is not None:
         print("Delivery failed: {}".format(err))
     else:
-        print("Message delivered to {} [{}]".format(msg.topic(), msg.partition()))
+        print("Message delivered to {}".format(msg.topic()))
 
 
 # Produce event to Kafka topic
