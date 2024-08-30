@@ -22,9 +22,15 @@ make up
 ```
 This command will set up the necessary Docker containers, including the Kafka broker, Neo4j database, and the Streamlit dashboard.
 
-### Hello World Example
+## Hello World Example
 Once the services are up, run the following command to produce an example event:
 ```bash
+pip install -r example/requirements.txt
 python example/producer.py
 ```
 Then, go to the [Dashboard](http://localhost:8502/Camera_Traps) to view the streamed data from the local instance of [neo4j database](http://localhost:7474/browser/).
+
+To bring down all the services and clean up the environment, run:
+```bash
+make down
+```
