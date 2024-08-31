@@ -1,0 +1,29 @@
+name: CKN Integration Tests
+
+on: [push]
+
+jobs:
+  test-neo4j-constraints:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'  # Specify the Python version you want to use
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install neo4j
+
+      - name: Run tests
+        run: |
+          python -m unittest discover -s tests -p "*.py"
+
+      - name: Clean up Neo4j
+        run: |
+          python -c "from neo4j import GraphDatabase; driver = GraphDatabase.driver('bolt://localhost:7687', auth=('neo4j', 'PWD_HERE')); with driver.session() as session: session.run('MATCH (n) DETACH DELETE n'); driver.close()"
