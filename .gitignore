@@ -1,5 +1,6 @@
 # IDE and editor files
 .idea/
+.vscode/
 
 # Virtual environment
 env/
@@ -8,12 +9,12 @@ env/
 # Log files
 ckn_daemon.log
 
-# Dashboard environment file and cache
+# Dashboard environment file
 dashboard/.env
-dashboard/__pycache__/
 
-# System files
+# System files and cache
 .DS_Store
+**/__pycache__/
 
 # Configuration directories
 ckn_kg/neo4j/
