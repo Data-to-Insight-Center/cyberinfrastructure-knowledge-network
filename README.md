@@ -1,34 +1,34 @@
 ## Cyberinfrastructure Knowledge Network (CKN)
 
-The Cyberinfrastructure Knowledge Network (CKN) repository provides the setup and components required to run CKN. This system integrates various services to manage and analyze data using a sophisticated pipeline involving data ingestion, processing, and visualization.
+This repo provides the setup and components required to run CKN. It integrates various services to manage and analyze data using a sophisticated pipeline involving data ingestion, processing, and visualization.
 
 ![CKN Design](ckn-design.png)
 
 ### Components
-- **Broker**: Sets up Kafka broker, topics, and connectors for streaming data.
-- **Knowledge Graph**: Manages neo4j database's infrastructure and connections.
+- **Broker**: Configures Kafka broker, topics, and connectors for streaming data.
+- **Knowledge Graph**: Manages Neo4j database infrastructure and connections.
 - **Stream Processors**: Integrates with CKN to enhance data processing workflows. More details at [CKN Stream Processors repository](https://github.com/Data-to-Insight-Center/ckn-stream-processors). 
-- **Dashboard**: Provides a Streamlit dashboard for visualizing data from knowledge graph and a LLM-based chatbot.
+- **Dashboard**: Provides a Streamlit dashboard for visualizing data from knowledge graph and a chatbot powered by a large language model.
 
 ### Plugins
 - **Oracle CKN Daemon**: Reads, processes, and sends camera trap events from Oracle Daemon and Power Measuring plugin.
 
 ## Getting Started
-To get started with CKN, first, bring up all the required services:
+To get started with CKN, bring up all the required services by running the below command:
 ```bash
 make up
 ```
-This command will set up the necessary Docker containers, including the Kafka broker, Neo4j database, and the Streamlit dashboard.
 
 ## Hello World Example
-Once the services are up, run the following command to produce an example event:
+Once the services are up, produce an example event by running:
 ```bash
 pip install -r example/requirements.txt
 python example/producer.py
 ```
-Then, go to the [Dashboard](http://localhost:8502/Camera_Traps) to view the streamed data from the local instance of [neo4j database](http://localhost:7474/browser/).
+Then, go to the [Dashboard](http://localhost:8502/Camera_Traps) to view the streamed data.
+To see the data in the database, access the [local Neo4j instance](http://localhost:7474/browser/) using the username `neo4j` and password `PWD_HERE`.
 
-To bring down all the services and clean up the environment, run:
+To shut down CKN, run:
 ```bash
 make down
 ```
