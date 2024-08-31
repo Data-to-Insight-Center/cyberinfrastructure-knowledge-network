@@ -15,7 +15,10 @@ jobs:
           --env=NEO4J_AUTH=neo4j/PWD_HERE
           --env=NEO4J_dbms_connector_bolt_advertised__address=localhost:7687
           --env=NEO4J_dbms_connector_http_advertised__address=localhost:7474
-        options: --health-cmd "cypher-shell -u neo4j -p PWD_HERE 'RETURN 1'" --health-interval 10s --health-timeout 5s --health-retries 5
+          --health-cmd "cypher-shell -u neo4j -p PWD_HERE 'RETURN 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
     - uses: actions/checkout@v2
