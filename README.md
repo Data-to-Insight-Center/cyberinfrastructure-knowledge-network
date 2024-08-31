@@ -1,7 +1,5 @@
 ## Cyberinfrastructure Knowledge Network (CKN)
 
-## Overview
-
 The Cyberinfrastructure Knowledge Network (CKN) repository provides the setup and components required to run CKN. This system integrates various services to manage and analyze data using a sophisticated pipeline involving data ingestion, processing, and visualization.
 
 ![CKN Design](ckn-design.png)
