@@ -1,25 +1,34 @@
-# Cyberinfrastucture Knowledge Network (CKN)
+## Cyberinfrastructure Knowledge Network (CKN)
 
-This repository contains the components and the setup to run CKN for TAPIS Camera Traps application.   
+This repo provides the setup and components required to run CKN. It integrates various services to manage and analyze data using a sophisticated pipeline involving data ingestion, processing, and visualization.
 
-Oracle CKN Daemon:
-- Daemon to read, process and send the camera-traps-oracle events. 
-- Only the events that are fully processed (by the image_scoring_plugin) are extracted. 
-- Dockerfile and Docker-compose files for ease of deployment of the daemon.
+![CKN Design](ckn-design.png)
 
-Dashboard:
-- CKN Analytics dashboard for camera-traps
+### Components
+- **Broker**: Configures Kafka broker, topics, and connectors for streaming data.
+- **Knowledge Graph**: Manages Neo4j database infrastructure and connections.
+- **Stream Processors**: Integrates with CKN to enhance data processing workflows. More details at [CKN Stream Processors repository](https://github.com/Data-to-Insight-Center/ckn-stream-processors). 
+- **Dashboard**: Provides a Streamlit dashboard for visualizing data from knowledge graph and a chatbot powered by a large language model.
 
-CKN Broker:
-- Kafka broker and connector setup 
-- Knowledge graph sinks for camera-traps events
+### Plugins
+- **Oracle CKN Daemon**: Reads, processes, and sends camera trap events from Oracle Daemon and Power Measuring plugin.
 
-CKN KG:
-- Knowledge graph docker compose file
+## Getting Started
+To get started with CKN, bring up all the required services by starting Docker and running the below command:
+```bash
+make up
+```
 
+## Hello World Example
+Once the services are up, produce an example event by running:
+```bash
+pip install -r example/requirements.txt
+python example/producer.py
+```
+Then, go to the [Dashboard](http://localhost:8502/Camera_Traps) to view the streamed data.
+To see the data in the database, access the [local Neo4j instance](http://localhost:7474/browser/) using the username `neo4j` and password `PWD_HERE`.
 
-
-
-
-### Stream processors are available at:
-[CKN Stream processors repository](https://github.com/Data-to-Insight-Center/ckn-stream-processors)
+To shut down CKN, run:
+```bash
+make down
+```

@@ -100,7 +100,7 @@ with open(NODES_FILE, 'r') as file:
             query = generate_cypher_query(data)
 
             # Execute the query directly in Neo4j
-            execute_query_in_neo4j(query)
+            # execute_query_in_neo4j(query)
         else:
             print(f"Failed to fetch data for UID: {uid}, Status Code: {response.status_code}")
 
