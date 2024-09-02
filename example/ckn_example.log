@@ -1,0 +1,14 @@
+2024-09-02 13:32:27,751 - Connecting to the CKN broker at localhost:9092
+2024-09-02 13:32:27,780 - Successfully connected to the CKN broker at localhost:9092
+2024-09-02 13:32:38,504 - Connecting to the CKN broker at localhost:9092
+2024-09-02 13:32:38,517 - Successfully connected to the CKN broker at localhost:9092
+2024-09-02 13:32:38,524 - Produced example event to 'oracle-events' topic
+2024-09-02 13:33:25,845 - Connecting to the CKN broker at localhost:9092
+2024-09-02 13:33:25,868 - Successfully connected to the CKN broker at localhost:9092
+2024-09-02 13:33:25,877 - Produced example event to 'oracle-events' topic
+2024-09-02 13:36:53,606 - Connecting to the CKN broker at localhost:9092
+2024-09-02 13:36:53,635 - Successfully connected to the CKN broker at localhost:9092
+2024-09-02 13:36:53,648 - Produced example event to 'oracle-events' topic
+2024-09-02 13:41:04,769 - Connecting to the CKN broker at localhost:9092
+2024-09-02 13:41:04,792 - Successfully connected to the CKN broker at localhost:9092
+2024-09-02 13:41:04,847 - Produced example event to 'oracle-events' topic

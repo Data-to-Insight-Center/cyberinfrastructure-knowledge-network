@@ -14,7 +14,7 @@ This repo provides the setup and components required to run CKN. It integrates v
 - **Oracle CKN Daemon**: Reads, processes, and sends camera trap events from Oracle Daemon and Power Measuring plugin.
 
 ## Getting Started
-To get started with CKN, bring up all the required services by starting Docker and running the below command:
+To get started with CKN, ensure that Docker is running. Then, bring up all the required services by starting Docker and running the command below:
 ```bash
 make up
 ```
