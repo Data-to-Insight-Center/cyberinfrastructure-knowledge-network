@@ -54,11 +54,8 @@ jobs:
       run: |
         cd plugins/oracle_ckn_daemon
         docker-compose up -d
-  
-    - name: Produce Plugin Events
-      run: |
-        cd plugins/oracle_ckn_daemon/events
-        touch image_mapping_final.json
+        sleep 10
+        touch ./events/image_mapping_final.json
 
     - name: Test Plugin
       run: |
