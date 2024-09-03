@@ -52,13 +52,14 @@ jobs:
 
     - name: Run Plugin Docker Compose
       run: |
-        cd plugins/oracle_ckn_daemon
-        docker-compose up -d
+        cd 
+        docker-compose up -f plugins/oracle_ckn_daemon/docker-compose.yml
   
     - name: Produce Plugin Events
       run: |
-        sleep 10
-        python plugins/oracle_ckn_daemon/touch.py
+        container_id=$(docker ps --filter "name=oracle_ckn_daemon_ckn-daemon_1" --format "{{.ID}}")
+        echo "CONTAINER_ID=$container_id" >> $GITHUB_ENV
+        docker exec ${{ env.CONTAINER_ID }} touch /oracle_logs/image_mapping_final.json
 
     - name: Test Plugin
       run: |

@@ -25,6 +25,14 @@ services:
     networks:
       - ckn-network
 
+  touch-file:
+    image: alpine
+    volumes:
+      - ./events:/oracle_logs:rw
+    entrypoint: ["/bin/sh", "-c", "touch /oracle_logs/image_mapping_final.json"]
+    networks:
+      - ckn-network
+
 networks:
   ckn-network:
     external: true
