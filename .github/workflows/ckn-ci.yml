@@ -55,18 +55,14 @@ jobs:
         cd plugins/oracle_ckn_daemon
         docker-compose up -d
   
-    - name: Wait for Plugin Container to be Ready
-      run: |
-        cd plugins/oracle_ckn_daemon
-        chmod +x check_container_ready.sh
-        ./check_container_ready.sh
-
     - name: Produce Plugin Events
       run: |
+        sleep 10
         python plugins/oracle_ckn_daemon/touch.py
 
     - name: Test Plugin
       run: |
+        sleep 10
         pip install -r plugins/oracle_ckn_daemon/requirements.txt
         python -m unittest discover -s plugins/oracle_ckn_daemon/tests -p "*.py"
 
