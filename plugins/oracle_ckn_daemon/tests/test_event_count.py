@@ -27,11 +27,13 @@ class TestRawImageCount(unittest.TestCase):
             result = session.run("MATCH (ri:RawImage) RETURN COUNT(ri) AS count")
             count = result.single()["count"]
 
+            # Iterate over each record and print the node details
+            for record in result:
+                node = record["n"]
+                print("Labels:", node.labels)
+
             # Print the count of RawImage nodes from the database
             print("Count of RawImage nodes in database:", count)
 
             # Assert that the count matches the total image count
             self.assertEqual(count, total_image_count, f"Expected {total_image_count} RawImage nodes but found {count}")
-
-if __name__ == '__main__':
-    unittest.main()
