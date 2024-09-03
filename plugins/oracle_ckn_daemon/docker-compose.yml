@@ -19,8 +19,8 @@ services:
       - ENABLE_POWER_MONITORING=true
 
     volumes:
-      - ./events:/oracle_logs:r
-      - ./events:/power_logs:r
+      - ./events:/oracle_logs:rw
+      - ./events:/power_logs:rw
 
     networks:
       - ckn-network
