@@ -17,7 +17,7 @@ up: network
 
 	# Check if neo4j-server has started and then add constraints
 	$(MAKE) check-neo4j-server
-	docker cp components/knowledge_graph/constraints.cypher neo4j_server:/constraints.cypher
+	docker cp ckn_kg/constraints.cypher neo4j_server:/constraints.cypher
 	docker exec -it neo4j_server cypher-shell -u neo4j -p PWD_HERE -f /constraints.cypher
 
 # Bring down services
