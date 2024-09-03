@@ -1,4 +1,4 @@
-name: CKN-Tests
+name: CKN-CI
 
 on: [push, pull_request]
 
@@ -47,7 +47,20 @@ jobs:
         python -m pip install --upgrade pip
         pip install neo4j
 
-    - name: Run Tests
+    - name: Run Plugin Docker Compose
+      run: |
+        cd plugins/oracle_ckn_daemon/docker-compose.yml
+        docker-compose up -d
+
+    - name: Produce Plugin Events
+      run: |
+        touch plugins/oracle_ckn_daemon/events/image_mapping_final.json
+
+    - name: Run Plugin Tests
+      run: |
+        python -m unittest discover -s tests -p "*.py"
+
+    - name: Run Tests for Infrastructure
       env:
         NEO4J_URI: bolt://localhost:7687
         NEO4J_USER: neo4j

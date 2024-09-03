@@ -275,5 +275,11 @@
     "image_store_delete_time": "2024-08-06T20:37:54.381557345+00:00",
     "image_decision": "Save"
   },
+  "4b5d738e-9c8a-5097-96e7-3c78a00e0f32": {
+    "image_count": 12,
+    "UUID": "4b5d738e-9c8a-5097-96e7-3c78a00e0f31",
+    "image_name": "/example_images/panda-cub.jpg",
+    "ground_truth": "animal"
+  },  
   "6e153711-9823-4ee6-b608-58e2e801db51": {}
 }
