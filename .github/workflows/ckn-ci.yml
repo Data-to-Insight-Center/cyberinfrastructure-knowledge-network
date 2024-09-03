@@ -57,8 +57,7 @@ jobs:
 
     - name: Produce Plugin Events
       run: |
-        touch plugins/oracle_ckn_daemon/events/image_mapping_final.json
-        sleep 5  # Wait for a short period to ensure the daemon processes the file
+        python plugins/oracle_ckn_daemon/touch.py
 
     - name: Test Plugin
       run: |
