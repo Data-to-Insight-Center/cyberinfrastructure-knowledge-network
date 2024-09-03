@@ -14,17 +14,17 @@ jobs:
       with:
         python-version: 3.8
 
-    - name: Install Docker Compose
+    - name: Install CKN Docker Compose
       run: |
         sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
         sudo chmod +x /usr/local/bin/docker-compose
         docker-compose --version
 
-    - name: Create Docker Network
+    - name: Create CKN Docker Network
       run: |
         docker network create ckn-network || true
 
-    - name: Start Docker Compose
+    - name: Start CKN Docker Compose
       run: |
         docker-compose up -d
 
@@ -63,7 +63,7 @@ jobs:
         pip install -r plugins/oracle_ckn_daemon/requirements.txt
         python -m unittest discover -s plugins/oracle_ckn_daemon/tests -p "*.py"
 
-    - name: Stop and Remove Docker Network
+    - name: Stop and Remove CKN Docker Network
       if: always()
       run: |
         docker-compose down
