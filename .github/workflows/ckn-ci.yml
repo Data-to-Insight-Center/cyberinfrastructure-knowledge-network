@@ -50,15 +50,12 @@ jobs:
         pip install neo4j
         python -m unittest discover -s tests -p "*.py"
 
-    - name: Run Plugin Docker Compose
+    - name: Test Plugin
       run: |
         cd plugins/oracle_ckn_daemon
         docker-compose up -d
         sleep 10
         touch ./events/image_mapping_final.json
-
-    - name: Test Plugin
-      run: |
         sleep 10
         pip install -r plugins/oracle_ckn_daemon/requirements.txt
         python -m unittest discover -s plugins/oracle_ckn_daemon/tests -p "*.py"
