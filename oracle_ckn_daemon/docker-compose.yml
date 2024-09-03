@@ -8,7 +8,7 @@ services:
     environment:
       - ORACLE_CSV_PATH=/oracle_logs/image_mapping_final.json
       - CKN_LOG_FILE=/oracle_logs/ckn.log
-      - CKN_KAFKA_BROKER=localhost:9092
+      - CKN_KAFKA_BROKER=broker:29092
       - CKN_KAFKA_TOPIC=oracle-events
       - CAMERA_TRAPS_DEVICE_ID=sachith-macbook
       - USER_ID=swithana
@@ -16,8 +16,16 @@ services:
       - EXPERIMENT_END_SIGNAL=6e153711-9823-4ee6-b608-58e2e801db51
       - POWER_SUMMARY_FILE=/power_logs/power_summary_report.json
       - POWER_SUMMARY_TOPIC=cameratraps-power-summary
-      - ENABLE_POWER_MONITORING=false
+      - ENABLE_POWER_MONITORING=true
 
     volumes:
-      - /Users/swithana/git/icicle/camera-traps/releases/0.3.3/oracle_plugin_dir:/oracle_logs:r
-      - /Users/swithana/git/icicle/camera-traps/releases/0.3.3/power_output_dir:/power_logs:r
+      - ./examples:/oracle_logs:r
+      - ./examples:/power_logs:r
+
+    networks:
+      - ckn-network
+
+networks:
+  ckn-network:
+    external: True
+      

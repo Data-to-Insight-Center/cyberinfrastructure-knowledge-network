@@ -7,7 +7,7 @@ env/
 .venv/
 
 # Log files
-ckn_daemon.log
+*.log
 
 # Dashboard environment file
 dashboard/.env
