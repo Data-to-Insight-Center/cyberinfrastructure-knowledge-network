@@ -25,9 +25,6 @@ class TestRawImageCount(unittest.TestCase):
         with self.driver.session() as session:
             # Query to count the number of RawImage nodes
             result = session.run("MATCH (ri:RawImage) RETURN COUNT(ri) AS count")
-            for record in result:
-                print(record["ri"])
-
             count = result.single()["count"]
 
             # Print the count of RawImage nodes from the database

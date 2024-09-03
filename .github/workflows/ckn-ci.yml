@@ -57,7 +57,7 @@ jobs:
 
         docker-compose -f plugins/oracle_ckn_daemon/docker-compose.yml logs
 
-        touch plugins/oracle_ckn_daemon/events/image_mapping_final.json
+        touch oracle_logs/image_mapping_final.json
         sleep 10
         pip install -r plugins/oracle_ckn_daemon/requirements.txt
         python -m unittest discover -s plugins/oracle_ckn_daemon/tests -p "*.py"
