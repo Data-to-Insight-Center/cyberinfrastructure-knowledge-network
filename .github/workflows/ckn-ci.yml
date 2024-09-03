@@ -54,13 +54,19 @@ jobs:
       run: |
         docker-compose -f plugins/oracle_ckn_daemon/docker-compose.yml up -d
         sleep 10
-
+    
         docker-compose -f plugins/oracle_ckn_daemon/docker-compose.yml logs
-
-        ls -la plugins/oracle_ckn_daemon/events
-        touch plugins/oracle_ckn_daemon/events/image_mapping_final.json
-        ls -la plugins/oracle_ckn_daemon/events
-        
+    
+        # Read the contents of the file and write them back to the same file
+        if [ -f plugins/oracle_ckn_daemon/events/image_mapping_final.json ]; then
+          echo "Recreating image_mapping_final.json with existing contents."
+          cat plugins/oracle_ckn_daemon/events/image_mapping_final.json > temp_file.json
+          mv temp_file.json plugins/oracle_ckn_daemon/events/image_mapping_final.json
+        else
+          echo "File does not exist. Creating a new one."
+          echo '{"": ""}' > plugins/oracle_ckn_daemon/events/image_mapping_final.json
+        fi
+    
         sleep 10
         pip install -r plugins/oracle_ckn_daemon/requirements.txt
         python -m unittest discover -s plugins/oracle_ckn_daemon/tests -p "*.py"

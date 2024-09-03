@@ -16,7 +16,7 @@ services:
       - EXPERIMENT_END_SIGNAL=6e153711-9823-4ee6-b608-58e2e801db51
       - POWER_SUMMARY_FILE=/power_logs/power_summary_report.json
       - POWER_SUMMARY_TOPIC=cameratraps-power-summary
-      - ENABLE_POWER_MONITORING=true
+      - ENABLE_POWER_MONITORING=false
 
     volumes:
       - ./events:/oracle_logs:rw
