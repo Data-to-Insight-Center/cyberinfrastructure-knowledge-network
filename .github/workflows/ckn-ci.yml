@@ -54,11 +54,17 @@ jobs:
 
     - name: Run Plugin Docker Compose
       run: |
-        cd plugins/oracle_ckn_daemon/docker-compose.yml
+        cd plugins/oracle_ckn_daemon
         docker-compose up -d
 
     - name: Produce Plugin Events
       run: |
+        echo "Waiting for oracle_ckn_daemon container to be ready..."
+        while ! docker exec $(docker ps -q --filter "name=oracle_ckn_daemon") curl -s http://localhost:8000/health | grep "ready"; do \
+          echo "oracle_ckn_daemon container starting..."; \
+          sleep 5; \
+        done
+        echo "oracle_ckn_daemon is ready"
         touch plugins/oracle_ckn_daemon/events/image_mapping_final.json
 
     - name: Test Plugin
