@@ -30,11 +30,30 @@ volumes:
 - /camera-traps/releases/0.3.3/power_output_dir:/power_logs:r
 ```
 
+### Usage
 
-##### Using docker compose:
-1. Set the environment variables on the docker-compose file
-2. Run the following command to start up the container with the env variables
-```shell
-docker-compose up -d
-```
-3. This should start the container and read the oracle-plugin output file and send the events to a hosted broker.
+1. **Start Services**
+   ```bash
+   make up
+   ```
+
+2. **Run Oracle CKN Daemon**
+   Once CKN is up, start oracle_daemon container by running:
+   ```bash
+   docker-compose up
+   ```
+
+3. **Modify the image_mapping timestamp**
+   ```bash
+   touch plugins/oracle_ckn_daemon/events/image_mapping_final.json
+   ```
+
+3. **View Streamed Data**
+   - Access the [Dashboard](http://localhost:8502/Camera_Traps) to view streamed data.
+   - Check the [local Neo4j instance](http://localhost:7474/browser/) with username `neo4j` and password `PWD_HERE`.
+
+4. **Stop Services**
+    To shut down CKN, run:
+    ```bash
+    make down
+    ```

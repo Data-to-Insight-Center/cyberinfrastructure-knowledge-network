@@ -42,28 +42,23 @@ CKN is designed to manage and analyze data through a sophisticated pipeline that
 
 ### Usage
 
-1. **Start the Services**
+1. **Start Services**
    ```bash
    make up
    ```
 
-    Once the services are up, produce an example event by running:
-
-2. **Install Example Requirements**
+2. **Run Example**
+   Once the services are up, produce an example event by running:
    ```bash
    pip install -r example/requirements.txt
-   ```
-
-3. **Run the Example Producer**
-   ```bash
    python example/producer.py
    ```
 
-3. **View the Data**
+3. **View Streamed Data**
    - Access the [Dashboard](http://localhost:8502/Camera_Traps) to view streamed data.
    - Check the [local Neo4j instance](http://localhost:7474/browser/) with username `neo4j` and password `PWD_HERE`.
 
-4. **Stop the Services**
+4. **Stop Services**
     To shut down CKN, run:
     ```bash
     make down
