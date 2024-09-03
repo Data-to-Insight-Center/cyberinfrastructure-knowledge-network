@@ -21,16 +21,11 @@ class TestRawImageCount(unittest.TestCase):
         with open(json_file_path, 'r') as file:
             data = json.load(file)
         
-        # Print the loaded JSON data for debugging
-        print("Loaded JSON data:", data)
-
-        # Calculate the total number of images
         total_image_count = len(data) - 1
-        print("Total image count from JSON:", total_image_count)
-
         with self.driver.session() as session:
             # Query to count the number of RawImage nodes
             result = session.run("MATCH (ri:RawImage) RETURN COUNT(ri) AS count")
+            print(result)
             count = result.single()["count"]
 
             # Print the count of RawImage nodes from the database
