@@ -58,6 +58,7 @@ jobs:
     - name: Wait for Plugin Container to be Ready
       run: |
         cd plugins/oracle_ckn_daemon
+        chmod +x check_container_ready.sh
         ./check_container_ready.sh
 
     - name: Produce Plugin Events
