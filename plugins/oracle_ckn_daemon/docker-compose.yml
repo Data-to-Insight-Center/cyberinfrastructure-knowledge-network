@@ -27,5 +27,4 @@ services:
 
 networks:
   ckn-network:
-    external: True
-      
+    external: true
