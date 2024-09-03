@@ -54,6 +54,11 @@ jobs:
       run: |
         cd plugins/oracle_ckn_daemon
         docker-compose up -d
+  
+    - name: Wait for Plugin Container to be Ready
+      run: |
+        cd plugins/oracle_ckn_daemon
+        ./check_container_ready.sh
 
     - name: Produce Plugin Events
       run: |
