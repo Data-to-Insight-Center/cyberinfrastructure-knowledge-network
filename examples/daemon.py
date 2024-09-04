@@ -63,50 +63,12 @@ def delivery_report(err, msg):
     else:
         logging.info("Produced example event to '%s' topic", msg.topic())
 
-def generate_event(
-    device_id: str = "example_device",
-    experiment_id_prefix: str = "example_experiment_",
-    user_id: str = "example_user",
-    model_id: str = "example_model",
-    uuid: str = "example_uuid",
-    image_name: str = "sample_image.png",
-    ground_truth: str = "cat",
-    image_count: int = 1,
-    image_decision: str = "Save"
-) -> dict:
-    """
-    Generates a sample event with the given parameters.
-    """
-    current_timestamp = datetime.utcnow().isoformat()
-    
-    event = {
-        "device_id": device_id,
-        "experiment_id": f"{experiment_id_prefix}{random.randint(0, 100)}",
-        "user_id": user_id,
-        "model_id": model_id,
-        "UUID": uuid,
-        "image_name": image_name,
-        "ground_truth": ground_truth,
-        "image_count": image_count,
-        "image_receiving_timestamp": f"{current_timestamp}Z",
-        "image_scoring_timestamp": f"{current_timestamp}Z",
-        "image_store_delete_time": f"{current_timestamp}Z",
-        "image_decision": image_decision,
-        "flattened_scores": json.dumps(
-            [
-                {"label": "cat", "probability": 0.95},
-                {"label": "dog", "probability": 0.05},
-            ]
-        ),
-    }
-    
-    return event
 
 if __name__ == "__main__":
     setup_logging()
 
     # Configure Kafka producer
-    kafka_conf = {'bootstrap.servers': KAFKA_BROKER, 'log_level': 0}
+    kafka_conf = {'bootstrap.servers': KAFKA_BROKER}
     logging.info("Connecting to the CKN broker at %s", KAFKA_BROKER)
 
     # Wait for CKN broker to be available
@@ -115,14 +77,31 @@ if __name__ == "__main__":
         sys.exit(1)
     logging.info("Successfully connected to the CKN broker at %s", KAFKA_BROKER)
 
-    while True:
-        # Example event data
-        event = generate_event()
+    # Example event data
+    current_timestamp = datetime.utcnow().isoformat()
+    event = {
+                "device_id": "example_device",
+                "experiment_id": "example_experiment_{}".format(random.randint(0, 100)),
+                "user_id": "example_user",
+                "model_id": "example_model",
+                "UUID": "example_uuid",
+                "image_name": "sample_image.png",
+                "ground_truth": "cat",
+                "image_count": 1,
+                "image_receiving_timestamp": "{}Z".format(current_timestamp),
+                "image_scoring_timestamp": "{}Z".format(current_timestamp),
+                "image_store_delete_time": "{}Z".format(current_timestamp),
+                "image_decision": "Save",
+                "flattened_scores": json.dumps(
+                    [
+                        {"label": "cat", "probability": 0.95},
+                        {"label": "dog", "probability": 0.05},
+                    ]
+                ),
+            }
 
-        # Produce event to Kafka topic
-        producer = Producer(**kafka_conf)
-        producer.produce(KAFKA_TOPIC, json.dumps(event), callback=delivery_report)
-        producer.flush(timeout=1)
 
-        # Sleep or wait for some time before sending the next event
-        time.sleep(60)  # Adjust the sleep time as needed
+    # Produce event to Kafka topic
+    producer = Producer(**kafka_conf)
+    producer.produce(KAFKA_TOPIC, json.dumps(event), callback=delivery_report)
+    producer.flush(timeout=1)
