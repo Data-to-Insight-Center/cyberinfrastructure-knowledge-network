@@ -58,7 +58,7 @@ class TestCKNDaemon(unittest.TestCase):
 
     def test_container_exited(self):
         # Name of the container to check
-        container_name = "oracle_ckn_daemon-ckn-daemon-1"
+        container_name = "oracle-daemon"
 
         try:
             # Get the container by name
