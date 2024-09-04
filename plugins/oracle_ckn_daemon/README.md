@@ -34,12 +34,14 @@ volumes:
 
 1. **Start Services**
    ```bash
+   cd ..
    make up
    ```
 
 2. **Run Oracle CKN Daemon**
    Once CKN is up, start oracle_daemon container by running:
    ```bash
+   cd plugins/oracle_daemon
    docker-compose up
    ```
 
