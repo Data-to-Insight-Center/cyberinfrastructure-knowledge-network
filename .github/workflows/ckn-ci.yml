@@ -23,7 +23,19 @@ jobs:
         run: |
           docker network create ckn-network || true
           docker compose -f docker-compose.yml up -d --build
-      
+
+      - name: Apply neo4j Constraints
+        run: |
+          echo "Waiting for Neo4j to be ready..."
+          while ! docker exec neo4j_server cypher-shell -u neo4j -p PWD_HERE "RETURN 1" > /dev/null 2>&1; do \
+            echo "neo4j-server starting..."; \
+            sleep 5; \
+          done
+          echo "Neo4j is ready"
+
+          docker cp ckn_kg/constraints.cypher neo4j_server:/constraints.cypher
+          docker exec neo4j_server cypher-shell -u neo4j -p PWD_HERE -f /constraints.cypher
+              
       - name: Build Plugin
         run: |
           docker compose -f plugins/oracle_ckn_daemon/docker-compose.yml up -d --build
@@ -38,6 +50,7 @@ jobs:
       - name: Produce Plugin Events
         run: |
           docker exec oracle-daemon touch /oracle_logs/image_mapping_final.json
+          sleep 10
 
   test:
     runs-on: ubuntu-latest
@@ -46,6 +59,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Test CKN
+        run: |
+          pip install neo4j
+          python -m unittest discover -s tests -p "*.py"
+
       - name: Test Plugin
         run: |
           pip install -r plugins/oracle_ckn_daemon/tests/requirements.txt
@@ -53,11 +71,18 @@ jobs:
 
   stop:
     runs-on: ubuntu-latest
-    needs: start
+    needs: [start, run]
     steps:
-    - name: Stop and Remove CKN Docker Network
-      if: always()
-      run: |
-        docker compose down
-        docker rm oracle-daemon || true
-        docker network rm ckn-network || true
+      - name: Checkout code
+        uses: actions/checkout@v2
+  
+      - name: Stop and Remove CKN Docker Network
+        if: always()
+        run: |
+          docker compose -f docker-compose.yml down
+          docker network rm ckn-network || true
+
+      - name: Remove Oracle Daemon Container
+        if: always()
+        run: |
+          docker rm oracle-daemon || true

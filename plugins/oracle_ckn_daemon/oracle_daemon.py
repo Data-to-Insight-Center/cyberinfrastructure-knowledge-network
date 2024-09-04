@@ -9,8 +9,7 @@ from confluent_kafka import Producer, KafkaError
 from confluent_kafka.admin import AdminClient
 from power_processor import PowerProcessor
 
-ORACLE_EVENTS_FILE = os.getenv('ORACLE_CSV_PATH',
-                               '/Users/swithana/git/icicle/camera-traps/releases/0.3.3/oracle_plugin_dir/image_mapping_final.json')
+ORACLE_EVENTS_FILE = os.getenv('ORACLE_CSV_PATH', 'plugins/oracle_ckn_daemon/events/image_mapping_final.json')
 CKN_LOG_FILE = os.getenv('CKN_LOG_FILE', './ckn_daemon.log')
 KAFKA_BROKER = os.getenv('CKN_KAFKA_BROKER', 'localhost:9092')
 KAFKA_TOPIC = os.getenv('CKN_KAFKA_TOPIC', 'oracle-events')
@@ -19,7 +18,7 @@ USER_ID = os.getenv('USER_ID', 'jstubbs')
 EXPERIMENT_ID = os.getenv('EXPERIMENT_ID', 'googlenet-iu-animal-classification')
 EXPERIMENT_END_SIGNAL = os.getenv('EXPERIMENT_END_SIGNAL', '6e153711-9823-4ee6-b608-58e2e801db51')
 
-POWER_SUMMARY_FILE = os.getenv('POWER_SUMMARY_FILE', '/Users/swithana/git/icicle/camera-traps/releases/0.3.3/power_output_dir/power_summary_report.json')
+POWER_SUMMARY_FILE = os.getenv('POWER_SUMMARY_FILE', 'plugins/oracle_ckn_daemon/events/power_summary_report.json')
 POWER_SUMMARY_TOPIC = os.getenv('POWER_SUMMARY_TOPIC', 'cameratraps-power-summary')
 POWER_SUMMARY_TIMOUT = os.getenv('POWER_SUMMARY_TIMOUT', 10)
 POWER_SUMMARY_MAX_TRIES = os.getenv('POWER_SUMMARY_TIMOUT', 5)
