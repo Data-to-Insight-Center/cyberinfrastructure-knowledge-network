@@ -72,26 +72,33 @@ class CKNKnowledgeGraph:
                 results[key] = result["value"] if result else 0
         return results
 
-    def get_experiment_info_for_user(self, user_id):
+    def get_experiment_info_for_user(self, user_id, set_empty_threshold=0.2):
+        # set_empty_threshold set the label to empty if the probability value is too small.
         query_experiment_info = f"""
-            MATCH (e:Experiment)-[:SUBMITTED_BY]-(u:User {{user_id: '{user_id}'}})
-            MATCH (e)-[:USED]-(m:Model)
-            MATCH (e)-[:EXECUTED_ON]-(d:EdgeDevice)
-            MATCH (e)-[r:PROCESSED_BY]-(img:RawImage)
-            WITH e.experiment_id AS experimentId, e.start_time AS startTime, COUNT(img) AS NumberOfRawImages, 
-                 u.user_id AS userId, m.model_id AS modelId, d.device_id AS deviceId
-            RETURN experimentId, userId, modelId, deviceId, startTime, NumberOfRawImages
-            """
+                    MATCH (e:Experiment)-[:SUBMITTED_BY]-(u:User {{user_id: '{user_id}'}})
+                    MATCH (e)-[:USED]-(m:Model)
+                    MATCH (e)-[:EXECUTED_ON]-(d:EdgeDevice)
+                    MATCH (e)-[r:PROCESSED_BY]-(img:RawImage)
+                    WITH e.experiment_id AS experimentId, e.start_time AS startTime, 
+                         COUNT(img) AS numberOfRawImages, 
+                         SUM(CASE WHEN r.image_decision = 'Save' THEN 1 ELSE 0 END) AS numSavedImages, 
+                         u.user_id AS userId, m.model_id AS modelId, d.device_id AS deviceId
+                    RETURN experimentId, userId, modelId, deviceId, startTime, numberOfRawImages, numSavedImages
+                    """
 
         query_save_accuracy = f"""
-            MATCH (u:User {{user_id: '{user_id}'}})<-[:SUBMITTED_BY]-(ex:Experiment)-[r:PROCESSED_BY]-(ri:RawImage)
-            WHERE r.image_decision = 'Save'
-            WITH ex, ri, r,
-            apoc.convert.fromJsonList(r.scores) AS scoresList
-            WITH ex, ri, r, 
-            REDUCE(maxProb = 0, score IN scoresList | 
-                    CASE WHEN score.probability > maxProb THEN score.probability ELSE maxProb END) AS accuracy
-            RETURN ex.experiment_id as experimentId, avg(accuracy)*100 AS average_accuracy, count(ri) as num_saved_images
+                    MATCH (ri:RawImage)-[pb:PROCESSED_BY]->(e:Experiment)-[:SUBMITTED_BY]->(u:User {{user_id: '{user_id}'}})
+                    WITH ri, pb, e, apoc.convert.fromJsonList(pb.scores) AS scoresList
+                    UNWIND scoresList AS score
+                    WITH ri, e, score.label AS label, score.probability AS probability
+                    ORDER BY probability DESC
+                    WITH ri, e, 
+                        CASE WHEN collect(probability)[0] < '{set_empty_threshold}' THEN 'empty' ELSE collect(label)[0] END AS predicted_label,
+                        CASE WHEN ri.ground_truth IS NULL OR ri.ground_truth = 'unknown' THEN 'empty' ELSE ri.ground_truth END AS ground_truth
+                    WITH ri, e, predicted_label, ground_truth, 
+                        CASE WHEN ground_truth = predicted_label THEN 1 ELSE 0 END AS accuracy
+                    WITH e, avg(accuracy) AS avg_accuracy, collect({{predicted_label: predicted_label, ground_truth: ground_truth}}) AS labels
+                    RETURN e.experiment_id AS experimentId, e.average_accuracy*100 AS averageAccuracy
             """
 
         # get experiment info
@@ -107,8 +114,7 @@ class CKNKnowledgeGraph:
         df_combined = pd.merge(df_experiment_info, df_save_accuracy, on='experimentId')
         print(df_combined)
         # Rename columns as per your requirement
-        df_combined.columns = ["Experiment", "User", "Model", "Device", "Start Time", "Total Images", "Accuracy [%]",
-                               "Saved Images"]
+        df_combined.columns = ["Experiment", "User", "Model", "Device", "Start Time", "Total Images", "Saved Images", "Accuracy [%]"]
 
         # Convert Start Time to datetime
         df_combined['Start Time'] = pd.to_datetime(df_combined['Start Time'], unit='ms')
