@@ -93,12 +93,12 @@ class CKNKnowledgeGraph:
                     WITH ri, e, score.label AS label, score.probability AS probability
                     ORDER BY probability DESC
                     WITH ri, e, 
-                        CASE WHEN collect(probability)[0] < '{set_empty_threshold}' THEN 'empty' ELSE collect(label)[0] END AS predicted_label,
+                        CASE WHEN collect(probability)[0] < 0.2 THEN 'empty' ELSE collect(label)[0] END AS predicted_label,
                         CASE WHEN ri.ground_truth IS NULL OR ri.ground_truth = 'unknown' THEN 'empty' ELSE ri.ground_truth END AS ground_truth
                     WITH ri, e, predicted_label, ground_truth, 
                         CASE WHEN ground_truth = predicted_label THEN 1 ELSE 0 END AS accuracy
                     WITH e, avg(accuracy) AS avg_accuracy, collect({{predicted_label: predicted_label, ground_truth: ground_truth}}) AS labels
-                    RETURN e.experiment_id AS experimentId, e.average_accuracy*100 AS averageAccuracy
+                    RETURN e.experiment_id AS experimentId, avg_accuracy * 100 AS averageAccuracy
             """
 
         # get experiment info
