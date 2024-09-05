@@ -9,7 +9,7 @@ from confluent_kafka import Producer
 from confluent_kafka.admin import AdminClient
 
 CKN_LOG_FILE = os.getenv('CKN_LOG_FILE', './ckn_example.log')
-KAFKA_BROKER = os.getenv('CKN_KAFKA_BROKER', '127.0.0.1:9092')
+KAFKA_BROKER = os.getenv('CKN_KAFKA_BROKER', 'localhost:9092')
 KAFKA_TOPIC = os.getenv('CKN_KAFKA_TOPIC', 'oracle-events')
 
 def setup_logging():
