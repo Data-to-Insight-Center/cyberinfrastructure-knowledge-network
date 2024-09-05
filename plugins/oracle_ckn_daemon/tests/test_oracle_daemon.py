@@ -25,7 +25,7 @@ class TestCKNDaemon(unittest.TestCase):
         json_file_path = 'plugins/oracle_ckn_daemon/events/image_mapping_final.json'
         with open(json_file_path, 'r') as file:
             data = json.load(file)
-        total_image_count = len(data) - 1
+        total_image_count = sum(1 for uuid, info in data.items() if "image_count" in info)
 
         with self.driver.session() as session:
             # Query to count the number of RawImage nodes
