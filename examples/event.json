@@ -1,0 +1,18 @@
+{
+  "device_id": "example_device",
+  "experiment_id": "example_experiment_42",
+  "user_id": "example_user",
+  "model_id": "example_model",
+  "UUID": "example_uuid",
+  "image_name": "sample_image.png",
+  "ground_truth": "cat",
+  "image_count": 1,
+  "image_receiving_timestamp": "2024-09-05T12:00:00Z",
+  "image_scoring_timestamp": "2024-09-05T12:00:01Z",
+  "image_store_delete_time": "2024-09-05T12:00:02Z",
+  "image_decision": "Save",
+  "flattened_scores": [
+    {"label": "cat", "probability": 0.95},
+    {"label": "dog", "probability": 0.05}
+  ]
+}

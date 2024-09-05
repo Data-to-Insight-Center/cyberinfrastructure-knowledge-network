@@ -8,8 +8,8 @@ from datetime import datetime
 from confluent_kafka import Producer
 from confluent_kafka.admin import AdminClient
 
-CKN_LOG_FILE = os.getenv('CKN_LOG_FILE', './ckn_example.log')
-KAFKA_BROKER = os.getenv('CKN_KAFKA_BROKER', '127.0.0.1:9092')
+CKN_LOG_FILE = os.getenv('CKN_LOG_FILE', 'ckn_example.log')
+KAFKA_BROKER = os.getenv('CKN_KAFKA_BROKER', 'broker:29092')
 KAFKA_TOPIC = os.getenv('CKN_KAFKA_TOPIC', 'oracle-events')
 
 def setup_logging():
@@ -63,6 +63,19 @@ def delivery_report(err, msg):
     else:
         logging.info("Produced example event to '%s' topic", msg.topic())
 
+def read_event_from_file(file_path):
+    """
+    Reads event data from a JSON file.
+    """
+    try:
+        with open(file_path, 'r') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        logging.error(f"Event file not found: {file_path}")
+        return None
+    except json.JSONDecodeError:
+        logging.error(f"Invalid JSON in event file: {file_path}")
+        return None
 
 if __name__ == "__main__":
     setup_logging()
@@ -77,29 +90,21 @@ if __name__ == "__main__":
         sys.exit(1)
     logging.info("Successfully connected to the CKN broker at %s", KAFKA_BROKER)
 
-    # Example event data
-    current_timestamp = datetime.utcnow().isoformat()
-    event = {
-                "device_id": "example_device",
-                "experiment_id": "example_experiment_{}".format(random.randint(0, 100)),
-                "user_id": "example_user",
-                "model_id": "example_model",
-                "UUID": "example_uuid",
-                "image_name": "sample_image.png",
-                "ground_truth": "cat",
-                "image_count": 1,
-                "image_receiving_timestamp": "{}Z".format(current_timestamp),
-                "image_scoring_timestamp": "{}Z".format(current_timestamp),
-                "image_store_delete_time": "{}Z".format(current_timestamp),
-                "image_decision": "Save",
-                "flattened_scores": json.dumps(
-                    [
-                        {"label": "cat", "probability": 0.95},
-                        {"label": "dog", "probability": 0.05},
-                    ]
-                ),
-            }
+    # Read event data from file
+    event = read_event_from_file("/app/event.json")
+    if event is None:
+        logging.error("Failed to read event data. Shutting down.")
+        sys.exit(1)
 
+    # Update timestamps to current time
+    current_timestamp = datetime.utcnow().isoformat()
+    event['image_receiving_timestamp'] = f"{current_timestamp}Z"
+    event['image_scoring_timestamp'] = f"{current_timestamp}Z"
+    event['image_store_delete_time'] = f"{current_timestamp}Z"
+
+    # Ensure flattened_scores is a JSON string
+    if isinstance(event['flattened_scores'], list):
+        event['flattened_scores'] = json.dumps(event['flattened_scores'])
 
     # Produce event to Kafka topic
     producer = Producer(**kafka_conf)

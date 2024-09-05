@@ -6,20 +6,12 @@ This repository provides the setup and components required to run the Cyberinfra
 
 ## Table of Contents
 
-- [About The Project](#about-the-project)
+- [Overview](#overview)
 - [Components](#components)
 - [Plugins](#plugins)
 - [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-- [Usage](#usage)
-  - [Hello World Example](#hello-world-example)
-- [Shutting Down](#shutting-down)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
 
-## About The Project
+## Overview
 
 CKN is designed to manage and analyze data through a sophisticated pipeline that involves data ingestion, processing, and visualization. This project aims to streamline data workflows by integrating various services.
 
@@ -48,18 +40,17 @@ CKN is designed to manage and analyze data through a sophisticated pipeline that
    ```
 
 2. **Run Example**
-   Once the services are up, produce an example event by running:
+   - Once the services are up, produce an example event by running:
    ```bash
-   pip install -r examples/requirements.txt
-   python examples/daemon.py
+   docker compose -f examples/docker-compose.yml up
    ```
 
 3. **View Streamed Data**
-   - Access the [Dashboard](http://localhost:8502/Camera_Traps) to view streamed data.
-   - Check the [local Neo4j instance](http://localhost:7474/browser/) with username `neo4j` and password `PWD_HERE`.
+   - Access the [Dashboard](http://localhost:8502/Camera_Traps) to view streamed data or Check the [local Neo4j instance](http://localhost:7474/browser/) with username `neo4j` and password `PWD_HERE`.
 
 4. **Stop Services**
-    To shut down CKN, run:
+    - To shut down CKN and example container, run:
     ```bash
     make down
+   docker compose -f examples/docker-compose.yml down
     ```
