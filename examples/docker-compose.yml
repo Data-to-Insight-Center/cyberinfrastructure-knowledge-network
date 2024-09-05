@@ -15,4 +15,4 @@ services:
 
 networks:
   ckn-network:
-    driver: bridge
+    external: True
