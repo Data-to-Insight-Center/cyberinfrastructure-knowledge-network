@@ -8,9 +8,8 @@ services:
     environment:
       - CKN_KAFKA_BROKER=broker:29092
       - CKN_KAFKA_TOPIC=oracle-events
-      - CKN_LOG_FILE=ckn_example.log
     volumes:
-      - ./:/app  # This mounts the current directory to /app in the container
+      - ./:/app
     networks:
       - ckn-network
 

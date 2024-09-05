@@ -48,7 +48,7 @@ jobs:
       - name: Test Example Plugin
         run: |
           pip install -r examples/tests/requirements.txt
-          python -m unittest discover -s examples/tests/ -p "*.py"
+          pytest examples/tests/ -v
 
       - name: Stop and Remove CKN Docker Network
         if: always()
