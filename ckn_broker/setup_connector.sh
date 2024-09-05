@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Installing connector plugins"
-confluent-hub install --no-prompt neo4j/kafka-connect-neo4j:latest
+confluent-hub install --no-prompt neo4j/kafka-connect-neo4j:5.0.5
 
 echo "Launching Kafka Connect worker"
 /etc/confluent/docker/run &
