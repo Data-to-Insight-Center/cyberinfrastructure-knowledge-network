@@ -50,8 +50,8 @@ CKN is designed to manage and analyze data through a sophisticated pipeline that
 2. **Run Example**
    Once the services are up, produce an example event by running:
    ```bash
-   pip install -r example/requirements.txt
-   python example/producer.py
+   pip install -r examples/requirements.txt
+   python examples/daemon.py
    ```
 
 3. **View Streamed Data**

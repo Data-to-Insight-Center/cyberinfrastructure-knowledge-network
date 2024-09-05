@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      - CKN_KAFKA_BROKER=broker:29092
+      - CKN_KAFKA_BROKER=127.0.0.1:9092
       - CKN_KAFKA_TOPIC=oracle-events
       - CKN_LOG_FILE=ckn_example.log
 
@@ -15,4 +15,4 @@ services:
 
 networks:
   ckn-network:
-    external: true
+    external: True
