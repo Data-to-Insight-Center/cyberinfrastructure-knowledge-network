@@ -28,7 +28,14 @@ def display_experiment_indicators(experiment_id, experiment_df):
     start_time = selected_experiment['Start Time']
     date_str = start_time.strftime("%Y-%m-%d")
     time_str = start_time.strftime("%H:%M:%S")
-    average_accuracy = round(selected_experiment['Accuracy [%]'], 2)
+
+    average_accuracy = selected_experiment['Accuracy [%]']
+
+    if average_accuracy is None:
+        average_accuracy = 'N/A'
+    else:
+        average_accuracy = round(average_accuracy, 2)
+
     total_images = selected_experiment['Total Images']
     saved_images = selected_experiment['Saved Images']
     deleted_images = total_images - saved_images
