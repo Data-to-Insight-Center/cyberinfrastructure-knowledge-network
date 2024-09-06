@@ -39,8 +39,10 @@ jobs:
       - name: Build CKN Oracle Daemon plugin
         run: |
           docker compose -f plugins/oracle_ckn_daemon/docker-compose.yml up -d --build
+          docker logs kafka-connect
           sleep 5
           docker exec ckn-oracle-daemon touch /oracle_logs/image_mapping_final.json
+          docker exec ckn-oracle-daemon tail -f /oracle_logs/ckn.log
 
       - name: Test Oracle CKN Plugin
         run: |
