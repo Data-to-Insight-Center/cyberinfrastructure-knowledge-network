@@ -9,6 +9,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v1
+
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
@@ -43,7 +46,7 @@ jobs:
       - name: Run CKN-Oracle Plugin
         run: |
           docker exec ckn-oracle-daemon touch /oracle_logs/image_mapping_final.json          
-          sleep 60
+          sleep 10
 
       - name: Test CKN-Oracle Plugin
         run: |
