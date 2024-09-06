@@ -5,6 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: ckn-oracle-daemon
     environment:
       - ORACLE_CSV_PATH=/oracle_logs/image_mapping_final.json
       - CKN_LOG_FILE=/oracle_logs/ckn.log

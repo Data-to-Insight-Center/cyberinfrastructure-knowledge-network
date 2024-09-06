@@ -1,9 +1,30 @@
 # CKN Daemon - Tapis Camera Traps
 CKN Daemon for extracting camera traps performance information from the Edge to the Cloud. 
 
-### How to run
+### Usage
 
-##### Using Docker image:
+1. Follow the steps [here](../../README.md) to start CKN.
+
+2. To start CKN-Oracle Daemon, run:
+   ```bash
+   docker compose -f docker-compose.yml up -d --build
+   ```
+
+3. To produce events, run:
+   ```bash
+   docker exec ckn-oracle-daemon touch /oracle_logs/image_mapping_final.json
+   ```
+
+4. Access the [Dashboard](http://localhost:8502/Camera_Traps) to view streamed data or check the [local Neo4j instance](http://localhost:7474/browser/) with username `neo4j` and password `PWD_HERE`.
+
+5. To stop CKN-Oracle Daemon, run:
+   ```bash
+   docker compose -f docker-compose.yml down
+   ```
+   Follow the steps [here](../../README.md) to stop CKN.
+
+---
+
 Docker image for the CKN Daemon for Cameratraps is available at:
 
 [D2I Docker Repository](https://hub.docker.com/repository/docker/iud2i/ckn-daemon-cameratraps/general)
@@ -22,40 +43,3 @@ The following environment variables can be set during experiment execution time.
       - POWER_SUMMARY_TOPIC=cameratraps-power-summary
       - POWER_SUMMARY_TIMOUT=10
       - POWER_SUMMARY_MAX_TRIES=5
-
-CKN Daemon reads the log files through volume mounting as follows:
-```
-volumes:
-- /camera-traps/releases/0.3.3/oracle_plugin_dir:/oracle_logs:r
-- /camera-traps/releases/0.3.3/power_output_dir:/power_logs:r
-```
-
-### Usage
-
-1. **Start Services**
-   ```bash
-   cd ..
-   make up
-   ```
-
-2. **Run Oracle CKN Daemon**
-   Once CKN is up, start oracle_daemon container by running:
-   ```bash
-   cd plugins/oracle_daemon
-   docker-compose up
-   ```
-
-3. **Modify the image_mapping timestamp**
-   ```bash
-   touch plugins/oracle_ckn_daemon/events/image_mapping_final.json
-   ```
-
-3. **View Streamed Data**
-   - Access the [Dashboard](http://localhost:8502/Camera_Traps) to view streamed data.
-   - Check the [local Neo4j instance](http://localhost:7474/browser/) with username `neo4j` and password `PWD_HERE`.
-
-4. **Stop Services**
-    To shut down CKN, run:
-    ```bash
-    make down
-    ```
