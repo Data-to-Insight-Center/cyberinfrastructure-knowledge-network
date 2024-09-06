@@ -52,7 +52,7 @@ jobs:
 
       - name: Test CKN
         run: |
-          pip install neo4j
+          pip install -r tests/requirements.txt
           python -m unittest discover -s tests -p "*.py"
 
       - name: Remove CKN-Oracle Container
