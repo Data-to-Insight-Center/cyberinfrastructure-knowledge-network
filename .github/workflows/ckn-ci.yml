@@ -50,7 +50,12 @@ jobs:
           echo "ckn-oracle-daemon is running."
           
           docker exec ckn-oracle-daemon bash -c "chmod 777 /oracle_logs"
+          docker exec ckn-oracle-daemon ls -l /oracle_logs
+          
+          echo "Triggering the observer..."
           docker exec ckn-oracle-daemon touch /oracle_logs/image_mapping_final.json
+          docker exec ckn-oracle-daemon ls -l /oracle_logs
+          
           sleep 10
 
       - name: Test CKN-Oracle Plugin
