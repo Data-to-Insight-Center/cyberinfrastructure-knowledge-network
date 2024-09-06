@@ -3,7 +3,7 @@ name: CKN-CI
 on: [push]
 
 jobs:
-  start:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -35,28 +35,33 @@ jobs:
 
           docker cp ckn_kg/constraints.cypher neo4j_server:/constraints.cypher
           docker exec neo4j_server cypher-shell -u neo4j -p PWD_HERE -f /constraints.cypher
-              
-      - name: Build Example Plugin
+
+      - name: Build CKN-Oracle Plugin
         run: |
-          docker compose -f examples/docker-compose.yml up -d --build
+          docker compose -f plugins/oracle_ckn_daemon/docker-compose.yml up -d --build
+
+      - name: Run CKN-Oracle Plugin
+        run: |
+          docker exec ckn-oracle-daemon touch /oracle_logs/image_mapping_final.json
+          sleep 10
+
+      - name: Test CKN-Oracle Plugin
+        run: |
+          pip install -r plugins/oracle_ckn_daemon/tests/requirements.txt
+          pytest plugins/oracle_ckn_daemon/tests -v
 
       - name: Test CKN
         run: |
           pip install neo4j
           python -m unittest discover -s tests -p "*.py"
 
-      - name: Test Example Plugin
+      - name: Remove CKN-Oracle Container
+        if: always()
         run: |
-          pip install -r examples/tests/requirements.txt
-          pytest examples/tests/ -v
+          docker compose -f plugins/oracle_ckn_daemon/docker-compose.yml down
 
       - name: Stop and Remove CKN Docker Network
         if: always()
         run: |
           docker compose -f docker-compose.yml down
           docker network rm ckn-network || true
-
-      - name: Remove Oracle Daemon Container
-        if: always()
-        run: |
-          docker compose -f examples/docker-compose.yml down

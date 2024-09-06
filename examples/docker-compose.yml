@@ -5,6 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: example-plugin
     environment:
       - CKN_KAFKA_BROKER=broker:29092
       - CKN_KAFKA_TOPIC=oracle-events
