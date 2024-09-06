@@ -42,18 +42,14 @@ jobs:
           sleep 5
           
           docker cp ckn-oracle-daemon:/oracle_logs/image_mapping_final.json plugins/oracle_ckn_daemon/events/image_mapping_final.json
-          docker exec ckn-oracle-daemon tail -f /oracle_logs/ckn.log
-          
-          sleep 10
+          docker exec ckn-oracle-daemon cat /oracle_logs/ckn.log
 
       - name: Test CKN-Oracle Plugin
-        if: always()
         run: |
           pip install -r plugins/oracle_ckn_daemon/tests/requirements.txt
           pytest plugins/oracle_ckn_daemon/tests -v
 
       - name: Test CKN
-        if: always()
         run: |
           pip install -r tests/requirements.txt
           python -m unittest discover -s tests -p "*.py"
