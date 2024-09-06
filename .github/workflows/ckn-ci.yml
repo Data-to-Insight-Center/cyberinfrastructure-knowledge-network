@@ -42,7 +42,6 @@ jobs:
           docker logs kafka-connect
           sleep 5
           docker exec ckn-oracle-daemon touch /oracle_logs/image_mapping_final.json
-          docker exec ckn-oracle-daemon tail -f /oracle_logs/ckn.log
 
       - name: Test Oracle CKN Plugin
         run: |
