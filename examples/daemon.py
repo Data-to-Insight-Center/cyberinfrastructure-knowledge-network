@@ -8,8 +8,8 @@ from datetime import datetime
 from confluent_kafka import Producer
 from confluent_kafka.admin import AdminClient
 
-CKN_LOG_FILE = os.getenv('CKN_LOG_FILE', './ckn_example.log')
-KAFKA_BROKER = os.getenv('CKN_KAFKA_BROKER', '127.0.0.1:9092')
+CKN_LOG_FILE = os.getenv('CKN_LOG_FILE', 'ckn_example.log')
+KAFKA_BROKER = os.getenv('CKN_KAFKA_BROKER', 'broker:29092')
 KAFKA_TOPIC = os.getenv('CKN_KAFKA_TOPIC', 'oracle-events')
 
 def setup_logging():
@@ -95,6 +95,16 @@ if __name__ == "__main__":
     if event is None:
         logging.error("Failed to read event data. Shutting down.")
         sys.exit(1)
+
+    # Update timestamps to current time
+    current_timestamp = datetime.utcnow().isoformat()
+    event['image_receiving_timestamp'] = f"{current_timestamp}Z"
+    event['image_scoring_timestamp'] = f"{current_timestamp}Z"
+    event['image_store_delete_time'] = f"{current_timestamp}Z"
+
+    # Ensure flattened_scores is a JSON string
+    if isinstance(event['flattened_scores'], list):
+        event['flattened_scores'] = json.dumps(event['flattened_scores'])
 
     # Produce event to Kafka topic
     producer = Producer(**kafka_conf)
