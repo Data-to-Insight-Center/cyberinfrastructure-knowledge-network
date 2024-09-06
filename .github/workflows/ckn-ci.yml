@@ -47,11 +47,13 @@ jobs:
           sleep 10
 
       - name: Test CKN-Oracle Plugin
+        if: always()
         run: |
           pip install -r plugins/oracle_ckn_daemon/tests/requirements.txt
           pytest plugins/oracle_ckn_daemon/tests -v
 
       - name: Test CKN
+        if: always()
         run: |
           pip install -r tests/requirements.txt
           python -m unittest discover -s tests -p "*.py"
