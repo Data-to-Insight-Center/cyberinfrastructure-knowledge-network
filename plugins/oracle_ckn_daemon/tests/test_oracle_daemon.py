@@ -46,7 +46,6 @@ def test_node_count(neo4j_driver, node_label, expected_count):
             int: The total number of nodes with the specified label.
         """
         result = tx.run(f"MATCH (n:{label}) RETURN count(n) AS totalNodes")
-        print("Result:", result.single())
         return result.single()["totalNodes"]
 
     with neo4j_driver.session() as session:

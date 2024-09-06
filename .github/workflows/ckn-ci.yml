@@ -36,19 +36,21 @@ jobs:
           docker cp ckn_kg/constraints.cypher neo4j_server:/constraints.cypher
           docker exec neo4j_server cypher-shell -u neo4j -p PWD_HERE -f /constraints.cypher
               
-      - name: Build Example Plugin
+      - name: Build CKN Oracle Daemon plugin
         run: |
-          docker compose -f examples/docker-compose.yml up -d --build
+          docker compose -f plugins/oracle_ckn_daemon/docker-compose.yml up -d --build
+          sleep 5
+          docker exec ckn-oracle-daemon touch /oracle_logs/image_mapping_final.json
+
+      - name: Test Oracle CKN Plugin
+        run: |
+          pip install -r plugins/oracle_ckn_daemon/tests/requirements.txt
+          pytest plugins/oracle_ckn_daemon/tests -v
 
       - name: Test CKN
         run: |
           pip install neo4j
           python -m unittest discover -s tests -p "*.py"
-
-      - name: Test Example Plugin
-        run: |
-          pip install -r examples/tests/requirements.txt
-          python -m unittest discover -s examples/tests/ -p "*.py"
 
       - name: Stop and Remove CKN Docker Network
         if: always()
