@@ -118,6 +118,9 @@ class CKNKnowledgeGraph:
 
         # Convert Start Time to datetime
         df_combined['Start Time'] = pd.to_datetime(df_combined['Start Time'], unit='ms')
+        # Convert the timezone to EDT
+        df_combined['Start Time'] = df_combined['Start Time'].dt.tz_localize('UTC')
+        df_combined['Start Time'] = df_combined['Start Time'].dt.tz_convert('America/New_York')
 
         df_combined.set_index("Experiment", inplace=True)
         return df_combined
@@ -231,7 +234,15 @@ class CKNKnowledgeGraph:
                 return None
 
             df['Start Time'] = pd.to_datetime(df['start_time'], unit='ms')
+            # convert time to EDT
+            df['Start Time'] = df['Start Time'].dt.tz_localize('UTC')
+            df['Start Time'] = df['Start Time'].dt.tz_convert('America/New_York')
+
             df['End Time'] = pd.to_datetime(df['end_time'], unit='ms')
+            # convert time to EDT
+            df['End Time'] = df['End Time'].dt.tz_localize('UTC')
+            df['End Time'] = df['End Time'].dt.tz_convert('America/New_York')
+
             return df
         else:
             return None

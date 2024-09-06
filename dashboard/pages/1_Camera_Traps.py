@@ -42,7 +42,7 @@ def display_experiment_indicators(experiment_id, experiment_df):
 
     col1, col2, col3, col4 = st.columns(4)
     col1.metric(label="Start Date", value=date_str)
-    col2.metric(label="Start Time", value=time_str)
+    col2.metric(label="Start Time", value=str(time_str + " EDT"))
     col3.metric(label="Average Accuracy [%]", value=average_accuracy)
     col4.metric(label="Saved / Deleted Images", value=f"{saved_images} / {deleted_images}")
 
@@ -101,7 +101,7 @@ def show_power_info(deployment_info):
         col10, col11, col12, col13 = st.columns(4)
         # col11.write("Start Time:", deployment_info['Start Time'][0])
         col10.metric(label="End Date", value=end_date)
-        col11.metric(label="End time", value=end_time)
+        col11.metric(label="End time", value=str(end_time + " EDT"))
         col12.metric(label="Total CPU (W)", value=total_cpu)
         col13.metric(label="Total GPU (W)", value=total_gpu)
 
