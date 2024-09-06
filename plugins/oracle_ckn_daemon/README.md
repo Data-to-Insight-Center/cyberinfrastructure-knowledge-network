@@ -5,9 +5,9 @@ CKN Daemon for extracting camera traps performance information from the Edge to 
 
 1. Follow the steps [here](../../README.md) to start CKN.
 
-2. To Build CKN-Oracle Daemon, run:
+2. To start CKN-Oracle Daemon, run:
    ```bash
-   docker compose -f plugins/oracle_ckn_daemon/docker-compose.yml up -d --build
+   docker compose -f docker-compose.yml up -d --build
    ```
 
 3. To produce events, run:
@@ -15,9 +15,13 @@ CKN Daemon for extracting camera traps performance information from the Edge to 
    docker exec ckn-oracle-daemon touch /oracle_logs/image_mapping_final.json
    ```
 
-4. Access the [Dashboard](http://localhost:8502/Camera_Traps) to view streamed data or Check the [local Neo4j instance](http://localhost:7474/browser/) with username `neo4j` and password `PWD_HERE`.
+4. Access the [Dashboard](http://localhost:8502/Camera_Traps) to view streamed data or check the [local Neo4j instance](http://localhost:7474/browser/) with username `neo4j` and password `PWD_HERE`.
 
-5. Follow the steps [here](../../README.md) to stop CKN.
+5. To stop CKN-Oracle Daemon, run:
+   ```bash
+   docker compose -f docker-compose.yml down
+   ```
+   Follow the steps [here](../../README.md) to stop CKN.
 
 ---
 

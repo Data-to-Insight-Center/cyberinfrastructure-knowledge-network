@@ -7,4 +7,4 @@ COPY requirements.txt /app/
 
 RUN pip install -r /app/requirements.txt
 
-ENTRYPOINT [ "python", "-u", "/app/daemon.py"]
+ENTRYPOINT [ "python", "-u", "/app/main.py"]

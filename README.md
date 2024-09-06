@@ -40,13 +40,13 @@ CKN is designed to manage and analyze data through a sophisticated pipeline that
    ```
 
 2. **Run Example**
-   - Once the services are up, produce an example event by running:
+   - Once the services are up, produce [an example event](examples/event.json) by running:
    ```bash
-   docker compose -f examples/docker-compose.yml up
+   docker compose -f examples/docker-compose.yml up -d --build
    ```
 
 3. **View Streamed Data**
-   - Access the [Dashboard](http://localhost:8502/Camera_Traps) to view streamed data or Check the [local Neo4j instance](http://localhost:7474/browser/) with username `neo4j` and password `PWD_HERE`.
+   - Access the [Dashboard](http://localhost:8502/Camera_Traps) to view the streamed data or check the [local Neo4j instance](http://localhost:7474/browser/) with username `neo4j` and password `PWD_HERE`.
 
 4. **Stop Services**
     - To shut down CKN and example container, run:

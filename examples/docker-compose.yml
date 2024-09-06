@@ -1,13 +1,15 @@
 version: '3.8'
 
 services:
-  ckn-daemon:
+  plugin:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: plugin
     environment:
       - CKN_KAFKA_BROKER=broker:29092
       - CKN_KAFKA_TOPIC=oracle-events
+      - CKN_LOG_FILE=ckn_example.log
     volumes:
       - ./:/app
     networks:
