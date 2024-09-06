@@ -14,7 +14,7 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: Install Docker Compose
+      - name: Install docker-compose
         run: |
           sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
           sudo chmod +x /usr/local/bin/docker-compose
@@ -24,7 +24,7 @@ jobs:
           docker network create ckn-network || true
           docker compose -f docker-compose.yml up -d --build
 
-      - name: Apply neo4j Constraints
+      - name: Apply neo4j constraints
         run: |
           echo "Waiting for Neo4j to be ready..."
           while ! docker exec neo4j_server cypher-shell -u neo4j -p PWD_HERE "RETURN 1" > /dev/null 2>&1; do \
@@ -42,6 +42,12 @@ jobs:
 
       - name: Run CKN-Oracle Plugin
         run: |
+          echo "Waiting for ckn-oracle-daemon to be ready..."
+          while ! docker ps --filter "name=ckn-oracle-daemon" | grep -q ckn-oracle-daemon; do
+            echo "Waiting for ckn-oracle-daemon to start..."
+            sleep 5
+          done
+          echo "ckn-oracle-daemon is running."
           docker exec ckn-oracle-daemon touch /oracle_logs/image_mapping_final.json
           sleep 10
 
