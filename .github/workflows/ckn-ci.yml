@@ -42,9 +42,9 @@ jobs:
           sleep 5
           
           docker cp ckn-oracle-daemon:/oracle_logs/image_mapping_final.json plugins/oracle_ckn_daemon/events/image_mapping_final.json
-          docker exec ckn-oracle-daemon cat /oracle_logs/ckn.log
+          docker exec ckn-oracle-daemon tail -f /oracle_logs/ckn.log
           
-          sleep 30
+          sleep 10
 
       - name: Test CKN-Oracle Plugin
         run: |
