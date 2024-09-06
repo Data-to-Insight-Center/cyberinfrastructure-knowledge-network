@@ -45,7 +45,6 @@ jobs:
           docker exec ckn-oracle-daemon cat /oracle_logs/ckn.log
           
           sleep 30
-          docker exec ckn-oracle-daemon cat /oracle_logs/ckn.log
 
       - name: Test CKN-Oracle Plugin
         run: |
