@@ -40,9 +40,8 @@ jobs:
         run: |
           docker compose -f plugins/oracle_ckn_daemon/docker-compose.yml up -d --build
           docker exec ckn-oracle-daemon ls -l /oracle_logs
-          sleep 10
-          docker exec ckn-oracle-daemon touch -m /oracle_logs/image_mapping_final.json
-          sleep 10
+          docker exec ckn-oracle-daemon rm /oracle_logs/image_mapping_final.json
+          docker exec ckn-oracle-daemon ls -l /oracle_logs
 
       - name: Test CKN-Oracle Plugin
         run: |
