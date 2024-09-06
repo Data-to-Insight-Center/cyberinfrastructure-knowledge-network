@@ -44,8 +44,8 @@ jobs:
           docker cp ckn-oracle-daemon:/oracle_logs/image_mapping_final.json plugins/oracle_ckn_daemon/events/image_mapping_final.json
           docker exec ckn-oracle-daemon cat /oracle_logs/ckn.log
           
-          echo "Counting RawImage nodes..."
-          docker exec neo4j_server cypher-shell -u neo4j -p PWD_HERE "MATCH (n:RawImage) RETURN count(n) AS totalNodes"
+          sleep 3
+          docker logs kafka-connect
 
       - name: Test CKN-Oracle Plugin
         run: |
