@@ -48,6 +48,8 @@ jobs:
             sleep 5
           done
           echo "ckn-oracle-daemon is running."
+          
+          docker exec ckn-oracle-daemon bash -c "chmod 777 /oracle_logs"
           docker exec ckn-oracle-daemon touch /oracle_logs/image_mapping_final.json
           sleep 10
 
