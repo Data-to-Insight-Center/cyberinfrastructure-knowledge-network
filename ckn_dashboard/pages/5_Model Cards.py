@@ -18,10 +18,7 @@ kg = CKNKnowledgeGraph(NEO4J_URI, NEO4J_USER, NEO4J_PWD)
 # todo: remove mc reconstructor once Patra Server is up
 mc_util = MCReconstructor(kg)
 
-st.set_page_config(
-    page_title="Model Cards",
-    page_icon="🪙",
-    layout="wide")
+st.set_page_config(page_title="Model Cards", page_icon="🪙", layout="wide")
 
 st.header("Model Cards")
 st.sidebar.header("Model Cards Access")

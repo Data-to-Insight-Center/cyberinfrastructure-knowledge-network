@@ -14,7 +14,8 @@ def get_llm_response(query):
     if query is None:
         answer = "How can I help you today?"
     else:
-        answer = run_langraph(query, format_chat_history(st.session_state.chat_history))
+        answer = run_langraph(
+            query, format_chat_history(st.session_state.chat_history))
         st.session_state.chat_history.append({"human": query, "agent": answer})
     for word in answer.split(" "):
         yield word + " "
@@ -37,10 +38,7 @@ def format_chat_history(deque_obj):
     return ", ".join(flattened_entries)
 
 
-st.set_page_config(
-    page_title="CKN Chat Bot",
-    page_icon="🤖",
-    layout="centered")
+st.set_page_config(page_title="CKN Chat Bot", page_icon="🤖", layout="centered")
 
 st.header("CKN Analytics Bot")
 

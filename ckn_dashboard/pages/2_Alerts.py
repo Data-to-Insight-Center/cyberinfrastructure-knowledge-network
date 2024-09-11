@@ -12,10 +12,7 @@ NEO4J_PWD = os.getenv('NEO4J_PWD', 'neo4jpwd')
 
 kg = CKNKnowledgeGraph(NEO4J_URI, NEO4J_USER, NEO4J_PWD)
 
-st.set_page_config(
-    page_title="CKN Alerts",
-    page_icon="⚠️",
-    layout="wide")
+st.set_page_config(page_title="CKN Alerts", page_icon="⚠️", layout="wide")
 
 st.header("CKN Alerts")
 st.sidebar.header("Alerts from CKN Topics")
@@ -23,10 +20,14 @@ st.sidebar.header("Alerts from CKN Topics")
 alerts = kg.fetch_alerts()
 
 # Filter by topic
-topic_filter = st.sidebar.multiselect("Select Topic", options=alerts['Source Topic'].unique(), default=alerts['Source Topic'].unique())
+topic_filter = st.sidebar.multiselect("Select Topic",
+                                      options=alerts['Source Topic'].unique(),
+                                      default=alerts['Source Topic'].unique())
 
 # Filter by priority
-priority_filter = st.sidebar.multiselect("Select Priority", options=alerts['Priority'].unique(), default=alerts['Priority'].unique())
+priority_filter = st.sidebar.multiselect("Select Priority",
+                                         options=alerts['Priority'].unique(),
+                                         default=alerts['Priority'].unique())
 
 min_date = alerts.index.min().date()
 max_date = alerts.index.max().date()

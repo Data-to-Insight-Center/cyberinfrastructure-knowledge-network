@@ -35,7 +35,7 @@ class CKNKnowledgeGraph:
 
         queries = {
             "average_probability":
-                f"""
+            f"""
                 MATCH (u:User)-[r:SUBMITTED_BY]-(e:Experiment)-[p:PROCESSED_BY]-(i:RawImage)
                 WITH p, apoc.convert.fromJsonList(p.scores) AS scores
                 UNWIND scores AS score
@@ -44,19 +44,19 @@ class CKNKnowledgeGraph:
                 RETURN round(avg(max_probability)*100) AS value
                 """,
             "user_count":
-                f"""
+            f"""
                 MATCH (u:User)
                 WHERE {date_range_clause} AND {experiment_clause} AND {device_clause} AND {user_clause}
                 RETURN count(u) AS value
             """,
             "image_count":
-                f"""
+            f"""
                 MATCH (i:RawImage)-[p:PROCESSED_BY]->(e:Experiment)-[:EXECUTED_ON]->(d:EdgeDevice)
                 WHERE {date_range_clause} AND {experiment_clause} AND {device_clause} AND {user_clause}
                 RETURN count(DISTINCT i) AS value
             """,
             "device_count":
-                f"""
+            f"""
                 MATCH (d:EdgeDevice)-[:EXECUTED_ON]->(e:Experiment)-[p:PROCESSED_BY]->(i:RawImage)
                 WHERE {date_range_clause} AND {experiment_clause} AND {device_clause} AND {user_clause}
                 RETURN count(DISTINCT d) AS value
@@ -111,21 +111,32 @@ class CKNKnowledgeGraph:
         save_accuracy_records = [record.data() for record in result]
         df_save_accuracy = pd.DataFrame(save_accuracy_records)
 
-        df_combined = pd.merge(df_experiment_info, df_save_accuracy, on='experimentId')
+        df_combined = pd.merge(df_experiment_info,
+                               df_save_accuracy,
+                               on='experimentId')
         print(df_combined)
         # Rename columns as per your requirement
-        df_combined.columns = ["Experiment", "User", "Model", "Device", "Start Time", "Total Images", "Saved Images", "Accuracy [%]"]
+        df_combined.columns = [
+            "Experiment", "User", "Model", "Device", "Start Time",
+            "Total Images", "Saved Images", "Accuracy [%]"
+        ]
 
         # Convert Start Time to datetime
-        df_combined['Start Time'] = pd.to_datetime(df_combined['Start Time'], unit='ms')
+        df_combined['Start Time'] = pd.to_datetime(df_combined['Start Time'],
+                                                   unit='ms')
         # Convert the timezone to EDT
-        df_combined['Start Time'] = df_combined['Start Time'].dt.tz_localize('UTC')
-        df_combined['Start Time'] = df_combined['Start Time'].dt.tz_convert('America/New_York')
+        df_combined['Start Time'] = df_combined['Start Time'].dt.tz_localize(
+            'UTC')
+        df_combined['Start Time'] = df_combined['Start Time'].dt.tz_convert(
+            'America/New_York')
 
         df_combined.set_index("Experiment", inplace=True)
         return df_combined
 
-    def fetch_accuracy_trend(self, date_range, experiment_id, image_saved=True):
+    def fetch_accuracy_trend(self,
+                             date_range,
+                             experiment_id,
+                             image_saved=True):
         start_date, end_date = date_range
         decision_clause = "AND pb.image_decision = 'Save'" if image_saved else ""
         query = f"""
@@ -139,11 +150,12 @@ class CKNKnowledgeGraph:
 
         result = self.session.run(query)
         records = [
-            (self.convert_to_datetime(record["image_scoring_timestamp"]), record["probability"])
-            for record in result
+            (self.convert_to_datetime(record["image_scoring_timestamp"]),
+             record["probability"]) for record in result
         ]
 
-        df = pd.DataFrame(records, columns=["image_scoring_timestamp", "probability"])
+        df = pd.DataFrame(records,
+                          columns=["image_scoring_timestamp", "probability"])
         df = df.sort_values(by='image_scoring_timestamp')
 
         return df
@@ -159,8 +171,8 @@ class CKNKnowledgeGraph:
 
         result = self.session.run(query)
         records = [
-            (self.convert_to_datetime(record["image_scoring_timestamp"]), record["probability"])
-            for record in result
+            (self.convert_to_datetime(record["image_scoring_timestamp"]),
+             record["probability"]) for record in result
         ]
 
         df = pd.DataFrame(records, columns=["Timestamp", "Accuracy"])
@@ -224,9 +236,8 @@ class CKNKnowledgeGraph:
             deployments = []
             for record in records:
                 deployment_info = record.get("d", {})
-                deployment_info.update({
-                    "Experiment": record.get("Experiment")
-                })
+                deployment_info.update(
+                    {"Experiment": record.get("Experiment")})
                 deployments.append(deployment_info)
 
             df = pd.DataFrame(deployments)
@@ -236,7 +247,8 @@ class CKNKnowledgeGraph:
             df['Start Time'] = pd.to_datetime(df['start_time'], unit='ms')
             # convert time to EDT
             df['Start Time'] = df['Start Time'].dt.tz_localize('UTC')
-            df['Start Time'] = df['Start Time'].dt.tz_convert('America/New_York')
+            df['Start Time'] = df['Start Time'].dt.tz_convert(
+                'America/New_York')
 
             df['End Time'] = pd.to_datetime(df['end_time'], unit='ms')
             # convert time to EDT
@@ -267,10 +279,14 @@ class CKNKnowledgeGraph:
 
         records = [record.data() for record in result]
         df = pd.DataFrame(records)
-        df.columns = ["Experiment", "User", "Model", "Device", "Accuracy [%]", "Start Time", "Total Images",
-                      "Saved Images"]
-        df['Start Time'] = pd.to_datetime(df['Start Time'], unit='ms')  # Convert to datetime
-        df.set_index("Experiment", inplace=True)  # Set experiment_id as the index
+        df.columns = [
+            "Experiment", "User", "Model", "Device", "Accuracy [%]",
+            "Start Time", "Total Images", "Saved Images"
+        ]
+        df['Start Time'] = pd.to_datetime(df['Start Time'],
+                                          unit='ms')  # Convert to datetime
+        df.set_index("Experiment",
+                     inplace=True)  # Set experiment_id as the index
         return df
 
     def get_device_type(self, experiment_id):
@@ -299,25 +315,27 @@ class CKNKnowledgeGraph:
         result = self.session.run(query)
         records = [record["processed_by_detail"] for record in result]
 
-        df = pd.DataFrame(records, columns=[
-            "image_name",
-            "ground_truth",
-            "image_scoring_timestamp",
-            "ingestion_timestamp",
-            "image_store_delete_time",
-            "model_id",
-            "image_decision",
-            "scores"
-        ])
+        df = pd.DataFrame(records,
+                          columns=[
+                              "image_name", "ground_truth",
+                              "image_scoring_timestamp", "ingestion_timestamp",
+                              "image_store_delete_time", "model_id",
+                              "image_decision", "scores"
+                          ])
 
         # Convert Neo4j DateTime objects to Python datetime objects
-        date_columns = ["image_scoring_timestamp", "image_store_delete_time", "ingestion_timestamp"]
+        date_columns = [
+            "image_scoring_timestamp", "image_store_delete_time",
+            "ingestion_timestamp"
+        ]
         for col in date_columns:
             if col in df.columns:
                 df[col] = df[col].apply(self.convert_to_native)
 
-        df.columns = ["Image", "Ground Truth", "Score Time", "Ingestion Time", "Delete Time", "Model",
-                      "Decision", "Scores"]
+        df.columns = [
+            "Image", "Ground Truth", "Score Time", "Ingestion Time",
+            "Delete Time", "Model", "Decision", "Scores"
+        ]
         df.set_index("Ingestion Time", inplace=True)
         return df
 
@@ -414,7 +432,9 @@ class CKNKnowledgeGraph:
         records = result.data()
         df = pd.DataFrame(records)
         df = df[['timestamp', 'exp_id', 'device_id', 'average_probability']]
-        df.columns = ['Timestamp', 'Experiment ID', 'Device ID', 'Average Accuracy']
+        df.columns = [
+            'Timestamp', 'Experiment ID', 'Device ID', 'Average Accuracy'
+        ]
         df.set_index('Timestamp', inplace=True)
 
         return df
@@ -471,7 +491,10 @@ class CKNKnowledgeGraph:
             'timestamp', 'alert_name', 'priority', 'source_topic',
             'description', 'UUID', 'event_data'
         ]]
-        df.columns = ['Timestamp', 'Alert Name', 'Priority', 'Source Topic', 'Description', 'UUID', 'Event Data']
+        df.columns = [
+            'Timestamp', 'Alert Name', 'Priority', 'Source Topic',
+            'Description', 'UUID', 'Event Data'
+        ]
         df.set_index('Timestamp', inplace=True)
         return df
 

@@ -1,4 +1,6 @@
 import json
+
+
 class MCReconstructor:
     """
     Re-constructs the model card from the Knowledge Graph

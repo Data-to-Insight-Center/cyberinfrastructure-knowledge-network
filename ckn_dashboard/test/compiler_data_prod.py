@@ -16,7 +16,8 @@ producer = Producer(**kafka_conf)
 event_data = {
     "uuid": "3455s-4e0e-4abb-af35-dc89eb962ec1",
     "application_name": "cg.c",
-    "program_location": "/mnt/d/workspace/ud-masters/benchmarks/NPB3.3-SER-C/CG/cg.c",
+    "program_location":
+    "/mnt/d/workspace/ud-masters/benchmarks/NPB3.3-SER-C/CG/cg.c",
     "loop_id": "main#3",
     "DataSize": "((1+(-1*firstcol))+lastcol)",
     "Number_of_Iterations": "null",
@@ -50,6 +51,7 @@ event_json = json.dumps(event_data)
 # Define the topic name
 topic_name = 'compiler-data'
 
+
 # Define a delivery report callback function
 def delivery_report(err, msg):
     """ Called once for each message produced to indicate delivery result.
@@ -57,7 +59,10 @@ def delivery_report(err, msg):
     if err is not None:
         print(f'Delivery failed for message {msg.key()}: {err}')
     else:
-        print(f'Message produced to {msg.topic()} [{msg.partition()}] @ offset {msg.offset()}')
+        print(
+            f'Message produced to {msg.topic()} [{msg.partition()}] @ offset {msg.offset()}'
+        )
+
 
 # Produce the message to the Kafka topic
 producer.produce(topic_name, value=event_json, callback=delivery_report)

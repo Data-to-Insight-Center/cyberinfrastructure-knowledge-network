@@ -5,6 +5,7 @@ import docker
 from unittest.mock import MagicMock
 from neo4j import GraphDatabase
 
+
 class TestExampleDaemon(unittest.TestCase):
 
     @classmethod
@@ -35,8 +36,11 @@ class TestExampleDaemon(unittest.TestCase):
             result = session.run("MATCH (n) RETURN count(n) AS totalNodes")
             actual_count = result.single()["totalNodes"]
 
-        self.assertEqual(actual_count, expected_count,
-                         f"Expected {expected_count} nodes, but found {actual_count} in Neo4j")
+        self.assertEqual(
+            actual_count, expected_count,
+            f"Expected {expected_count} nodes, but found {actual_count} in Neo4j"
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

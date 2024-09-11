@@ -13,10 +13,9 @@ NEO4J_PWD = os.getenv('NEO4J_PWD', 'neo4jpwd')
 
 kg = CKNKnowledgeGraph(NEO4J_URI, NEO4J_USER, NEO4J_PWD)
 
-st.set_page_config(
-    page_title="Compiler profiling application",
-    page_icon="📸",
-    layout="wide")
+st.set_page_config(page_title="Compiler profiling application",
+                   page_icon="📸",
+                   layout="wide")
 
 st.header("Compiler profiling application")
 st.sidebar.header("Compiler profiling application")
@@ -34,7 +33,8 @@ with col1:
 if selected_application:
     profile_runs = kg.fetch_profile_runs(selected_application)
     with col2:
-        selected_profile_run = st.selectbox("Select Profile Run", profile_runs['profile_run'])
+        selected_profile_run = st.selectbox("Select Profile Run",
+                                            profile_runs['profile_run'])
         st.write("#")
 
 # Load user-specific data

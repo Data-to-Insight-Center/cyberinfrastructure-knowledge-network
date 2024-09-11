@@ -13,15 +13,15 @@ NEO4J_PWD = os.getenv('NEO4J_PWD', 'neo4jpwd')
 
 kg = CKNKnowledgeGraph(NEO4J_URI, NEO4J_USER, NEO4J_PWD)
 
-st.set_page_config(
-    page_title="Camera Traps Experiments",
-    page_icon="📸",
-    layout="wide")
+st.set_page_config(page_title="Camera Traps Experiments",
+                   page_icon="📸",
+                   layout="wide")
 
 st.header("Camera Traps Experiments")
 st.sidebar.header("Camera Traps Analytics")
 
 users = kg.fetch_distinct_users()
+
 
 def display_experiment_indicators(experiment_id, experiment_df):
     selected_experiment = experiment_df.loc[experiment_id]
@@ -44,7 +44,9 @@ def display_experiment_indicators(experiment_id, experiment_df):
     col1.metric(label="Start Date", value=date_str)
     col2.metric(label="Start Time", value=str(time_str + " EDT"))
     col3.metric(label="Average Accuracy [%]", value=average_accuracy)
-    col4.metric(label="Saved / Deleted Images", value=f"{saved_images} / {deleted_images}")
+    col4.metric(label="Saved / Deleted Images",
+                value=f"{saved_images} / {deleted_images}")
+
 
 def show_model_device_info(model_id, experiment_id):
     col1, col2 = st.columns(2)
@@ -61,9 +63,8 @@ def show_model_device_info(model_id, experiment_id):
     col2.metric(label="Device Type:", value=device_info)
 
 
-
 # Create three columns
-col1, col2= st.columns(2)
+col1, col2 = st.columns(2)
 
 # Display DataFrames in columns
 with col1:
@@ -73,7 +74,8 @@ with col1:
 if selected_user:
     experiments = kg.fetch_experiments(selected_user)
     with col2:
-        selected_experiment = st.selectbox("Select Experiment", experiments['experiment_id'])
+        selected_experiment = st.selectbox("Select Experiment",
+                                           experiments['experiment_id'])
         st.write(" ")
 
 if selected_user:
@@ -95,7 +97,8 @@ def show_power_info(deployment_info):
         st.markdown("##### Power information")
         total_cpu = round(deployment_info['total_cpu_power_consumption'][0], 3)
         total_gpu = round(deployment_info['total_gpu_power_consumption'][0], 3)
-        end_timestamp = str(deployment_info['End Time'][0].strftime('%Y-%m-%d %H:%M:%S'))
+        end_timestamp = str(
+            deployment_info['End Time'][0].strftime('%Y-%m-%d %H:%M:%S'))
         end_date, end_time = end_timestamp.split(' ')
 
         col10, col11, col12, col13 = st.columns(4)
@@ -106,17 +109,21 @@ def show_power_info(deployment_info):
         col13.metric(label="Total GPU (W)", value=total_gpu)
 
         # Showing the plugin information separately
-        plugin_metrics = deployment_info.drop(
-            columns=["Experiment", "start_time", "end_time", "deployment_id", "Start Time", "End Time",
-                     "total_cpu_power_consumption", "total_gpu_power_consumption"])
+        plugin_metrics = deployment_info.drop(columns=[
+            "Experiment", "start_time", "end_time", "deployment_id",
+            "Start Time", "End Time", "total_cpu_power_consumption",
+            "total_gpu_power_consumption"
+        ])
 
         plugins = []
         for column in plugin_metrics.columns:
             if "cpu_power_consumption" in column or "gpu_power_consumption" in column:
-                plugin_name = column.split('_plugin_')[0].replace('_', ' ').capitalize()
+                plugin_name = column.split('_plugin_')[0].replace(
+                    '_', ' ').capitalize()
                 if "cpu_power_consumption" in column:
                     cpu_power = plugin_metrics[column][0]
-                    gpu_power = plugin_metrics[column.replace('cpu_power_consumption', 'gpu_power_consumption')][0]
+                    gpu_power = plugin_metrics[column.replace(
+                        'cpu_power_consumption', 'gpu_power_consumption')][0]
                 else:
                     continue
 
@@ -156,4 +163,3 @@ if selected_experiment:
         # Display deployment information
         deployment_info = kg.get_exp_deployment_info(selected_experiment)
         show_power_info(deployment_info)
-
