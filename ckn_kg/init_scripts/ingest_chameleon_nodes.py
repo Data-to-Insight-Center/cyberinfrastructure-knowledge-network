@@ -10,7 +10,9 @@ neo4j_config = {
 NODES_FILE = "./chameleon_node_uids.txt"
 
 # Initialize Neo4j driver
-driver = GraphDatabase.driver(neo4j_config['uri'], auth=(neo4j_config['user'], neo4j_config['password']))
+driver = GraphDatabase.driver(neo4j_config['uri'],
+                              auth=(neo4j_config['user'],
+                                    neo4j_config['password']))
 
 
 # Generate the cypher query per each node_id
@@ -102,7 +104,9 @@ with open(NODES_FILE, 'r') as file:
             # Execute the query directly in Neo4j
             # execute_query_in_neo4j(query)
         else:
-            print(f"Failed to fetch data for UID: {uid}, Status Code: {response.status_code}")
+            print(
+                f"Failed to fetch data for UID: {uid}, Status Code: {response.status_code}"
+            )
 
 # Close the Neo4j driver
 driver.close()

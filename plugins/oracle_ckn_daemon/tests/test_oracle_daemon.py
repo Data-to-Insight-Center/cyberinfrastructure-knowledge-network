@@ -1,6 +1,7 @@
 import pytest
 from neo4j import GraphDatabase
 
+
 @pytest.fixture(scope="module")
 def neo4j_driver():
     """
@@ -13,6 +14,7 @@ def neo4j_driver():
     driver = GraphDatabase.driver(uri, auth=("neo4j", "PWD_HERE"))
     yield driver
     driver.close()
+
 
 @pytest.mark.parametrize("node_label, expected_count", [
     ("Experiment", 1),
@@ -34,6 +36,7 @@ def test_node_count(neo4j_driver, node_label, expected_count):
     Raises:
         AssertionError: If the actual number of nodes does not match the expected count.
     """
+
     def count_nodes(tx, label):
         """
         Helper function to execute a Cypher query that counts the number of nodes with a specific label.

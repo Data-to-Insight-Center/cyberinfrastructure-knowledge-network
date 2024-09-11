@@ -9,17 +9,24 @@ from confluent_kafka import Producer, KafkaError
 from confluent_kafka.admin import AdminClient
 from power_processor import PowerProcessor
 
-ORACLE_EVENTS_FILE = os.getenv('ORACLE_CSV_PATH', 'plugins/oracle_ckn_daemon/events/image_mapping_final.json')
+ORACLE_EVENTS_FILE = os.getenv(
+    'ORACLE_CSV_PATH',
+    'plugins/oracle_ckn_daemon/events/image_mapping_final.json')
 CKN_LOG_FILE = os.getenv('CKN_LOG_FILE', './ckn_daemon.log')
 KAFKA_BROKER = os.getenv('CKN_KAFKA_BROKER', 'localhost:9092')
 KAFKA_TOPIC = os.getenv('CKN_KAFKA_TOPIC', 'oracle-events')
 DEVICE_ID = os.getenv('CAMERA_TRAPS_DEVICE_ID', 'iu-edge-server-cib')
 USER_ID = os.getenv('USER_ID', 'jstubbs')
-EXPERIMENT_ID = os.getenv('EXPERIMENT_ID', 'googlenet-iu-animal-classification')
-EXPERIMENT_END_SIGNAL = os.getenv('EXPERIMENT_END_SIGNAL', '6e153711-9823-4ee6-b608-58e2e801db51')
+EXPERIMENT_ID = os.getenv('EXPERIMENT_ID',
+                          'googlenet-iu-animal-classification')
+EXPERIMENT_END_SIGNAL = os.getenv('EXPERIMENT_END_SIGNAL',
+                                  '6e153711-9823-4ee6-b608-58e2e801db51')
 
-POWER_SUMMARY_FILE = os.getenv('POWER_SUMMARY_FILE', 'plugins/oracle_ckn_daemon/events/power_summary_report.json')
-POWER_SUMMARY_TOPIC = os.getenv('POWER_SUMMARY_TOPIC', 'cameratraps-power-summary')
+POWER_SUMMARY_FILE = os.getenv(
+    'POWER_SUMMARY_FILE',
+    'plugins/oracle_ckn_daemon/events/power_summary_report.json')
+POWER_SUMMARY_TOPIC = os.getenv('POWER_SUMMARY_TOPIC',
+                                'cameratraps-power-summary')
 POWER_SUMMARY_TIMOUT = os.getenv('POWER_SUMMARY_TIMOUT', 10)
 POWER_SUMMARY_MAX_TRIES = os.getenv('POWER_SUMMARY_TIMOUT', 5)
 ENABLE_POWER_MONITORING = os.getenv('ENABLE_POWER_MONITORING', "false")
@@ -30,7 +37,8 @@ class OracleEventHandler(FileSystemEventHandler):
     Event handler class to handle events received from the Oracle plugin through the output.json.
     """
 
-    def __init__(self, file_path, producer, topic, device_id, experiment_id, user_id):
+    def __init__(self, file_path, producer, topic, device_id, experiment_id,
+                 user_id):
         self.file_path = file_path
         self.producer = producer
         self.topic = topic
@@ -66,7 +74,9 @@ class OracleEventHandler(FileSystemEventHandler):
                     data = json.load(file)
                     break
             except json.JSONDecodeError:
-                logging.debug("File not complete. Waiting for the file to be completely written")
+                logging.debug(
+                    "File not complete. Waiting for the file to be completely written"
+                )
                 time.sleep(1)
 
         shutdown_signal = False
@@ -92,7 +102,8 @@ class OracleEventHandler(FileSystemEventHandler):
             ground_truth = value.get("ground_truth")
             image_receiving_timestamp = value.get("image_receiving_timestamp")
             image_scoring_timestamp = value.get("image_scoring_timestamp")
-            image_store_delete_time = value.get("image_store_delete_time", value.get("image_delete_time"))
+            image_store_delete_time = value.get("image_store_delete_time",
+                                                value.get("image_delete_time"))
             image_decision = value.get("image_decision")
             model_id = value.get("model_id")
 
@@ -129,7 +140,9 @@ class OracleEventHandler(FileSystemEventHandler):
 
         # shut down if the signal was received
         if shutdown_signal:
-            logging.info("Shutdown signal from Oracle received... Shutting down CKN Daemon.")
+            logging.info(
+                "Shutdown signal from Oracle received... Shutting down CKN Daemon."
+            )
             self.stop_daemon = True
 
     def produce_event(self, event):
@@ -147,7 +160,9 @@ class OracleEventHandler(FileSystemEventHandler):
             row_json = json.dumps(event)
 
             # send the event
-            self.producer.produce(self.topic, key=EXPERIMENT_ID, value=row_json)
+            self.producer.produce(self.topic,
+                                  key=EXPERIMENT_ID,
+                                  value=row_json)
 
             # add line to the processed set only if the produce succeeds
             self.processed_images.add(event['UUID'])
@@ -197,14 +212,18 @@ def test_ckn_broker_connection(configuration, timeout=10, num_tries=5):
             topics = admin_client.list_topics(timeout=timeout)
             return True
         except Exception as e:
-            logging.info(f"CKN broker not available yet: {e}. Retrying in 5 seconds...")
+            logging.info(
+                f"CKN broker not available yet: {e}. Retrying in 5 seconds...")
             time.sleep(5)
     logging.info(f"Could not connect to the CKN broker...")
     return False
 
+
 if __name__ == "__main__":
     setup_logging()
-    logging.basicConfig(filename=CKN_LOG_FILE, level=logging.INFO, format='%(asctime)s - %(message)s')
+    logging.basicConfig(filename=CKN_LOG_FILE,
+                        level=logging.INFO,
+                        format='%(asctime)s - %(message)s')
 
     # Wait until the file exists
     while not os.path.exists(ORACLE_EVENTS_FILE):
@@ -220,20 +239,28 @@ if __name__ == "__main__":
     ckn_broker_available = test_ckn_broker_connection(kafka_conf)
 
     if not ckn_broker_available:
-        logging.info(f"Shutting down CKN Daemon due to broker not being available")
+        logging.info(
+            f"Shutting down CKN Daemon due to broker not being available")
         sys.exit(0)
 
     # Successful connection to CKN broker
-    logging.info("Successfully connected to the CKN broker at %s", KAFKA_BROKER)
+    logging.info("Successfully connected to the CKN broker at %s",
+                 KAFKA_BROKER)
 
     # Initialize the Kafka producer
     producer = Producer(**kafka_conf)
 
     # Start the event handler for listening to the file modifications.
-    event_handler = OracleEventHandler(file_path=ORACLE_EVENTS_FILE, producer=producer, topic=KAFKA_TOPIC,
-                                       device_id=DEVICE_ID, experiment_id=EXPERIMENT_ID, user_id=USER_ID)
+    event_handler = OracleEventHandler(file_path=ORACLE_EVENTS_FILE,
+                                       producer=producer,
+                                       topic=KAFKA_TOPIC,
+                                       device_id=DEVICE_ID,
+                                       experiment_id=EXPERIMENT_ID,
+                                       user_id=USER_ID)
     observer = Observer()
-    observer.schedule(event_handler, path=os.path.dirname(ORACLE_EVENTS_FILE), recursive=False)
+    observer.schedule(event_handler,
+                      path=os.path.dirname(ORACLE_EVENTS_FILE),
+                      recursive=False)
 
     logging.info(f"Watching file: {ORACLE_EVENTS_FILE}")
     observer.start()
@@ -242,7 +269,8 @@ if __name__ == "__main__":
         while not event_handler.stop_daemon:
             time.sleep(1)
     except KeyboardInterrupt:
-        logging.info("Keyboard interrupt received. Stopping the oracle observer.")
+        logging.info(
+            "Keyboard interrupt received. Stopping the oracle observer.")
 
     # wait for oracle thread to finish
     observer.stop()
@@ -250,6 +278,9 @@ if __name__ == "__main__":
 
     if ENABLE_POWER_MONITORING != 'false':
         # Experiment is shutting down. Streaming power information before shutting down.
-        power_processor = PowerProcessor(POWER_SUMMARY_FILE, producer, POWER_SUMMARY_TOPIC, EXPERIMENT_ID, POWER_SUMMARY_MAX_TRIES, POWER_SUMMARY_TIMOUT)
+        power_processor = PowerProcessor(POWER_SUMMARY_FILE, producer,
+                                         POWER_SUMMARY_TOPIC, EXPERIMENT_ID,
+                                         POWER_SUMMARY_MAX_TRIES,
+                                         POWER_SUMMARY_TIMOUT)
         power_processor.process_summary_events()
         logging.info("Power summary processed. Exiting the CKN Daemon...")

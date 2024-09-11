@@ -8,7 +8,14 @@ class PowerProcessor:
     """
     Processes the power events and sends events to the CKN Broker.
     """
-    def __init__(self, power_summary_file, kafka_producer, topic, experiment_id, max_attempts=5, timeout=10):
+
+    def __init__(self,
+                 power_summary_file,
+                 kafka_producer,
+                 topic,
+                 experiment_id,
+                 max_attempts=5,
+                 timeout=10):
         self.power_summary_file = power_summary_file
         self.kafka_producer = kafka_producer
         self.topic = topic
@@ -42,8 +49,10 @@ class PowerProcessor:
             cpu_consumption = plugin_data["cpu_power_consumption"]
             gpu_consumption = plugin_data["gpu_power_consumption"]
 
-            flattened_event[f"{plugin_name}_cpu_power_consumption"] = cpu_consumption
-            flattened_event[f"{plugin_name}_gpu_power_consumption"] = gpu_consumption
+            flattened_event[
+                f"{plugin_name}_cpu_power_consumption"] = cpu_consumption
+            flattened_event[
+                f"{plugin_name}_gpu_power_consumption"] = gpu_consumption
 
             # Accumulate total CPU and GPU consumption
             total_cpu_consumption += cpu_consumption
@@ -72,7 +81,9 @@ class PowerProcessor:
                 power_summary_json = json.dumps(power_summary)
 
                 # send the event to kafka
-                self.kafka_producer.produce(self.topic, key=self.experiment_id, value=power_summary_json)
+                self.kafka_producer.produce(self.topic,
+                                            key=self.experiment_id,
+                                            value=power_summary_json)
                 self.kafka_producer.flush()
                 return
             # Increment the attempt count and wait before trying again
@@ -80,5 +91,3 @@ class PowerProcessor:
             time.sleep(self.timeout)
 
         logging.info("No power summary file found...")
-
-
