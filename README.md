@@ -1,8 +1,8 @@
 # Cyberinfrastructure Knowledge Network (CKN)
 
-This repository provides the setup and components required to run the Cyberinfrastructure Knowledge Network (CKN). It integrates various services to manage and analyze data using a sophisticated pipeline involving data ingestion, processing, and visualization.
+CKN connects the Edge to the cloud with specialized components for data ingestion, processing, and visualization. 
 
-![CKN Design](ckn-design.png)
+![CKN Design](docs/ckn-design.png)
 
 ## Table of Contents
 
@@ -10,10 +10,6 @@ This repository provides the setup and components required to run the Cyberinfra
 - [Components](#components)
 - [Plugins](#plugins)
 - [Getting Started](#getting-started)
-
-## Overview
-
-CKN is designed to manage and analyze data through a sophisticated pipeline that involves data ingestion, processing, and visualization. This project aims to streamline data workflows by integrating various services.
 
 ## Components
 
@@ -30,26 +26,31 @@ CKN is designed to manage and analyze data through a sophisticated pipeline that
 
 ### Prerequisites
 
-- Ensure Docker is installed and running on your machine.
+- Ensure docker and docker-compose is installed and running on your machine.
 
-### Usage
+### Quickstart
+We use Docker Compose to create an environment with Confluent Platform components and Neo4j running inside Docker.
 
-1. **Start Services**
+- **Clone the repository and run:**
    ```bash
    make up
    ```
+   When the process completes you should have all the modules up and running. You can check the status with:
+   ```bash
+    docker compose ps
+    ```
 
-2. **Run Example**
-   - Once the services are up, produce [an example event](examples/event.json) by running:
+<br>
+
+- **To produce [an example event](examples/event.json), run:**
    ```bash
    docker compose -f examples/docker-compose.yml up -d --build
    ```
+  Access the [Dashboard](http://localhost:8502/Camera_Traps) to view the streamed data or check the [local Neo4j instance](http://localhost:7474/browser/) with username `neo4j` and password `PWD_HERE`.
 
-3. **View Streamed Data**
-   - Access the [Dashboard](http://localhost:8502/Camera_Traps) to view the streamed data or check the [local Neo4j instance](http://localhost:7474/browser/) with username `neo4j` and password `PWD_HERE`.
+<br>
 
-4. **Stop Services**
-    - To shut down CKN and example container, run:
+- **To shut down and remove all containers, run:**
     ```bash
     make down
    docker compose -f examples/docker-compose.yml down
