@@ -10,7 +10,7 @@ env/
 *.log
 
 # Dashboard environment file
-dashboard/.env
+ckn_dashboard/.env
 
 # System files and cache
 .DS_Store

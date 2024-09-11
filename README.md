@@ -4,13 +4,6 @@ CKN connects the Edge to the cloud with specialized components for data ingestio
 
 ![CKN Design](docs/ckn-design.png)
 
-## Table of Contents
-
-- [Overview](#overview)
-- [Components](#components)
-- [Plugins](#plugins)
-- [Getting Started](#getting-started)
-
 ## Components
 
 - **Broker**: Configures Kafka broker, topics, and connectors for streaming data.
@@ -35,18 +28,18 @@ We use Docker Compose to create an environment with Confluent Platform component
    ```bash
    make up
    ```
-   When the process completes you should have all the modules up and running. You can check the status with:
+   When the process completes you can check if all the modules up and running with:
    ```bash
     docker compose ps
     ```
 
 <br>
 
-- **To produce [an example event](examples/event.json), run:**
+- **To produce [an example event](plugins/examples/event.json), run:**
    ```bash
    docker compose -f examples/docker-compose.yml up -d --build
    ```
-  Access the [Dashboard](http://localhost:8502/Camera_Traps) to view the streamed data or check the [local Neo4j instance](http://localhost:7474/browser/) with username `neo4j` and password `PWD_HERE`.
+  View the streamed data on the [dashboard](http://localhost:8502/Camera_Traps) or check the [local neo4j instance](http://localhost:7474/browser/) with username `neo4j` and password `PWD_HERE`.
 
 <br>
 

@@ -9,7 +9,7 @@ st.set_page_config(
 
 st.header("CKN Streaming Analytics Dashboard")
 
-st.sidebar.success("Select the dashboard.")
+st.sidebar.success("Select the ckn_dashboard.")
 
 st.markdown(
     """
