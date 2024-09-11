@@ -35,9 +35,9 @@ We use Docker Compose to create an environment with Confluent Platform component
 
 <br>
 
-- **To produce [an example event](plugins/examples/event.json), run:**
+- **To produce [an example event](plugins/example/event.json), run:**
    ```bash
-   docker compose -f examples/docker-compose.yml up -d --build
+   docker compose -f plugins/example/docker-compose.yml up -d --build
    ```
   View the streamed data on the [dashboard](http://localhost:8502/Camera_Traps) or check the [local neo4j instance](http://localhost:7474/browser/) with username `neo4j` and password `PWD_HERE`.
 
@@ -46,5 +46,5 @@ We use Docker Compose to create an environment with Confluent Platform component
 - **To shut down and remove all containers, run:**
     ```bash
     make down
-   docker compose -f examples/docker-compose.yml down
+   docker compose -f plugins/example/docker-compose.yml down
     ```

@@ -11,7 +11,7 @@ from power_processor import PowerProcessor
 
 ORACLE_EVENTS_FILE = os.getenv(
     'ORACLE_CSV_PATH',
-    'plugins/oracle_ckn_daemon/events/image_mapping_final.json')
+    'plugins/ckn_oracle_daemon/events/image_mapping_final.json')
 CKN_LOG_FILE = os.getenv('CKN_LOG_FILE', './ckn_daemon.log')
 KAFKA_BROKER = os.getenv('CKN_KAFKA_BROKER', 'localhost:9092')
 KAFKA_TOPIC = os.getenv('CKN_KAFKA_TOPIC', 'oracle-events')
@@ -24,7 +24,7 @@ EXPERIMENT_END_SIGNAL = os.getenv('EXPERIMENT_END_SIGNAL',
 
 POWER_SUMMARY_FILE = os.getenv(
     'POWER_SUMMARY_FILE',
-    'plugins/oracle_ckn_daemon/events/power_summary_report.json')
+    'plugins/ckn_oracle_daemon/events/power_summary_report.json')
 POWER_SUMMARY_TOPIC = os.getenv('POWER_SUMMARY_TOPIC',
                                 'cameratraps-power-summary')
 POWER_SUMMARY_TIMOUT = os.getenv('POWER_SUMMARY_TIMOUT', 10)
