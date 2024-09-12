@@ -1,6 +1,6 @@
 name: CKN-CI
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   start:
