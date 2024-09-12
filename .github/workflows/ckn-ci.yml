@@ -36,30 +36,26 @@ jobs:
           docker cp ckn_kg/constraints.cypher neo4j_server:/constraints.cypher
           docker exec neo4j_server cypher-shell -u neo4j -p PWD_HERE -f /constraints.cypher
               
-      - name: Build and Test CKN Oracle Daemon plugin with ENABLE_POWER_MONITORING=False
+      - name: Build and Test CKN Oracle Daemon plugin WITHOUT power_monitoring
         run: |
           docker compose -f plugins/oracle_ckn_daemon/docker-compose.yml up -d --build
           sleep 5
           docker exec ckn-oracle-daemon touch /oracle_logs/image_mapping_final.json
 
-      - name: Test Oracle CKN Plugin with ENABLE_POWER_MONITORING=False
-        run: |
           pip install -r plugins/oracle_ckn_daemon/tests/requirements.txt
+          pytest plugins/oracle_ckn_daemon/tests/test_oracle_ckn_daemon.py -v
           pytest plugins/oracle_ckn_daemon/tests/test_power_monitoring_false.py -v
           docker compose -f plugins/oracle_ckn_daemon/docker-compose.yml down
 
-      - name: Build and Test CKN Oracle Daemon plugin with ENABLE_POWER_MONITORING=True
+      - name: Build and Test CKN Oracle Daemon plugin WITH power_monitoring
         run: |
           sed -i '20s/ENABLE_POWER_MONITORING=false/ENABLE_POWER_MONITORING=true/' plugins/oracle_ckn_daemon/docker-compose.yml
-          cat plugins/oracle_ckn_daemon/docker-compose.yml
 
           docker compose -f plugins/oracle_ckn_daemon/docker-compose.yml up -d --build
           sleep 5
           docker exec ckn-oracle-daemon touch /oracle_logs/image_mapping_final.json
           sleep 5
 
-      - name: Test Oracle CKN Plugin with ENABLE_POWER_MONITORING=False
-        run: |
           pytest plugins/oracle_ckn_daemon/tests/test_power_monitoring_true.py -v
           docker compose -f plugins/oracle_ckn_daemon/docker-compose.yml down
 
