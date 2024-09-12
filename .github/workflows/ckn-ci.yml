@@ -1,6 +1,6 @@
 name: CKN-CI
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   start:
@@ -26,26 +26,42 @@ jobs:
 
       - name: Apply neo4j Constraints
         run: |
-          echo "Waiting for Neo4j to be ready..."
+          echo "Waiting for neo4j to be ready..."
           while ! docker exec neo4j_server cypher-shell -u neo4j -p PWD_HERE "RETURN 1" > /dev/null 2>&1; do \
             echo "neo4j-server starting..."; \
             sleep 5; \
           done
-          echo "Neo4j is ready"
+          echo "neo4j is ready"
 
           docker cp ckn_kg/constraints.cypher neo4j_server:/constraints.cypher
           docker exec neo4j_server cypher-shell -u neo4j -p PWD_HERE -f /constraints.cypher
               
-      - name: Build CKN Oracle Daemon plugin
+      - name: Build CKN Oracle Daemon plugin WITHOUT power_monitoring
         run: |
           docker compose -f plugins/oracle_ckn_daemon/docker-compose.yml up -d --build
           sleep 5
           docker exec ckn-oracle-daemon touch /oracle_logs/image_mapping_final.json
 
-      - name: Test Oracle CKN Plugin
+      - name: Test CKN Oracle Daemon plugin WITHOUT power_monitoring
         run: |
           pip install -r plugins/oracle_ckn_daemon/tests/requirements.txt
-          pytest plugins/oracle_ckn_daemon/tests -v
+          pytest plugins/oracle_ckn_daemon/tests/test_ckn_oracle_daemon.py -v
+          pytest plugins/oracle_ckn_daemon/tests/test_power_monitoring_false.py -v
+          docker compose -f plugins/oracle_ckn_daemon/docker-compose.yml down
+
+      - name: Build CKN Oracle Daemon plugin WITH power_monitoring
+        run: |
+          sed -i '20s/ENABLE_POWER_MONITORING=false/ENABLE_POWER_MONITORING=true/' plugins/oracle_ckn_daemon/docker-compose.yml
+
+          docker compose -f plugins/oracle_ckn_daemon/docker-compose.yml up -d --build
+          sleep 5
+          docker exec ckn-oracle-daemon touch /oracle_logs/image_mapping_final.json
+          sleep 5
+
+      - name: Test CKN Oracle Daemon plugin WITH power_monitoring
+        run: |
+          pytest plugins/oracle_ckn_daemon/tests/test_power_monitoring_true.py -v
+          docker compose -f plugins/oracle_ckn_daemon/docker-compose.yml down
 
       - name: Test CKN
         run: |
@@ -57,8 +73,3 @@ jobs:
         run: |
           docker compose -f docker-compose.yml down
           docker network rm ckn-network || true
-
-      - name: Remove Oracle Daemon Container
-        if: always()
-        run: |
-          docker compose -f examples/docker-compose.yml down
