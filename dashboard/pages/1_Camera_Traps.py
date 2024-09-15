@@ -3,7 +3,6 @@ import pandas as pd
 import os
 import streamlit as st
 from dotenv import load_dotenv
-import plotly.express as px
 
 load_dotenv()
 
@@ -23,7 +22,7 @@ st.sidebar.header("Camera Traps Analytics")
 
 users = kg.fetch_distinct_users()
 
-def display_experiment_indicators(experiment_id, experiment_df):
+def display_experiment_indicators(experiment_id, experiment_df, model_id):
     selected_experiment = experiment_df.loc[experiment_id]
     start_time = selected_experiment['Start Time']
     date_str = start_time.strftime("%Y-%m-%d")
@@ -40,48 +39,21 @@ def display_experiment_indicators(experiment_id, experiment_df):
     saved_images = selected_experiment['Saved Images']
     deleted_images = total_images - saved_images
 
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric(label="Start Date", value=date_str)
-    col2.metric(label="Start Time", value=str(time_str + " EDT"))
-    col3.metric(label="Average Accuracy [%]", value=average_accuracy)
-    col4.metric(label="Saved / Deleted Images", value=f"{saved_images} / {deleted_images}")
 
-def show_model_device_info(model_id, experiment_id):
-    col1, col2 = st.columns(2)
-    # get model information
     model_name = kg.get_mode_name_version(model_id)
-
     if model_name is None:
         model_name = "BioCLIP:1.0"
 
     # get device information
     device_info = kg.get_device_type(experiment_id)
 
-    col1.metric(label="Model:", value=model_name)
-    col2.metric(label="Device Type:", value=device_info)
-
-
-
-# Create three columns
-col1, col2= st.columns(2)
-
-# Display DataFrames in columns
-with col1:
-    selected_user = st.selectbox("Select User", users)
-    st.write(" ")
-
-if selected_user:
-    experiments = kg.fetch_experiments(selected_user)
-    with col2:
-        selected_experiment = st.selectbox("Select Experiment", experiments['experiment_id'])
-        st.write(" ")
-
-if selected_user:
-    with col1:
-        st.subheader(f"Experiment details for user: {selected_user}")
-        exp_summary_user = kg.get_experiment_info_for_user(selected_user)
-        st.write(exp_summary_user)
-
+    col1, col2, col3, col4, col5, col6 = st.columns(6)
+    col1.metric(label="Start Date", value=date_str)
+    col2.metric(label="Start Time", value=str(time_str + " EDT"))
+    col3.metric(label="Model", value=model_name)
+    col4.metric(label="Device Type", value=device_info)
+    col5.metric(label="Average Accuracy [%]", value=average_accuracy)
+    col6.metric(label="Saved / Deleted Images", value=f"{saved_images} / {deleted_images}")
 
 def show_power_info(deployment_info):
     """
@@ -98,12 +70,12 @@ def show_power_info(deployment_info):
         end_timestamp = str(deployment_info['End Time'][0].strftime('%Y-%m-%d %H:%M:%S'))
         end_date, end_time = end_timestamp.split(' ')
 
-        col10, col11, col12, col13 = st.columns(4)
+        col1, col2, col3, col4 = st.columns(4)
         # col11.write("Start Time:", deployment_info['Start Time'][0])
-        col10.metric(label="End Date", value=end_date)
-        col11.metric(label="End time", value=str(end_time + " EDT"))
-        col12.metric(label="Total CPU (W)", value=total_cpu)
-        col13.metric(label="Total GPU (W)", value=total_gpu)
+        col1.metric(label="End Date", value=end_date)
+        col2.metric(label="End time", value=str(end_time + " EDT"))
+        col3.metric(label="Total CPU (W)", value=total_cpu)
+        col4.metric(label="Total GPU (W)", value=total_gpu)
 
         # Showing the plugin information separately
         plugin_metrics = deployment_info.drop(
@@ -127,31 +99,47 @@ def show_power_info(deployment_info):
                 })
         plugins_df = pd.DataFrame(plugins)
         plugins_df.set_index("Plugin Name", inplace=True)
-        st.dataframe(plugins_df)
+        st.dataframe(plugins_df, use_container_width=True)
 
+
+col1 = st.container()
+
+# Display DataFrames in columns
+with col1:
+    selected_user = st.selectbox("Select User", users)
+    st.write(" ")
+
+if selected_user:
+    with col1:
+        exp_summary_user = kg.get_experiment_info_for_user(selected_user)
+        st.dataframe(exp_summary_user, use_container_width=True)
+        st.divider()
+
+if selected_user:
+    experiments = kg.fetch_experiments(selected_user)
+    with col1:
+        selected_experiment = st.selectbox("Select Experiment", experiments['experiment_id'])
+        st.write(" ")
 
 # Load user-specific data
 if selected_experiment:
-    with col2:
-        # Display experiment summary
-        display_experiment_indicators(selected_experiment, exp_summary_user)
-
+    with col1:
         # get the experiment details for the selected experiment
         experiment_info = kg.get_exp_info_raw(selected_experiment)
 
         # extracting model id
         model_id = experiment_info['Model'].iloc[0]
 
+        # Display experiment summary
+        display_experiment_indicators(selected_experiment, exp_summary_user, model_id)
+
         # dropping the model from the dataframe
         experiment_info = experiment_info.drop(columns=['Model'])
         experiment_info = experiment_info.drop(columns=['Delete Time'])
 
-        # show model and device information
-        show_model_device_info(model_id, selected_experiment)
-
         # Display experiment raw data
-        st.markdown("##### Experiment data")
-        st.write(experiment_info)
+        st.dataframe(experiment_info, use_container_width=True)
+        st.divider()
 
         # Display deployment information
         deployment_info = kg.get_exp_deployment_info(selected_experiment)
