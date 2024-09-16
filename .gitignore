@@ -9,8 +9,8 @@ env/
 # Log files
 *.log
 
-# Dashboard environment file
-dashboard/.env
+# Environment files
+*.env
 
 # System files and cache
 .DS_Store

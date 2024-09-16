@@ -2,7 +2,7 @@
 
 CKN connects the Edge to the cloud by means of event streaming.
 
-![CKN Design](ckn-design.png)
+<img src="ckn-design.png" alt="CKN Design" style="width:100%;">
 
 ## Components
 
@@ -43,7 +43,7 @@ We use Docker Compose to create an environment with Confluent Platform component
 
 2. **To produce [an example event](examples/event.json), run:**
    ```bash
-   docker compose -f plugins/example/docker-compose.yml up -d --build
+   docker compose -f examples/docker-compose.yml up -d --build
    ```
   View the streamed data on the [dashboard](http://localhost:8502/Camera_Traps) or check the [local neo4j instance](http://localhost:7474/browser/) with username `neo4j` and password `PWD_HERE`.
 
@@ -52,7 +52,7 @@ We use Docker Compose to create an environment with Confluent Platform component
 3. **To shut down and remove all containers, run:**
     ```bash
     make down
-   docker compose -f plugins/example/docker-compose.yml down
+   docker compose -f examples/docker-compose.yml down
     ```
    
 ### Reference
