@@ -2,7 +2,7 @@
 
 CKN connects the Edge to the cloud by means of event streaming.
 
-![CKN Design](ckn-design.png)
+<img src="ckn-design.png" alt="CKN Design" style="width:100%;">
 
 ## Components
 
