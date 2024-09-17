@@ -16,13 +16,23 @@ st.set_page_config(
     page_title="Camera Traps Experiments",
     page_icon="📸",
     layout="wide")
+st.markdown(
+    """
+<style>
+[data-testid="stMetricValue"] {
+    font-size: 20px;
+}
+</style>
+""",
+    unsafe_allow_html=True,
+)
 
 st.header("Camera Traps Experiments")
 st.sidebar.header("Camera Traps Analytics")
 
 users = kg.fetch_distinct_users()
 
-def display_experiment_indicators(experiment_id, experiment_df, model_id):
+def get_experiment_indicators(experiment_id, experiment_df, model_id):
     selected_experiment = experiment_df.loc[experiment_id]
     start_time = selected_experiment['Start Time']
     date_str = start_time.strftime("%Y-%m-%d")
@@ -35,11 +45,6 @@ def display_experiment_indicators(experiment_id, experiment_df, model_id):
     else:
         average_accuracy = round(average_accuracy, 2)
 
-    total_images = selected_experiment['Total Images']
-    saved_images = selected_experiment['Saved Images']
-    deleted_images = total_images - saved_images
-
-
     model_name = kg.get_mode_name_version(model_id)
     if model_name is None:
         model_name = "BioCLIP:1.0"
@@ -47,35 +52,21 @@ def display_experiment_indicators(experiment_id, experiment_df, model_id):
     # get device information
     device_info = kg.get_device_type(experiment_id)
 
-    col1, col2, col3, col4, col5, col6 = st.columns(6)
-    col1.metric(label="Start Date", value=date_str)
-    col2.metric(label="Start Time", value=str(time_str + " EDT"))
-    col3.metric(label="Model", value=model_name)
-    col4.metric(label="Device Type", value=device_info)
-    col5.metric(label="Average Accuracy [%]", value=average_accuracy)
-    col6.metric(label="Saved / Deleted Images", value=f"{saved_images} / {deleted_images}")
+    return date_str, time_str, model_name, device_info, average_accuracy
 
-def show_power_info(deployment_info):
+def get_power_info(deployment_info):
     """
     Retrieve and show power information for a given experiment.
     :param deployment_info:
     :return:
     """
     if deployment_info is None:
-        st.write("No deployment info found for the experiment.")
+        return None, None, None, None, None
     else:
-        st.markdown("##### Power information")
         total_cpu = round(deployment_info['total_cpu_power_consumption'][0], 3)
         total_gpu = round(deployment_info['total_gpu_power_consumption'][0], 3)
         end_timestamp = str(deployment_info['End Time'][0].strftime('%Y-%m-%d %H:%M:%S'))
         end_date, end_time = end_timestamp.split(' ')
-
-        col1, col2, col3, col4 = st.columns(4)
-        # col11.write("Start Time:", deployment_info['Start Time'][0])
-        col1.metric(label="End Date", value=end_date)
-        col2.metric(label="End time", value=str(end_time + " EDT"))
-        col3.metric(label="Total CPU (W)", value=total_cpu)
-        col4.metric(label="Total GPU (W)", value=total_gpu)
 
         # Showing the plugin information separately
         plugin_metrics = deployment_info.drop(
@@ -99,7 +90,8 @@ def show_power_info(deployment_info):
                 })
         plugins_df = pd.DataFrame(plugins)
         plugins_df.set_index("Plugin Name", inplace=True)
-        st.dataframe(plugins_df, use_container_width=True)
+
+        return end_date, end_time, total_cpu, total_gpu, plugins_df
 
 
 col1 = st.container()
@@ -107,19 +99,19 @@ col1 = st.container()
 # Display DataFrames in columns
 with col1:
     selected_user = st.selectbox("Select User", users)
-    st.write(" ")
 
 if selected_user:
     with col1:
         exp_summary_user = kg.get_experiment_info_for_user(selected_user)
-        st.dataframe(exp_summary_user, use_container_width=True)
-        st.divider()
+
+        default_rows = 3
+        height = min(50 * default_rows, 50 * len(exp_summary_user))
+        st.dataframe(exp_summary_user, use_container_width=True, height=height)
 
 if selected_user:
     experiments = kg.fetch_experiments(selected_user)
     with col1:
-        selected_experiment = st.selectbox("Select Experiment", experiments['experiment_id'])
-        st.write(" ")
+        selected_experiment = st.selectbox(f"Select Experiment performed by {selected_user}", experiments['experiment_id'])
 
 # Load user-specific data
 if selected_experiment:
@@ -127,21 +119,38 @@ if selected_experiment:
         # get the experiment details for the selected experiment
         experiment_info = kg.get_exp_info_raw(selected_experiment)
 
-        # extracting model id
+        # extracting model id and drop
         model_id = experiment_info['Model'].iloc[0]
-
-        # Display experiment summary
-        display_experiment_indicators(selected_experiment, exp_summary_user, model_id)
-
-        # dropping the model from the dataframe
         experiment_info = experiment_info.drop(columns=['Model'])
         experiment_info = experiment_info.drop(columns=['Delete Time'])
 
+        # Get experiment summary
+        date_str, time_str, model_name, device_info, average_accuracy = get_experiment_indicators(selected_experiment, exp_summary_user, model_id)
+
+        # Get deployment information
+        deployment_info = kg.get_exp_deployment_info(selected_experiment)
+        end_date, end_time, total_cpu, total_gpu, plugins_df = get_power_info(deployment_info)
+
+        # Create columns based on whether end_date and end_time are provided
+        columns = st.columns(5 if end_date and end_time else 4)
+        columns[0].metric(label="Start Time", value=f"{date_str} {time_str} EDT")
+        columns[1].metric(label="Model", value=model_name)
+        columns[2].metric(label="Device Type", value=device_info)
+        columns[3].metric(label="Average Accuracy [%]", value=average_accuracy)
+
+        if end_date and end_time:
+            columns[-1].metric(label="End time", value=f"{end_date} {end_time} EDT")
+
         # Display experiment raw data
         st.dataframe(experiment_info, use_container_width=True)
-        st.divider()
 
-        # Display deployment information
-        deployment_info = kg.get_exp_deployment_info(selected_experiment)
-        show_power_info(deployment_info)
+        if plugins_df is not None:
+            st.markdown("#### Power Information")
+            col1, col2 = st.columns(2)
+            col1.metric(label="Total CPU Consumption (W)", value=total_cpu)
+            col2.metric(label="Total GPU Consumption (W)", value=total_gpu)
+            st.dataframe(plugins_df, use_container_width=True)
+
+        else:
+            st.write("No power information available for this experiment.")
 
