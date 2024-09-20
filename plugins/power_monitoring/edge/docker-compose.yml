@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  ckn-daemon:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ckn-edge-daemon
+    ports:
+      - "8080:8080"
