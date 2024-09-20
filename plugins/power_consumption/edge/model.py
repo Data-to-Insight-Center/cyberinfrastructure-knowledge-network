@@ -1,7 +1,6 @@
 import torch
 from PIL import Image
-from torchvision import transforms
-from torchvision import models
+from torchvision import transforms, models
 
 
 class ModelStore:

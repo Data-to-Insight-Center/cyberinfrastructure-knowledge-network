@@ -5,34 +5,8 @@ from json import dumps
 
 import connexion
 from flask import Flask, flash, request, redirect, jsonify
-from kafka import KafkaProducer
-
+from confluent_kafka import Producer
 from model import predict, pre_process, load_model
-
-
-class KafkaIngester:
-    """
-    Library class for ingesting information into CKN through Kafka.
-    """
-
-    def __init__(self, server_list, ckn_topic):
-        self.producer = KafkaProducer(bootstrap_servers=[server_list],
-                                      value_serializer=lambda x: dumps(x).encode('utf-8'))
-
-        self.topic = ckn_topic
-
-    def send_request(self, request, key=None):
-        """
-        Sends requests to CKN
-        """
-        self.producer.send(topic=self.topic, value=request, key=key.encode())
-
-    def send_qoe(self, request):
-        """
-        Sends QoE events to CKN
-        """
-        self.producer.send(topic=self.topic, value=request)
-
 
 app = connexion.App(__name__, specification_dir="./")
 log = logging.getLogger('werkzeug')
@@ -53,9 +27,10 @@ server_list = os.getenv('CKN_KAFKA_BROKER', 'localhost:9092')
 inference_topic = 'inference-qoe-test'
 model_deployment_topic = 'model-deployments'
 
-producer = KafkaIngester(server_list, inference_topic)
-model_producer = KafkaIngester(server_list, model_deployment_topic)
-
+config = {
+            'bootstrap.servers': server_list,
+        }
+producer = Producer(config)
 
 class Window:
     total_acc = 0
@@ -97,7 +72,8 @@ def deploy_model():
 def send_model_change(new_model):
     # send the model changed info to the knowledge graph
     model_change = {"server_id": SERVER_ID, "model": new_model}
-    model_producer.send_request(model_change, key=SERVER_ID)
+    # model_producer.send_request(model_change, key=SERVER_ID)
+    producer.produce(topic=model_deployment_topic, value=dumps(model_change))
     print("Model change to {} sent to CKN".format(new_model))
 
 
@@ -148,7 +124,7 @@ def process_only_file(file):
     prediction, probability = predict(preprocessed_input)
     compute_time = time.time() - start_time
 
-    result = {'prediction': prediction, "compute_time": compute_time, "probability": probability}
+    result = {'start_time': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time)), 'prediction': prediction, "compute_time": compute_time, "probability": probability}
     return jsonify(result)
 
 
