@@ -1,48 +1,50 @@
 import os
 import time
-import requests
+import csv
 from jtop import jtop
 
-
-# Log file where data will be written
-log_file = "power_log.txt"
-
-# Duration to run the script (in seconds)
-duration = 500
+csv_file = "power_log.csv"
+duration = 2000  # seconds
 
 # Record the start time
 start_time = time.time()
 
-# Open the log file in append mode
-with open(log_file, 'a') as f:
+# Open the CSV file in append mode
+with open(csv_file, 'a', newline='') as f:
+    csv_writer = csv.writer(f)
+
+    # Write the header only if the file is empty
+    if os.stat(csv_file).st_size == 0:
+        csv_writer.writerow(['timestamp',
+        'cpu_volt', 'cpu_curr', 'cpu_power', 'cpu_avg_power',
+        'gpu_volt', 'gpu_curr', 'gpu_power', 'gpu_avg_power',
+        'total_volt', 'total_curr', 'total_power', 'total_avg_power'])
+
     with jtop() as jetson:
         while jetson.ok():
             # Check if the duration has passed
             elapsed_time = time.time() - start_time
             if elapsed_time > duration:
-                print("Time limit reached. Exiting.")
+                print(f"written to {csv_file}")
                 break
 
             # Get the current timestamp
             timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
 
-            # Create log entry
-            log_entry = "{} - {}\n".format(timestamp, jetson.power)
+            # Extract power details for CPU and GPU from 'jetson.power'
+            cpu_power = jetson.power['rail']['POM_5V_CPU']
+            gpu_power = jetson.power['rail']['POM_5V_GPU']
+            total_power = jetson.power['tot']
 
-            # Write to log file
-            f.write(log_entry)
-            f.flush()  # Ensure data is written immediately
+            # Create log entry for CSV
+            log_entry = [
+                timestamp,
+                cpu_power['volt'], cpu_power['curr'], cpu_power['power'], cpu_power['avg'],
+                gpu_power['volt'], gpu_power['curr'], gpu_power['power'], gpu_power['avg'],
+                total_power['volt'], total_power['curr'], total_power['power'], total_power['avg']
+            ]
 
-            # Sleep for a short period to avoid excessive logging
+            csv_writer.writerow(log_entry)
+            f.flush()
+
             time.sleep(1)
-
-# After logging, send the file via POST request
-url = os.getenv('UPLOAD_URL')
-files = {'file': open(log_file, 'rb')}
-response = requests.post(url, files=files)
-
-# Check the response from the server
-if response.status_code == 200:
-    print("File uploaded successfully.")
-else:
-    print("Failed to upload file. Status code: {}".format(response.status_code))

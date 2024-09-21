@@ -70,10 +70,12 @@ def predict():
             with open(CSV_FILE, 'a', newline='') as f:
                 writer = csv.writer(f)
                 if not file_exists:
-                    writer.writerow(["start_time", "end_time", "prediction", "probability", "qoe", "acc_qoe", "delay_qoe"])
+                    writer.writerow(["start_time", "end_time", "req_delay", "req_acc", "prediction", "probability", "qoe", "acc_qoe", "delay_qoe"])
                 writer.writerow([
                     start_time.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3],
                     end_time.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3],
+                    req_delay,
+                    req_acc,
                     prediction,
                     probability,
                     qoe,
@@ -81,7 +83,9 @@ def predict():
                     delay_qoe
                 ])
 
-            return jsonify({"message": "Prediction successful", "prediction": prediction}), 200
+            return jsonify({"prediction": prediction, "probability": probability,
+                            "req_delay": req_delay, "req_acc": req_acc,
+                            "qoe": qoe, "acc_qoe": acc_qoe, "delay_qoe": delay_qoe}), 200
 
 
 if __name__ == "__main__":

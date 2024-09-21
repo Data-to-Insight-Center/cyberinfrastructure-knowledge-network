@@ -19,3 +19,6 @@ env/
 # Configuration directories
 ckn_kg/neo4j/
 neo4j/
+
+plugins/power_monitoring/server/uploads
+plugins/power_monitoring/device/data

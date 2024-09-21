@@ -73,15 +73,13 @@ def main():
                 if response.status_code != 200:
                     print(f"Error: {response.status_code} - {response.text}")
                 else:
-                    print(f"Success: {response.status_code} - {response.text}")
-
-                break
+                    print(response.text)
 
             print("Signaling split end after {} requests!".format(len(split_data[split_idx])))
-            time.sleep(5)
+
             total_splits += 1
-            if total_splits == 1:
-                print("{0} rounds sent!".format(i + 1))
+            print("{0} rounds sent!".format(i + 1))
+            if total_splits == 2:
                 break
 
 if __name__ == "__main__":
