@@ -1,5 +1,6 @@
 import os
 import time
+import datetime
 
 import torch
 from PIL import Image
@@ -82,14 +83,14 @@ def get_prediction_results(file):
     :return: {prediction, compute_time}
     """
     filename = save_file(file)
-    start_time = time.strftime("%Y-%m-%d %H:%M:%S")
+    start_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
 
     # Preprocess and Predict
     preprocessed_input = pre_process(filename)
     prediction, probability = predict(preprocessed_input)
 
     # Compute time
-    end_time = time.strftime("%Y-%m-%d %H:%M:%S")
+    end_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
     result = {'prediction': prediction, "probability": probability, "start_time": start_time, "end_time": end_time}
 
     # write to csv file
