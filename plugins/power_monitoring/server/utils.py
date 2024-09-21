@@ -1,10 +1,9 @@
 import os
 import time
-import datetime
+from datetime import timedelta
 
 import torch
 from PIL import Image
-from flask import jsonify
 from torchvision import transforms
 from werkzeug.utils import secure_filename
 
@@ -61,7 +60,7 @@ def pre_process(filename):
     return input_batch
 
 
-def predict(input):
+def get_prediction_probability(input):
     """
     Predicting the class for a given pre-processed input
     :param input:
@@ -75,30 +74,6 @@ def predict(input):
     high_prob, pred_label = torch.topk(prob, 1)
 
     return str((labels[pred_label[0]])), high_prob[0].item()
-
-def get_prediction_results(file):
-    """
-    Saves the file into the uploads directory and returns the prediction.
-    :param file:
-    :return: {prediction, compute_time}
-    """
-    filename = save_file(file)
-    start_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
-
-    # Preprocess and Predict
-    preprocessed_input = pre_process(filename)
-    prediction, probability = predict(preprocessed_input)
-
-    # Compute time
-    end_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
-    result = {'prediction': prediction, "probability": probability, "start_time": start_time, "end_time": end_time}
-
-    # write to csv file
-    with open('predictions.csv', 'a') as f:
-        f.write(f"{result['start_time']}, {result['end_time']}, {result['prediction']}, {result['probability']}\n")
-
-    return jsonify(result)
-
 
 def save_file(file):
     """
@@ -121,3 +96,27 @@ def check_file_extension(filename):
     :return: if the file extension is of an image or not.
     """
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ACCEPTED_EXTENSIONS
+
+def process_qoe(probability, compute_time, req_delay, req_accuracy):
+    """
+    Processes the QoE value for a given inference.
+    """
+    acc_qoe = calculate_acc_qoe(req_accuracy, probability)
+    delay_qoe = calculate_delay_qoe(req_delay, compute_time)
+    return 0.5*acc_qoe + 0.5*delay_qoe, acc_qoe, delay_qoe
+
+def calculate_acc_qoe(req_acc, provided_acc):
+    """
+    Measures the accuracy QoE between two values.
+    """
+    # dxy = np.abs(req_acc-provided_acc)/np.max((req_acc, provided_acc))
+    return min(1.0, provided_acc/req_acc)
+
+
+def calculate_delay_qoe(req_delay, provided_delay):
+    """
+    Measures the delay QoE between two values.
+    """
+    req_delay_seconds = req_delay.total_seconds() if isinstance(req_delay, timedelta) else req_delay
+    provided_delay_seconds = provided_delay.total_seconds() if isinstance(provided_delay, timedelta) else provided_delay
+    return min(1.0, req_delay_seconds / provided_delay_seconds)

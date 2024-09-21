@@ -1,9 +1,10 @@
-import requests
-import datetime
 import csv
-import numpy as np
+import json
 import os
 import time
+
+import numpy as np
+import requests
 
 URL = "http://10.20.72.45:8080/predict"
 DEVICE_NAME = "raspi-3"
@@ -34,15 +35,6 @@ def get_json_requests(dataset):
     return np.asarray(json_data)
 
 
-def send_request(filename, file_location, payload):
-    start_time = datetime.datetime.now().microsecond / 1000
-    files = [('file', (filename, open(file_location, 'rb'), 'image/jpeg'))]
-    headers = {}
-    response = requests.request("POST", URL, headers=headers, data=payload, files=files)
-    total_time = datetime.datetime.now().microsecond / 1000 - start_time
-    return response, total_time
-
-
 def split_data_by_timestamp(data):
     timestamp = data[0][-1]
     split_data = []
@@ -70,14 +62,27 @@ def main():
         for split_idx in range(len(split_data)):
             json_requests = get_json_requests(np.asarray(split_data[split_idx]))
             for k in range(json_requests.shape[0]):
-                response, r_time = send_request(images_raspi_1[k], image_paths[k], json_requests[k])
+                file_path = image_paths[k]
+                json_payload = json_requests[k]
+
+                with open(file_path, 'rb') as f:
+                    files = {'file': (file_path, f)}
+                    # Convert JSON payload to a string and include it in form data
+                    response = requests.post(URL, files=files, data={'json': json.dumps(json_payload)})
+
+                if response.status_code != 200:
+                    print(f"Error: {response.status_code} - {response.text}")
+                else:
+                    print(f"Success: {response.status_code} - {response.text}")
+
+                break
+
             print("Signaling split end after {} requests!".format(len(split_data[split_idx])))
             time.sleep(5)
             total_splits += 1
             if total_splits == 1:
                 print("{0} rounds sent!".format(i + 1))
                 break
-
 
 if __name__ == "__main__":
     main()
