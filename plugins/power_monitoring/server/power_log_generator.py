@@ -1,20 +1,27 @@
 import os
 import time
 import csv
+import requests
 from jtop import jtop
+import logging
 
-csv_file = "power_log.csv"
-duration = 2000  # seconds
+from dotenv import load_dotenv
 
-# Record the start time
+logging.basicConfig(level=logging.DEBUG)
+load_dotenv(".env")
+
+CLOUD_URL = os.getenv("CLOUD_URL")
+POWER_CSV = os.getenv("POWER_CSV")
+
+duration = 10  # seconds
 start_time = time.time()
 
 # Open the CSV file in append mode
-with open(csv_file, 'a', newline='') as f:
+with open(POWER_CSV, 'a', newline='') as f:
     csv_writer = csv.writer(f)
 
     # Write the header only if the file is empty
-    if os.stat(csv_file).st_size == 0:
+    if os.stat(POWER_CSV).st_size == 0:
         csv_writer.writerow(['timestamp',
         'cpu_volt', 'cpu_curr', 'cpu_power', 'cpu_avg_power',
         'gpu_volt', 'gpu_curr', 'gpu_power', 'gpu_avg_power',
@@ -25,7 +32,7 @@ with open(csv_file, 'a', newline='') as f:
             # Check if the duration has passed
             elapsed_time = time.time() - start_time
             if elapsed_time > duration:
-                print(f"written to {csv_file}")
+                print(f"written to {POWER_CSV}")
                 break
 
             # Get the current timestamp
@@ -48,3 +55,12 @@ with open(csv_file, 'a', newline='') as f:
             f.flush()
 
             time.sleep(1)
+
+
+    # POST predictions.csv to the cloud
+    response = requests.post(CLOUD_URL, files={'file': open(POWER_CSV, 'rb')})
+
+    if response.status_code != 200:
+        logging.error(f"Error: {response.status_code} - {response.text}")
+    else:
+        logging.info(response.text)

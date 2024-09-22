@@ -13,7 +13,6 @@ def upload_file():
         return 'No file part', 400
 
     file = request.files['file']
-    print(file)
 
     if file.filename == '':
         return 'No selected file', 400
@@ -25,4 +24,4 @@ def upload_file():
     return 'File uploaded successfully', 200
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8082)  # Adjust host and port as needed
+    app.run(host='0.0.0.0', port=8082)
