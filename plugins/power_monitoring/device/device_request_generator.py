@@ -92,10 +92,7 @@ if __name__ == "__main__":
                         files=files,
                         data={'json': json.dumps(json_payload)})
 
-                if response.status_code != 200:
-                    logging.error(f"Error: {response.status_code} - {response.text}")
-                else:
-                    logging.info(response.text)
+                logging.info(response.status_code)
 
             logging.info("Signaling split end after {} requests!".format(len(split_data[split_idx])))
 

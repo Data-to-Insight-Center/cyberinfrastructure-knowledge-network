@@ -13,7 +13,7 @@ load_dotenv(".env")
 CLOUD_URL = os.getenv("CLOUD_URL")
 POWER_CSV = os.getenv("POWER_CSV")
 
-duration = 10  # seconds
+duration = 250  # seconds
 start_time = time.time()
 
 # Open the CSV file in append mode
@@ -58,7 +58,7 @@ with open(POWER_CSV, 'a', newline='') as f:
 
 
     # POST predictions.csv to the cloud
-    response = requests.post(CLOUD_URL, files={'file': open(POWER_CSV, 'rb')})
+    response = requests.post(f"{CLOUD_URL}/upload_power", files={'file': open(POWER_CSV, 'rb')})
 
     if response.status_code != 200:
         logging.error(f"Error: {response.status_code} - {response.text}")
