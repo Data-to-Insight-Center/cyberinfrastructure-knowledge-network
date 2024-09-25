@@ -1,0 +1,24 @@
+version: "3.0"
+
+networks:
+  cameratraps:
+    driver: bridge
+
+services:
+  powerMonitorPlugin:
+    container_name: power_monitor
+    image: power_monitor
+    networks:
+      - cameratraps
+    privileged: true  # Needed to access Jetson Nano power stats
+    pid: host  # Allows the container to monitor the host's processes
+    environment:
+      - POWER_CSV=/logs/power.csv
+      - TRAPS_POWER_BACKEND=tegrastats  # Specific to Jetson Nano
+      - TZ=America/New_York  # Set timezone to Eastern Standard Time
+    volumes:
+      # Mount the current directory (where docker-compose.yml is located) to /logs in the container
+      - .:/logs
+      # Ensure the jtop socket is available to the container
+      - /run/jtop.sock:/run/jtop.sock
+    command: python3 /app/power_log_generator.py

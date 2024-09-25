@@ -1,15 +1,14 @@
 import os
 import time
 import csv
-import requests
 from jtop import jtop
 import logging
 
 logging.basicConfig(level=logging.DEBUG)
 
-POWER_CSV = "power.csv"
+POWER_CSV = "/logs/power.csv"
 
-duration = 100000  # seconds
+duration = 10  # seconds
 start_time = time.time()
 
 # Open the CSV file in append mode
