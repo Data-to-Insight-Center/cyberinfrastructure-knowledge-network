@@ -5,15 +5,11 @@ import requests
 from jtop import jtop
 import logging
 
-from dotenv import load_dotenv
-
 logging.basicConfig(level=logging.DEBUG)
-load_dotenv(".env")
 
-CLOUD_URL = os.getenv("CLOUD_URL")
-POWER_CSV = os.getenv("POWER_CSV")
+POWER_CSV = "power.csv"
 
-duration = 250  # seconds
+duration = 100000  # seconds
 start_time = time.time()
 
 # Open the CSV file in append mode
@@ -55,12 +51,3 @@ with open(POWER_CSV, 'a', newline='') as f:
             f.flush()
 
             time.sleep(1)
-
-
-    # POST predictions.csv to the cloud
-    response = requests.post(f"{CLOUD_URL}/upload_power", files={'file': open(POWER_CSV, 'rb')})
-
-    if response.status_code != 200:
-        logging.error(f"Error: {response.status_code} - {response.text}")
-    else:
-        logging.info(response.text)

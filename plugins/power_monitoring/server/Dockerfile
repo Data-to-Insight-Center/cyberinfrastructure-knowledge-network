@@ -1,17 +1,20 @@
+# Use an official Python runtime as a parent image
 FROM python:3.9-slim
 
+# Set the working directory in the container
 WORKDIR /app
 
-COPY device_request_handler.py /app/
-COPY utils.py /app/
-COPY requirements.txt /app/
-COPY imagenet_classes.txt /app/
-COPY .env /app/.env
+# Copy all files and folders from current directory to /app in container
+COPY . .
 
-RUN pip install -r /app/requirements.txt
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-RUN mkdir /app/uploads
+# Conditionally create the uploads directory
+RUN mkdir -p /app/uploads
 
+# Expose the port the app runs on
 EXPOSE 8080
 
-ENTRYPOINT [ "python", "-u", "/app/device_request_handler.py"]
+# Run the application
+ENTRYPOINT ["python", "/app/server.py"]
