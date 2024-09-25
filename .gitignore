@@ -22,3 +22,7 @@ neo4j/
 
 plugins/power_monitoring/server/uploads
 plugins/power_monitoring/device/data
+
+plugins/power_monitoring/server/QoE_predictive.csv
+plugins/power_monitoring/server/timers.csv
+plugins/power_monitoring/server/power.csv
