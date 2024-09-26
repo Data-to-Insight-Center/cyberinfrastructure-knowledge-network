@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y \
     && pip3 install jetson-stats
 
 # Copy your script into the container
-COPY your_power_monitor_script.py /app/
+COPY power_log_generator.py /app/
 
 # Set the working directory
 WORKDIR /app
