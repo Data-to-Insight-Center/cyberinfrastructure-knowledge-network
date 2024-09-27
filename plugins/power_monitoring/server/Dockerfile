@@ -1,4 +1,3 @@
-# Use an official Python runtime as a parent image
 FROM python:3.9-slim
 
 # Set the working directory in the container
@@ -16,5 +15,8 @@ RUN mkdir -p /app/uploads
 # Expose the port the app runs on
 EXPOSE 8080
 
-# Run the application
-ENTRYPOINT ["python", "/app/server.py"]
+# Create a script to run both server.py and power_logger.py
+RUN echo '#!/bin/bash\npython -u /app/server.py &\npython -u /app/power_logger.py' > /app/start.sh && chmod +x /app/start.sh
+
+# Use the script as the entry point
+ENTRYPOINT ["/app/start.sh"]

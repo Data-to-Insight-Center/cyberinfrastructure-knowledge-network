@@ -1,0 +1,5 @@
+services:
+  device:
+    build:
+      context: .
+    container_name: device
