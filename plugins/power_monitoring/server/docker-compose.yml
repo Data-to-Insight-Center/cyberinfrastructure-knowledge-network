@@ -6,11 +6,11 @@ services:
     container_name: ckn-daemon
     ports:
       - "8080:8080"
-    privileged: true  # Needed to access Jetson Nano power stats
-    pid: host  # Allows the container to monitor the host's processes
+    privileged: true
+    pid: host
     environment:
       - POWER_CSV=/logs/power.csv
-      - TRAPS_POWER_BACKEND=tegrastats  # Specific to Jetson Nano
+      - TRAPS_POWER_BACKEND=tegrastats
       - TZ=America/New_York
     volumes:
       - .:/logs
@@ -18,5 +18,6 @@ services:
       - ./QoE_predictive.csv:/app/QoE_predictive.csv
       - ./timers.csv:/app/timers.csv
       - /run/jtop.sock:/run/jtop.sock
+      - /var/run/docker.sock:/var/run/docker.sock  # Mounting host's Docker socket
     command: >
       bash -c "python3 /app/power_logger.py & python3 /app/server.py"

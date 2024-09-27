@@ -3,6 +3,11 @@ FROM python:3.9-slim
 # Set the working directory in the container
 WORKDIR /app
 
+# Install system dependencies and Docker CLI
+RUN apt-get update \
+    && apt-get install -y docker.io \
+    && rm -rf /var/lib/apt/lists/*  # Clean up APT when done so it doesnt use up extra space
+
 # Copy all files and folders from current directory to /app in container
 COPY . .
 
