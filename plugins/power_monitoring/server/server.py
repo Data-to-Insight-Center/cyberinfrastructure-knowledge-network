@@ -161,7 +161,7 @@ def process_w_qoe(file, data):
     req_delay = float(data['delay'])
     ground_truth = data['ground_truth']
 
-    if ground_truth in {"cat", "dog"} and ground_truth == prediction:
+    if ground_truth == prediction:
         accuracy = 1
     else:
         accuracy = 0

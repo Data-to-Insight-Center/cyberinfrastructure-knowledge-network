@@ -14,7 +14,7 @@ This generates the REST requests along with the images to be sent to the EDGE RE
 SERVER_ADDRESS = os.getenv("SERVER_ADDRESS")
 URL = f"{SERVER_ADDRESS}/predict"
 SIGNAL_URL = f"{SERVER_ADDRESS}/changetimestep"
-DEVICE_NAME = "raspi-3"
+DEVICE_NAME = "d2iedgeai2"
 DATA_FILE = 'data/1_min_window_low_delay_high_rps.csv'
 IMAGE_DIRECTORY = './data/images'
 IMAGES = []
@@ -93,12 +93,6 @@ def send_request(filename, file_location, payload):
     ]
     headers = {}
 
-    # if 'cat' in filename, ground_truth = 'cat', if dog in filename, ground_truth = 'dog'
-    ground_truth = 'cat' if 'cat' in filename else 'dog'
-
-    # add ground truth to the payload
-    payload['ground_truth'] = ground_truth
-
     response = requests.request("POST", URL, headers=headers, data=payload, files=files)
     total_time = datetime.datetime.now().microsecond/1000 - start_time
 
@@ -141,10 +135,6 @@ def main():
     # split data by timestamp
     split_data = split_data_by_timestamp(device_data)
 
-    # convert to json requests
-    # json_requests = get_json_requests(device_data)
-
-
     # get the input images
     images_raspi_1, image_paths = get_images_in_order(IMAGE_DIRECTORY, DEVICE_NAME)
     max_iterations = 1
@@ -158,8 +148,9 @@ def main():
 
             # send each request along wih an image from the IMAGENET data
             for k in range(json_requests.shape[0]):
-                response, r_time = send_request(images_raspi_1[k], image_paths[k], json_requests[k])
-                break
+                filename, file_location, payload = images_raspi_1[k], image_paths[k], json_requests[k]
+                payload['ground_truth'] = filename.split('.')[0]
+                response, r_time = send_request(filename, file_location, payload)
 
             print("Signaling split end after {} requests!".format(len(split_data[split_idx])))
             signal_split_end()
