@@ -89,11 +89,11 @@ with open("imagenet_classes.txt", "r") as f:
 
 def pre_process(filename):
     """
-    Pre-processes the image to allow the image to be fed into the pytorch model.
-    :param filename:
-    :return: pre-processed image
+    Pre-processes the image to allow the image to be fed into the PyTorch model.
+    :param filename: Path to the image file.
+    :return: Pre-processed image tensor.
     """
-    input_image = Image.open(filename)
+    input_image = Image.open(filename).convert("RGB")  # Ensure the image is in RGB format
     preprocess = transforms.Compose([
         transforms.Resize(256),
         transforms.CenterCrop(224),

@@ -1,10 +1,10 @@
+import json
+import logging
 import os
 import sys
-import json
 import time
-import random
-import logging
 from datetime import datetime
+
 from confluent_kafka import Producer
 from confluent_kafka.admin import AdminClient
 

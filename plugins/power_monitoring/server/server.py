@@ -3,33 +3,27 @@ import logging
 import os
 import time
 from datetime import datetime
-
+import json
 import numpy as np
 from flask import Flask, flash, request, redirect, jsonify
-
+from confluent_kafka import Producer
 from model import predict, pre_process, model_store
+from dotenv import load_dotenv
+from werkzeug.utils import secure_filename
 
+load_dotenv(".env")
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
-# api specification
-# app.add_api("api.yml")
-from werkzeug.utils import secure_filename
-
-UPLOAD_FOLDER = './uploads'
-ACCEPTED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['TESTING'] = True
-app.config['SECRET_KEY'] = "ckn-edge-ai"
+app.config['UPLOAD_FOLDER'] = './uploads'
+SERVER_ID = os.getenv('SERVER_ID', 'd2iedgeai3')
+KAFKA_TOPIC = os.getenv('CKN_KAFKA_TOPIC', 'power_monitoring')
+KAFKA_BROKER = os.getenv('CKN_KAFKA_BROKER', '172.18.0.5:29092')
+RESULTS_CSV = os.getenv('RESULTS_CSV', './QoE_predictive.csv')
+TIMES_CSV = os.getenv('TIMES_CSV', './times.csv')
 
-SERVER_ID = "EDGE-1"
-server_list = 'localhost:9092'
-inference_topic = 'inference-qoe'
-model_deployment_topic = 'model-deployments'
-
-
+producer = Producer({'bootstrap.servers': KAFKA_BROKER})
 @app.route("/")
 def home():
     """
@@ -86,7 +80,7 @@ def check_file_extension(filename):
     :param filename:
     :return: if the file extension is of an image or not.
     """
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ACCEPTED_EXTENSIONS
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg'}
 
 
 @app.route('/predict', methods=['POST'])
@@ -144,84 +138,59 @@ def process_w_qoe(file, data):
     :param file:
     :return: {prediction, compute_time}
     """
-    start_time = time.time()
-    QOE_CSV = save_file(file)
+    total_start_time = time.time()
 
-    compute_start = time.time()
-    # pre-processing the image
-    preprocessed_input = pre_process(QOE_CSV)
-    # prediction on the pre-processed image
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-    prediction, probability = predict(preprocessed_input)
-    compute_time = time.time() - compute_start
-
-    pub_timer = time.time()
-    # processing the QoE values
+    filename = save_file(file)
     req_acc = float(data['accuracy'])
     req_delay = float(data['delay'])
     ground_truth = data['ground_truth']
 
-    if ground_truth == prediction:
-        accuracy = 1
-    else:
-        accuracy = 0
+    # Computation
+    compute_start_time = time.time()
+    preprocessed_input = pre_process(filename)
+    prediction, probability = predict(preprocessed_input)
+    compute_end_time = time.time()
+    compute_time = compute_end_time - compute_start_time
 
+    accuracy = int(ground_truth == prediction)
     qoe, acc_qoe, delay_qoe = process_qoe(probability, compute_time, req_delay, req_acc)
-
-    # get the current model_id
     current_model_id = model_store.get_current_model_id()
 
-    result = {'prediction': prediction, "compute_time": compute_time, "probability": probability, 'QoE': qoe,
-              'Acc_QoE': acc_qoe, 'Delay_QoE': delay_qoe, 'model': current_model_id}
-
-    qoe_event = send_summary_event(data, qoe, compute_time, probability, prediction, acc_qoe, delay_qoe,
-                                   current_model_id)
-
-    qoe_event['timestamp'] = timestamp
-    qoe_event['accuracy'] = accuracy
-    qoe_event['ground_truth'] = ground_truth
-
-    pub_time = time.time() - pub_timer
-
-    total_time = time.time() - start_time
-
-    filename = './QoE_predictive.csv'
-    perf_filename = './timers.csv'
-
-    perf_event = {'compute_time': compute_time, 'pub_time': pub_time, 'total_time': total_time}
-    write_csv_file([qoe_event], filename)
-    write_perf_file([perf_event], perf_filename)
-
-    return jsonify(result)
-
-
-def send_summary_event(data, qoe, compute_time, probability, prediction, acc_qoe, delay_qoe, model_name):
-    req_acc = float(data['accuracy'])
-    req_delay = float(data['delay'])
+    timestamp = datetime.fromtimestamp(compute_end_time).strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
 
     qoe_event = {'server_id': SERVER_ID, 'service_id': data['service_id'], 'client_id': data['client_id'],
-                 'prediction': prediction, "compute_time": compute_time, "pred_accuracy": probability, 'total_qoe': qoe,
+                 'prediction': prediction, 'compute_time': compute_time, 'probability': probability, 'total_qoe': qoe,
                  'accuracy_qoe': acc_qoe, 'delay_qoe': delay_qoe, 'req_acc': req_acc, 'req_delay': req_delay,
-                 'model': model_name, 'added_time': data['added_time']}
-    # producer.send_request(qoe_event, key=SERVER_ID)
-    return qoe_event
+                 'model': current_model_id, 'timestamp': timestamp, 'accuracy': accuracy, 'ground_truth': ground_truth}
 
+    pub_start_time = time.time()
+    producer.produce(KAFKA_TOPIC, json.dumps(qoe_event))
+    producer.flush(timeout=1)
+    pub_time = time.time() - pub_start_time
+
+    total_time = time.time() - total_start_time
+
+    perf_event = {'compute_time': compute_time, 'pub_time': pub_time, 'total_time': total_time}
+    write_csv_file(qoe_event, RESULTS_CSV)
+    write_perf_file(perf_event, TIMES_CSV)
+
+    return jsonify({"STATUS": "OK"})
 
 def write_csv_file(data, filename):
-    csv_columns = ['server_id', 'service_id', 'client_id', 'prediction', 'compute_time', 'pred_accuracy', 'total_qoe',
-                   'accuracy_qoe', 'delay_qoe', 'req_acc', 'req_delay', 'model', 'added_time', 'timestamp', 'accuracy', 'ground_truth']
+    csv_columns = data.keys()
+
     with open(filename, "a") as file:
         csvwriter = csv.DictWriter(file, csv_columns)
         # csvwriter.writeheader()
-        csvwriter.writerows(data)
+        csvwriter.writerows([data])
 
 
 def write_perf_file(data, filename):
-    csv_columns = ['compute_time', 'pub_time', 'total_time']
+    csv_columns = data.keys()
     with open(filename, "a") as file:
         csvwriter = csv.DictWriter(file, csv_columns)
         # csvwriter.writeheader()
-        csvwriter.writerows(data)
+        csvwriter.writerows([data])
 
 
 def process_qoe(probability, compute_time, req_delay, req_accuracy):
@@ -233,42 +202,10 @@ def process_qoe(probability, compute_time, req_delay, req_accuracy):
     :param req_accuracy:
     :return: total QoE, accuracy QoE, delay QoE
     """
-    acc_qoe = calculate_acc_qoe(req_accuracy, probability)
-    delay_qoe = calculate_delay_qoe(req_delay, compute_time)
+    acc_qoe = min(1.0, req_accuracy / probability)
+    delay_qoe = min(1.0, req_delay / compute_time)
     return 0.5 * acc_qoe + 0.5 * delay_qoe, acc_qoe, delay_qoe
 
-
-def calculate_acc_qoe(req_acc, provided_acc):
-    """
-    Measures the accuracy QoE between two values.
-    :param x:
-    :param y:
-    :return:
-    """
-    # dxy = np.abs(req_acc-provided_acc)/np.max((req_acc, provided_acc))
-    return min(1.0, provided_acc / req_acc)
-
-
-def calculate_delay_qoe(req_delay, provided_delay):
-    """
-    Measures the delay QoE between two values.
-    :param x:
-    :param y:
-    :return:
-    """
-    # dxy = np.abs(req_delay-provided_delay)/np.max((req_delay, provided_delay))
-    return min(1.0, req_delay / provided_delay)
-
-
-def similarity(x, y):
-    """
-    Measures the similarity between two values.
-    :param x:
-    :param y:
-    :return:
-    """
-    dxy = np.abs(x - y) / np.max((x, y))
-    return float(dxy)
 
 
 def process_only_file(file):

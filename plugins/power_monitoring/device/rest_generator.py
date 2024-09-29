@@ -57,20 +57,6 @@ def parse_data_file(file):
     return data
 
 
-def get_device_data(data, device_name):
-    """
-    Filters the given dataset by device name and returns the corresponding data
-    Args:
-        data:
-        device_name:
-
-    Returns:
-
-    """
-    return data
-    # return data[np.where(data[:, 4] == device_name)]
-
-
 def get_json_requests(dataset):
   """
   Given a set of requests, converts them into json format and returns the dataset
@@ -124,15 +110,7 @@ def split_data_by_timestamp(data):
 
 
 def main():
-    """
-    Run the generator for a given device
-    Returns:
-
-    """
-    # get the device input data
-    data_file = parse_data_file(DATA_FILE)
-    device_data = get_device_data(data_file, DEVICE_NAME)
-    # split data by timestamp
+    device_data = parse_data_file(DATA_FILE)
     split_data = split_data_by_timestamp(device_data)
 
     # get the input images
@@ -147,17 +125,18 @@ def main():
             json_requests = get_json_requests(np.asarray(split_data[split_idx]))
 
             # send each request along wih an image from the IMAGENET data
-            for k in range(json_requests.shape[0]):
+            for k in range(70):
                 filename, file_location, payload = images_raspi_1[k], image_paths[k], json_requests[k]
+
                 payload['ground_truth'] = filename.split('.')[0]
                 response, r_time = send_request(filename, file_location, payload)
 
-            print("Signaling split end after {} requests!".format(len(split_data[split_idx])))
+            print("Signaling split end after {} requests!".format(70))
             signal_split_end()
             time.sleep(5)
             total_splits += 1
 
-            if total_splits == 20:
+            if total_splits == 50:
                 print("{0} rounds sent!".format(i + 1))
                 break
 
