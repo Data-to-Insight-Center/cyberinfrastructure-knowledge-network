@@ -1,11 +1,12 @@
 import subprocess
 import time
-
+import os
 from jtop import jtop
+from dotenv import load_dotenv
 
-# Set up logging path and filename
-POWER_CSV = "/logs/power.csv"
-CONTAINER_NAME = "ckn-daemon"
+load_dotenv(".env")
+POWER_CSV = os.getenv('POWER_CSV', '/logs/power.csv')
+CONTAINER_NAME = os.getenv('CONTAINER_NAME', 'ckn-daemon')
 
 def convert_memory_to_bytes(mem_str):
     """
@@ -103,23 +104,21 @@ def read_stats(jetson):
     """
     Read power stats from jtop and correlate them with CPU/GPU usage of a specific PID.
     """
-    # Get power data
-    data = jetson.power
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+
+    cpu_power = jetson.power['rail']['POM_5V_CPU']
+    gpu_power = jetson.power['rail']['POM_5V_GPU']
+    total_power = jetson.power['tot']
 
     cpu_usage = get_container_cpu_percentage(CONTAINER_NAME)
     memory_usage = get_container_memory_usage(CONTAINER_NAME)
 
-    # Access CPU and GPU power from the correct keys in 'rail'
-    if 'POM_5V_CPU' in data['rail'] and 'POM_5V_GPU' in data['rail']:
-        cpu_power = round(data['rail']['POM_5V_CPU']['power'] * cpu_usage, 2) # Estimate CPU power for the PID
-    else:
-        return
-
-    timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-
     # Write data to csv
     with open(POWER_CSV, 'a') as f:
-        f.write(f"{timestamp}, {cpu_power}, {cpu_usage}, {memory_usage}, {data['rail']['POM_5V_CPU']['power']}, {data['rail']['POM_5V_GPU']['power']}, {data['tot']['power']}\n")
+        f.write(f"{timestamp}, {cpu_usage}, {memory_usage}, {cpu_power['volt']}, {cpu_power['curr']}, "
+                f"{cpu_power['power']}, {cpu_power['avg']}, {gpu_power['volt']}, {gpu_power['curr']}, "
+                f"{gpu_power['power']}, {gpu_power['avg']}, {total_power['volt']}, {total_power['curr']}, "
+                f"{total_power['power']}, {total_power['avg']}\n")
 
 
 def jtop_measure():

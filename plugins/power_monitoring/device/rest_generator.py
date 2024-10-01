@@ -123,15 +123,20 @@ def main():
         for split_idx in range(len(split_data)):
             # convert each split to json requests
             json_requests = get_json_requests(np.asarray(split_data[split_idx]))
+            requests_count = json_requests.shape[0]
+
+            if requests_count < 500:
+                continue
+            requests_count = 500
 
             # send each request along wih an image from the IMAGENET data
-            for k in range(70):
+            for k in range(requests_count):
                 filename, file_location, payload = images_raspi_1[k], image_paths[k], json_requests[k]
 
                 payload['ground_truth'] = filename.split('.')[0]
                 response, r_time = send_request(filename, file_location, payload)
 
-            print("Signaling split end after {} requests!".format(70))
+            print("Signaling split end after {} requests!".format(requests_count))
             signal_split_end()
             time.sleep(5)
             total_splits += 1

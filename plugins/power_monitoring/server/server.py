@@ -1,29 +1,31 @@
 import csv
-import logging
+import json
 import os
 import time
 from datetime import datetime
-import json
-import numpy as np
-from flask import Flask, flash, request, redirect, jsonify
+
 from confluent_kafka import Producer
-from model import predict, pre_process, model_store
 from dotenv import load_dotenv
+from flask import Flask, flash, request, redirect, jsonify
 from werkzeug.utils import secure_filename
 
+from model import predict, pre_process, model_store
+
 load_dotenv(".env")
-log = logging.getLogger('werkzeug')
-log.setLevel(logging.ERROR)
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = './uploads'
 SERVER_ID = os.getenv('SERVER_ID', 'd2iedgeai3')
-KAFKA_TOPIC = os.getenv('CKN_KAFKA_TOPIC', 'power_monitoring')
-KAFKA_BROKER = os.getenv('CKN_KAFKA_BROKER', '172.18.0.5:29092')
-RESULTS_CSV = os.getenv('RESULTS_CSV', './QoE_predictive.csv')
-TIMES_CSV = os.getenv('TIMES_CSV', './times.csv')
+KAFKA_TOPIC = os.getenv('CKN_KAFKA_TOPIC', 'ckn-qoe')
+KAFKA_BROKER = os.getenv('CKN_KAFKA_BROKER', '10.20.39.102:9092')
+RESULTS_CSV = os.getenv('RESULTS_CSV', '/logs/results.csv')
 
 producer = Producer({'bootstrap.servers': KAFKA_BROKER})
+
+def delivery_report(err, msg):
+    if err is not None:
+        print(f"Message delivery failed: {err}")
+
 @app.route("/")
 def home():
     """
@@ -164,33 +166,25 @@ def process_w_qoe(file, data):
                  'model': current_model_id, 'timestamp': timestamp, 'accuracy': accuracy, 'ground_truth': ground_truth}
 
     pub_start_time = time.time()
-    producer.produce(KAFKA_TOPIC, json.dumps(qoe_event))
+    producer.produce(KAFKA_TOPIC, json.dumps(qoe_event), callback=delivery_report)
     producer.flush(timeout=1)
     pub_time = time.time() - pub_start_time
 
     total_time = time.time() - total_start_time
 
-    perf_event = {'compute_time': compute_time, 'pub_time': pub_time, 'total_time': total_time}
+    qoe_event['pub_time'] = pub_time
+    qoe_event['total_time'] = total_time
     write_csv_file(qoe_event, RESULTS_CSV)
-    write_perf_file(perf_event, TIMES_CSV)
 
     return jsonify({"STATUS": "OK"})
 
 def write_csv_file(data, filename):
     csv_columns = data.keys()
-
     with open(filename, "a") as file:
         csvwriter = csv.DictWriter(file, csv_columns)
         # csvwriter.writeheader()
         csvwriter.writerows([data])
 
-
-def write_perf_file(data, filename):
-    csv_columns = data.keys()
-    with open(filename, "a") as file:
-        csvwriter = csv.DictWriter(file, csv_columns)
-        # csvwriter.writeheader()
-        csvwriter.writerows([data])
 
 
 def process_qoe(probability, compute_time, req_delay, req_accuracy):
