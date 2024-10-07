@@ -4,9 +4,9 @@ FROM python:3.9-slim
 WORKDIR /app
 
 # Install system dependencies and Docker CLI
-RUN apt-get update \
-    && apt-get install -y docker.io \
-    && rm -rf /var/lib/apt/lists/*  # Clean up APT when done so it doesnt use up extra space
+#RUN apt-get update \
+#    && apt-get install -y docker.io \
+#    && rm -rf /var/lib/apt/lists/*  # Clean up APT when done so it doesnt use up extra space
 
 # Copy all files and folders from current directory to /app in container
 COPY . .
@@ -21,7 +21,4 @@ RUN mkdir -p /app/uploads
 EXPOSE 8080
 
 # Create a script to run both server.py and power_logger.py
-RUN echo '#!/bin/bash\npython -u /app/server.py &\npython -u /app/power_logger.py' > /app/start.sh && chmod +x /app/start.sh
-
-# Use the script as the entry point
-ENTRYPOINT ["/app/start.sh"]
+ENTRYPOINT [ "python", "-u", "/app/server.py"]

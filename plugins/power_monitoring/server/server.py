@@ -2,8 +2,11 @@ import csv
 import json
 import os
 import time
+import threading
 from datetime import datetime
 
+from queue import Queue
+from jtop import jtop
 from confluent_kafka import Producer
 from dotenv import load_dotenv
 from flask import Flask, flash, request, redirect, jsonify
@@ -133,6 +136,20 @@ def upload_predict():
             return process_only_file(file)
     return ''
 
+def measure_average_power(jetson, stop_event, result_queue):
+    total_power = 0.0
+    num_samples = 0
+    sample_interval = 0.1
+
+    while not stop_event.is_set():
+        cpu_power_sample = jetson.power['rail']['POM_5V_CPU']['volt']
+        total_power += cpu_power_sample
+        num_samples += 1
+        time.sleep(sample_interval)
+
+    average_power = total_power / num_samples if num_samples > 0 else 0
+    result_queue.put(average_power)
+
 
 def process_w_qoe(file, data):
     """
@@ -140,43 +157,48 @@ def process_w_qoe(file, data):
     :param file:
     :return: {prediction, compute_time}
     """
-    total_start_time = time.time()
-
+    total_start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
     filename = save_file(file)
     req_acc = float(data['accuracy'])
     req_delay = float(data['delay'])
     ground_truth = data['ground_truth']
 
-    # Computation
-    compute_start_time = time.time()
-    preprocessed_input = pre_process(filename)
-    prediction, probability = predict(preprocessed_input)
-    compute_end_time = time.time()
-    compute_time = compute_end_time - compute_start_time
+    with jtop() as jetson:
+        if jetson.ok():
+            stop_event = threading.Event()
+            result_queue = Queue()
 
+            power_thread = threading.Thread(target=measure_average_power, args=(jetson, stop_event, result_queue))
+            power_thread.start()
+
+            try:
+                compute_start_time = time.time()
+                preprocessed_input = pre_process(filename)
+                prediction, probability = predict(preprocessed_input)
+                compute_end_time = time.time()
+            finally:
+                stop_event.set()
+                power_thread.join()
+
+            cpu_power = result_queue.get() if not result_queue.empty() else 0
+
+    compute_time = compute_end_time - compute_start_time
     accuracy = int(ground_truth == prediction)
     qoe, acc_qoe, delay_qoe = process_qoe(probability, compute_time, req_delay, req_acc)
-    current_model_id = model_store.get_current_model_id()
+    model = model_store.get_current_model_id()
+    total_end_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
 
-    timestamp = datetime.fromtimestamp(compute_end_time).strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+    qoe_event = {
+        'prediction': prediction, 'compute_time': compute_time, 'probability': probability, 'accuracy': accuracy,
+        'total_qoe': qoe, 'accuracy_qoe': acc_qoe, 'delay_qoe': delay_qoe, 'cpu_power': cpu_power,
+        'model': model, 'start_time': total_start_time, 'end_time': total_end_time,
+    }
 
-    qoe_event = {'server_id': SERVER_ID, 'service_id': data['service_id'], 'client_id': data['client_id'],
-                 'prediction': prediction, 'compute_time': compute_time, 'probability': probability, 'total_qoe': qoe,
-                 'accuracy_qoe': acc_qoe, 'delay_qoe': delay_qoe, 'req_acc': req_acc, 'req_delay': req_delay,
-                 'model': current_model_id, 'timestamp': timestamp, 'accuracy': accuracy, 'ground_truth': ground_truth}
-
-    pub_start_time = time.time()
     producer.produce(KAFKA_TOPIC, json.dumps(qoe_event), callback=delivery_report)
     producer.flush(timeout=1)
-    pub_time = time.time() - pub_start_time
-
-    total_time = time.time() - total_start_time
-
-    qoe_event['pub_time'] = pub_time
-    qoe_event['total_time'] = total_time
-    write_csv_file(qoe_event, RESULTS_CSV)
 
     return jsonify({"STATUS": "OK"})
+
 
 def write_csv_file(data, filename):
     csv_columns = data.keys()
