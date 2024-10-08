@@ -136,39 +136,28 @@ def upload_predict():
             return process_only_file(file)
     return ''
 
-def measure_average_power(jetson, stop_event, result_queue):
-    total_power = 0.0
-    num_samples = 0
-    sample_interval = 0.1
-
+def measure_average_power(jetson, stop_event, cpu_power_queue):
+    cpu_power = 0.0
     while not stop_event.is_set():
-        cpu_power_sample = jetson.power['rail']['POM_5V_CPU']['volt']
-        total_power += cpu_power_sample
-        num_samples += 1
-        time.sleep(sample_interval)
+        cpu_power += jetson.power['rail']['POM_5V_CPU']['volt']
+        time.sleep(0.1)
 
-    average_power = total_power / num_samples if num_samples > 0 else 0
-    result_queue.put(average_power)
+    cpu_power_queue.put(cpu_power)
 
 
 def process_w_qoe(file, data):
     """
-    Saves the file into the uploads directory and returns the prediction and calculates and pushes the qoe parameters.
-    :param file:
-    :return: {prediction, compute_time}
+    Processes the image with the QoE parameters.
     """
     total_start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
     filename = save_file(file)
-    req_acc = float(data['accuracy'])
-    req_delay = float(data['delay'])
-    ground_truth = data['ground_truth']
 
     with jtop() as jetson:
         if jetson.ok():
             stop_event = threading.Event()
-            result_queue = Queue()
+            cpu_power_queue = Queue()
 
-            power_thread = threading.Thread(target=measure_average_power, args=(jetson, stop_event, result_queue))
+            power_thread = threading.Thread(target=measure_average_power, args=(jetson, stop_event, cpu_power_queue))
             power_thread.start()
 
             try:
@@ -180,22 +169,27 @@ def process_w_qoe(file, data):
                 stop_event.set()
                 power_thread.join()
 
-            cpu_power = result_queue.get() if not result_queue.empty() else 0
+            cpu_power = cpu_power_queue.get() if not cpu_power_queue.empty() else 0
 
     compute_time = compute_end_time - compute_start_time
-    accuracy = int(ground_truth == prediction)
-    qoe, acc_qoe, delay_qoe = process_qoe(probability, compute_time, req_delay, req_acc)
+    accuracy = int(data['ground_truth'] == prediction)
+    qoe, acc_qoe, delay_qoe = process_qoe(probability, compute_time, float(data['delay']), float(data['accuracy']))
     model = model_store.get_current_model_id()
-    total_end_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
 
-    qoe_event = {
-        'prediction': prediction, 'compute_time': compute_time, 'probability': probability, 'accuracy': accuracy,
-        'total_qoe': qoe, 'accuracy_qoe': acc_qoe, 'delay_qoe': delay_qoe, 'cpu_power': cpu_power,
-        'model': model, 'start_time': total_start_time, 'end_time': total_end_time,
-    }
+    qoe_event = {'server_id': SERVER_ID, 'service_id': data['service_id'], 'client_id': data['client_id'],
+                 'ground_truth': data['ground_truth'], 'req_delay': data['delay'], 'req_acc': data['accuracy'],
+                 'prediction': prediction, 'compute_time': compute_time, 'probability': probability,
+                 'accuracy': accuracy, 'total_qoe': qoe, 'accuracy_qoe': acc_qoe, 'delay_qoe': delay_qoe,
+                 'cpu_power': cpu_power, 'model': model, 'start_time': total_start_time,
+                 'end_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]}
 
+    pub_start_time = time.time()
     producer.produce(KAFKA_TOPIC, json.dumps(qoe_event), callback=delivery_report)
     producer.flush(timeout=1)
+    qoe_event['pub_time'] = time.time() - pub_start_time
+
+    # Write to csv
+    write_csv_file(qoe_event, RESULTS_CSV)
 
     return jsonify({"STATUS": "OK"})
 

@@ -22,17 +22,11 @@ if __name__ == '__main__':
     consumer.subscribe([topic])
 
     csv_file = f"results/2024-10-07.csv"
-
-    # Define the CSV headers
-    csv_headers = [
-        "prediction", "compute_time", "probability", "accuracy",
-        "total_qoe", "accuracy_qoe", "delay_qoe", "cpu_power",
-        "model", "start_time", "end_time"
-    ]
+    fieldnames = ['server_id', 'service_id', 'client_id', 'ground_truth', 'req_delay', 'req_acc', 'prediction', 'compute_time', 'probability', 'accuracy', 'total_qoe', 'accuracy_qoe', 'delay_qoe', 'cpu_power', 'model', 'start_time', 'end_time']
 
     # Open the CSV file and set up the CSV writer
     with open(csv_file, mode='w', newline='') as file:
-        writer = csv.DictWriter(file, fieldnames=csv_headers)
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()  # Write the headers to the CSV file
 
         # Poll for new messages from Kafka and write them to the CSV
