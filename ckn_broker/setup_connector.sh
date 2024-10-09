@@ -23,6 +23,7 @@ curl -X POST -H "Content-Type: application/json" --data @/app/neo4jsink-oracle-e
 curl -X POST -H "Content-Type: application/json" --data @/app/neo4jsink-oracle-alerts-connector.json http://localhost:8083/connectors
 curl -X POST -H "Content-Type: application/json" --data @/app/neo4jsink-compiler-data-connector.json http://localhost:8083/connectors
 curl -X POST -H "Content-Type: application/json" --data @/app/neo4jsink-cameratraps-power-summary-connector.json http://localhost:8083/connectors
+curl -X POST -H "Content-Type: application/json" --data @/app/neo4jsink-ckn-qoe-connector.json http://localhost:8083/connectors
 
 echo "Connector setup completed"
 

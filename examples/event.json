@@ -1,18 +1,19 @@
 {
-  "device_id": "example_device",
-  "experiment_id": "example_experiment_42",
-  "user_id": "example_user",
-  "model_id": "example_model",
-  "UUID": "example_uuid",
-  "image_name": "sample_image.png",
-  "ground_truth": "cat",
-  "image_count": 1,
-  "image_receiving_timestamp": "2024-09-05T12:00:00Z",
-  "image_scoring_timestamp": "2024-09-05T12:00:01Z",
-  "image_store_delete_time": "2024-09-05T12:00:02Z",
-  "image_decision": "Save",
-  "flattened_scores": [
-    {"label": "cat", "probability": 0.95},
-    {"label": "dog", "probability": 0.05}
-  ]
+  "server_id": "d2iedgeai3",
+  "service_id": "imagenet_image_classification",
+  "client_id": "raspi-1",
+  "ground_truth": "african_chameleon",
+  "req_delay": "0.049",
+  "req_acc": "0.852",
+  "prediction": "african_chameleon",
+  "compute_time": 2.7392568588256836,
+  "probability": 0.9859079718589783,
+  "accuracy": 1,
+  "total_qoe": 0.4410330421296957,
+  "accuracy_qoe": 0.8641780209906528,
+  "delay_qoe": 0.017888063268738607,
+  "cpu_power": 142904.0,
+  "model": "550e8400-e29b-41d4-a716-446655440000",
+  "start_time": "2024-10-08 13:27:23.587",
+  "end_time": "2024-10-08 13:27:27.358"
 }
