@@ -20,10 +20,4 @@ env/
 ckn_kg/neo4j/
 neo4j/
 
-plugins/power_monitoring/server/uploads
-plugins/power_monitoring/device/data
-
-plugins/power_monitoring/cloud/results
-plugins/power_monitoring/server/results.csv
-plugins/power_monitoring/server/power.csv
-/plugins/power_monitoring/server/results/
+plugins/power_monitoring
