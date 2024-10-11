@@ -1,19 +1,18 @@
 {
   "name": "PostgresSinkConnector",
   "config": {
-    "connector.class": "io.aiven.connect.jdbc.JdbcSinkConnector",
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "topics": "ckn_raw",
     "connection.url": "jdbc:postgresql://postgres:5432/mydatabase",
     "connection.user": "myuser",
     "connection.password": "mypassword",
-    "topics": "ckn-qoe",
-    "table.name.format": "my_postgres_table",
-    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
     "value.converter": "org.apache.kafka.connect.json.JsonConverter",
-    "key.converter.schemas.enable": false,
+    "table.name.format": "ckn_raw",
     "value.converter.schemas.enable": true,
-    "insert.mode": "insert",
+    "delete.enabled":false,
     "auto.create": true,
-    "auto.evolve": true,
-    "pk.mode": "none"
+    "auto.evolve": false,
+    "errors.tolerance": "all",
+    "errors.log.enable": true
   }
 }

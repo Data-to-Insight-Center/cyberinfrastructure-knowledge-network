@@ -1,10 +1,7 @@
 #!/bin/bash
 
 echo "Installing connector plugins"
-confluent-hub install confluentinc/kafka-connect-jdbc:10.6.2
-
-echo "Verifying installed plugins"
-curl -s http://localhost:8083/connector-plugins | jq
+confluent-hub install --no-prompt confluentinc/kafka-connect-jdbc:latest
 
 echo "Launching Kafka Connect worker"
 /etc/confluent/docker/run &
