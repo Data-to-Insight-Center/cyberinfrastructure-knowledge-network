@@ -1,7 +1,7 @@
 {
   "name": "Neo4jSinkConnectorDeployment",
   "config": {
-    "topics": "ckn-model-swap",
+    "topics": "ckn_model_change",
     "connector.class": "streams.kafka.connect.sink.Neo4jSinkConnector",
     "errors.retry.timeout": "-1",
     "errors.retry.delay.max.ms": "1000",
@@ -15,11 +15,17 @@
     "neo4j.server.uri": "bolt://neo4j:7687",
     "neo4j.authentication.basic.username": "neo4j",
     "neo4j.authentication.basic.password": "PWD_HERE",
-    "neo4j.topic.cypher.ckn-model-swap": "
+    "neo4j.topic.cypher.ckn_model_change": "
       MERGE (server:Server {server_id: event.server_id})
       MERGE (model:Model {model_id: event.model_id})
       MERGE (depl:Deployment {deployment_id: event.deployment_id})
-        ON CREATE SET depl.timestamp = event.timestamp
+        ON CREATE SET
+          depl.timestamp = event.timestamp,
+          depl.status = event.status,
+          depl.avg_accuracy = COALESCE(event.avg_accuracy, NULL),
+          depl.avg_qoe = COALESCE(event.avg_qoe, NULL),
+          depl.avg_cpu_power = COALESCE(event.avg_cpu_power, NULL),
+          depl.avg_gpu_power = COALESCE(event.avg_gpu_power, NULL)
       MERGE (server)-[:DEPLOYED]->(depl)
       MERGE (model)-[:DEPLOYED_IN]->(depl)
     "

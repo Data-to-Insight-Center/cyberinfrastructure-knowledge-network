@@ -3,6 +3,8 @@ import json
 import os
 import time
 import threading
+import logging
+import uuid
 from datetime import datetime
 
 from queue import Queue
@@ -19,7 +21,8 @@ load_dotenv(".env")
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = './uploads'
 SERVER_ID = os.getenv('SERVER_ID', 'd2iedgeai3')
-KAFKA_TOPIC = os.getenv('CKN_KAFKA_TOPIC', 'ckn-qoe')
+RAW_EVENT_TOPIC = os.getenv('RAW_EVENT_TOPIC', 'ckn_raw')
+MODEL_CHANGE_TOPIC = os.getenv('MODEL_CHANGE_TOPIC', 'ckn_model_change')
 KAFKA_BROKER = os.getenv('CKN_KAFKA_BROKER', '10.20.39.102:9092')
 RESULTS_CSV = os.getenv('RESULTS_CSV', '/logs/results.csv')
 
@@ -27,8 +30,9 @@ producer = Producer({'bootstrap.servers': KAFKA_BROKER})
 
 def delivery_report(err, msg):
     if err is not None:
-        print(f"Message delivery failed: {err}")
-
+        logging.error(f"Message delivery failed: {err}")
+    else:
+        logging.info(f"Message delivered to {msg.topic()} [{msg.partition()}] at offset {msg.offset()}")
 @app.route("/")
 def home():
     """
@@ -71,12 +75,17 @@ def changeTimestep():
     send_model_change(new_model_id)
     return 'OK'
 
-
 def send_model_change(new_model):
     # send the model changed info to the knowledge graph
-    model_change = {"server_id": SERVER_ID, "model": new_model}
-    # model_producer.send_request(model_change, key=SERVER_ID)
-    print("Model change to {} sent to CKN".format(new_model))
+    event = {"server_id": SERVER_ID, "model_id": new_model, "status": "start", "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]}
+
+    # Create a UUID based on the combined fields
+    combined_string = f"{event['server_id']}_{event['model_id']}_{event['timestamp']}"
+    event["deployment_id"] = str(uuid.uuid5(uuid.NAMESPACE_DNS, combined_string))
+
+    producer.produce(MODEL_CHANGE_TOPIC, json.dumps(event), callback=delivery_report, key=event["deployment_id"])
+    producer.flush(timeout=1)
+    logging.info("Model change to {} sent to CKN".format(new_model))
 
 
 def check_file_extension(filename):
@@ -136,13 +145,21 @@ def upload_predict():
             return process_only_file(file)
     return ''
 
-def measure_average_power(jetson, stop_event, cpu_power_queue):
+
+def measure_average_power(jetson, stop_event, cpu_power_queue, gpu_power_queue, tot_power_queue):
     cpu_power = 0.0
+    gpu_power = 0.0
+    total_power = 0.0
+
     while not stop_event.is_set():
         cpu_power += jetson.power['rail']['POM_5V_CPU']['volt']
+        gpu_power += jetson.power['rail']['POM_5V_GPU']['volt']
+        total_power += jetson.power['tot']['power']
         time.sleep(0.1)
 
     cpu_power_queue.put(cpu_power)
+    gpu_power_queue.put(gpu_power)
+    tot_power_queue.put(total_power)
 
 
 def process_w_qoe(file, data):
@@ -156,8 +173,10 @@ def process_w_qoe(file, data):
         if jetson.ok():
             stop_event = threading.Event()
             cpu_power_queue = Queue()
+            gpu_power_queue = Queue()
+            tot_power_queue = Queue()
 
-            power_thread = threading.Thread(target=measure_average_power, args=(jetson, stop_event, cpu_power_queue))
+            power_thread = threading.Thread(target=measure_average_power, args=(jetson, stop_event, cpu_power_queue, gpu_power_queue, tot_power_queue))
             power_thread.start()
 
             try:
@@ -170,26 +189,56 @@ def process_w_qoe(file, data):
                 power_thread.join()
 
             cpu_power = cpu_power_queue.get() if not cpu_power_queue.empty() else 0
+            gpu_power = gpu_power_queue.get() if not gpu_power_queue.empty() else 0
+            total_power = tot_power_queue.get() if not tot_power_queue.empty() else 0
 
     compute_time = compute_end_time - compute_start_time
     accuracy = int(data['ground_truth'] == prediction)
-    qoe, acc_qoe, delay_qoe = process_qoe(probability, compute_time, float(data['delay']), float(data['accuracy']))
+    req_delay, req_acc = float(data['delay']), float(data['accuracy'])
+    qoe, acc_qoe, delay_qoe = process_qoe(probability, compute_time, req_delay, req_acc)
     model = model_store.get_current_model_id()
 
-    qoe_event = {'server_id': SERVER_ID, 'service_id': data['service_id'], 'client_id': data['client_id'],
-                 'ground_truth': data['ground_truth'], 'req_delay': data['delay'], 'req_acc': data['accuracy'],
-                 'prediction': prediction, 'compute_time': compute_time, 'probability': probability,
-                 'accuracy': accuracy, 'total_qoe': qoe, 'accuracy_qoe': acc_qoe, 'delay_qoe': delay_qoe,
-                 'cpu_power': cpu_power, 'model': model, 'start_time': total_start_time,
-                 'end_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]}
+    payload = {'server_id': SERVER_ID, 'service_id': data['service_id'], 'client_id': data['client_id'],
+               'ground_truth': data['ground_truth'], 'req_delay': req_delay, 'req_acc': req_acc,
+               'prediction': prediction, 'compute_time': compute_time, 'probability': probability,
+               'accuracy': accuracy, 'total_qoe': qoe, 'accuracy_qoe': acc_qoe, 'delay_qoe': delay_qoe,
+               'cpu_power': cpu_power, 'gpu_power': gpu_power, 'total_power': total_power,'model': model,
+               'start_time': total_start_time, 'end_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]}
+
+    schema = {
+        "type": "struct",
+        "fields": [
+            {"type": "string", "optional": True, "field": "server_id"},
+            {"type": "string", "optional": True, "field": "service_id"},
+            {"type": "string", "optional": True, "field": "client_id"},
+            {"type": "string", "optional": True, "field": "ground_truth"},
+            {"type": "float", "optional": True, "field": "req_delay"},
+            {"type": "float", "optional": True, "field": "req_acc"},
+            {"type": "string", "optional": True, "field": "prediction"},
+            {"type": "float", "optional": True, "field": "compute_time"},
+            {"type": "float", "optional": True, "field": "probability"},
+            {"type": "int32", "optional": True, "field": "accuracy"},
+            {"type": "float", "optional": True, "field": "total_qoe"},
+            {"type": "float", "optional": True, "field": "accuracy_qoe"},
+            {"type": "float", "optional": True, "field": "delay_qoe"},
+            {"type": "float", "optional": True, "field": "cpu_power"},
+            {"type": "float", "optional": True, "field": "gpu_power"},
+            {"type": "float", "optional": True, "field": "total_power"},
+            {"type":"string",  "optional": True, "field": "model"},
+            {"type":"string", "optional": True, "field": "start_time"},
+            {"type":"string", "optional": True, "field": "end_time"}
+        ],
+        "optional": False,
+        "name": "mydatabase"
+    }
 
     pub_start_time = time.time()
-    producer.produce(KAFKA_TOPIC, json.dumps(qoe_event), callback=delivery_report)
+    producer.produce(RAW_EVENT_TOPIC, json.dumps({'schema': schema, 'payload': payload}), callback=delivery_report, key=payload["client_id"])
     producer.flush(timeout=1)
-    qoe_event['pub_time'] = time.time() - pub_start_time
+    payload['pub_time'] = time.time() - pub_start_time
 
     # Write to csv
-    write_csv_file(qoe_event, RESULTS_CSV)
+    write_csv_file(payload, RESULTS_CSV)
 
     return jsonify({"STATUS": "OK"})
 
@@ -200,7 +249,6 @@ def write_csv_file(data, filename):
         csvwriter = csv.DictWriter(file, csv_columns)
         # csvwriter.writeheader()
         csvwriter.writerows([data])
-
 
 
 def process_qoe(probability, compute_time, req_delay, req_accuracy):
@@ -215,7 +263,6 @@ def process_qoe(probability, compute_time, req_delay, req_accuracy):
     acc_qoe = min(1.0, req_accuracy / probability)
     delay_qoe = min(1.0, req_delay / compute_time)
     return 0.5 * acc_qoe + 0.5 * delay_qoe, acc_qoe, delay_qoe
-
 
 
 def process_only_file(file):

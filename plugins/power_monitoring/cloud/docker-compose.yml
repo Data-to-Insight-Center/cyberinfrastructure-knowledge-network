@@ -91,7 +91,7 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_CREATE_TOPICS: "ckn-qoe:1:1, ckn_raw:1:1"
+      KAFKA_CREATE_TOPICS: "ckn_model_change:1:1, ckn_raw:1:1"
     networks:
       - ckn-network
 
@@ -129,19 +129,19 @@ services:
       - ckn-network
 
   # CKN Dashboard Service
-#  ckn-dashboard:
-#    image: iud2i/ckn-analytics-dashboard:latest
-#    container_name: dashboard
-#    ports:
-#      - "8502:8502"
-#    environment:
-#      - NEO4J_URI=bolt://neo4j:7687
-#      - NEO4J_USER=neo4j
-#      - NEO4J_PWD=PWD_HERE
-#      - OPENAI_API_KEY=''
-#      - PATRA_SERVER=''
-#    networks:
-#      - ckn-network
+  ckn-dashboard:
+    image: iud2i/ckn-analytics-dashboard:latest
+    container_name: dashboard
+    ports:
+      - "8502:8502"
+    environment:
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PWD=PWD_HERE
+      - OPENAI_API_KEY=''
+      - PATRA_SERVER=''
+    networks:
+      - ckn-network
 
 # Define Networks and Volumes
 networks:
