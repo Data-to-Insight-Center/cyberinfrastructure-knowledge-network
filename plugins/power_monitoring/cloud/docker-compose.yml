@@ -28,9 +28,9 @@ services:
   postgres:
     image: postgres:14
     environment:
-      POSTGRES_DB: mydatabase
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: ckn
+      POSTGRES_USER: d2i
+      POSTGRES_PASSWORD: iu
 #    volumes:
 #      - postgres-data:/var/lib/postgresql/data
     ports:
@@ -42,8 +42,8 @@ services:
   pgadmin:
     image: dpage/pgadmin4
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_EMAIL: neelk@iu.edu
+      PGADMIN_DEFAULT_PASSWORD: d2i
       PGADMIN_LISTEN_PORT: 80
     ports:
       - "8080:80"
@@ -86,7 +86,7 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_CREATE_TOPICS: "ckn_model_change:1:1, ckn_raw:1:1"
+      KAFKA_CREATE_TOPICS: "ckn_raw:1:1, ckn_start_deployment:1:1, ckn_stop_deployment:1:1"
     networks:
       - ckn-network
 

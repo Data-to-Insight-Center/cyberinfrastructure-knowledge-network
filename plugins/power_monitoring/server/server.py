@@ -3,7 +3,6 @@ import json
 import os
 import time
 import threading
-import logging
 import uuid
 from datetime import datetime
 
@@ -21,18 +20,22 @@ load_dotenv(".env")
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = './uploads'
 SERVER_ID = os.getenv('SERVER_ID', 'd2iedgeai3')
-RAW_EVENT_TOPIC = os.getenv('RAW_EVENT_TOPIC', 'ckn_raw')
-MODEL_CHANGE_TOPIC = os.getenv('MODEL_CHANGE_TOPIC', 'ckn_model_change')
+
 KAFKA_BROKER = os.getenv('CKN_KAFKA_BROKER', '10.20.39.102:9092')
 RESULTS_CSV = os.getenv('RESULTS_CSV', '/logs/results.csv')
 
+RAW_EVENT_TOPIC = os.getenv('RAW_EVENT_TOPIC', 'ckn_raw')
+START_DEPLOYMENT_TOPIC = os.getenv('START_DEPLOYMENT_TOPIC', 'ckn_start_deployment')
+STOP_DEPLOYMENT_TOPIC = os.getenv('STOP_DEPLOYMENT_TOPIC', 'ckn_stop_deployment')
+
 producer = Producer({'bootstrap.servers': KAFKA_BROKER})
+previous_deployment_id = None
 
 def delivery_report(err, msg):
     if err is not None:
-        logging.error(f"Message delivery failed: {err}")
+        print(f"Message delivery failed: {err}")
     else:
-        logging.info(f"Message delivered to {msg.topic()} [{msg.partition()}] at offset {msg.offset()}")
+        print(f"Message delivered to {msg.topic()} [{msg.partition()}] at offset {msg.offset()}")
 @app.route("/")
 def home():
     """
@@ -75,17 +78,39 @@ def changeTimestep():
     send_model_change(new_model_id)
     return 'OK'
 
-def send_model_change(new_model):
-    # send the model changed info to the knowledge graph
-    event = {"server_id": SERVER_ID, "model_id": new_model, "status": "start", "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]}
+def send_model_change(new_model_id):
+    global previous_deployment_id
 
-    # Create a UUID based on the combined fields
-    combined_string = f"{event['server_id']}_{event['model_id']}_{event['timestamp']}"
-    event["deployment_id"] = str(uuid.uuid5(uuid.NAMESPACE_DNS, combined_string))
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+    # Generate a unique deployment ID for the new deployment
+    combined_string = f"{SERVER_ID}_{new_model_id}_{timestamp}"
+    deployment_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, combined_string))
 
-    producer.produce(MODEL_CHANGE_TOPIC, json.dumps(event), callback=delivery_report, key=event["deployment_id"])
+    # Prepare the event with the new and previous deployment ID
+    start_event = {
+        "server_id": SERVER_ID,
+        "service_id": "imagenet_image_classification",
+        "device_id": "d2iedgeai2",
+        "deployment_id": deployment_id,
+        "status": "RUNNING",
+        "model_id": new_model_id,
+        "start_time": timestamp
+    }
+    producer.produce(START_DEPLOYMENT_TOPIC, json.dumps(start_event), callback=delivery_report, key=deployment_id)
     producer.flush(timeout=1)
-    logging.info("Model change to {} sent to CKN".format(new_model))
+
+    if previous_deployment_id:
+        stop_event = {
+        "deployment_id": previous_deployment_id,
+        "status": "STOPPED",
+        "stop_time": timestamp
+        }
+        producer.produce(STOP_DEPLOYMENT_TOPIC, json.dumps(stop_event), callback=delivery_report, key=previous_deployment_id)
+        producer.flush(timeout=1)
+
+    # Update the previous_deployment_id with the current deployment_id
+    previous_deployment_id = deployment_id
+
 
 
 def check_file_extension(filename):
@@ -238,7 +263,7 @@ def process_w_qoe(file, data):
     payload['pub_time'] = time.time() - pub_start_time
 
     # Write to csv
-    write_csv_file(payload, RESULTS_CSV)
+    # write_csv_file(payload, RESULTS_CSV)
 
     return jsonify({"STATUS": "OK"})
 

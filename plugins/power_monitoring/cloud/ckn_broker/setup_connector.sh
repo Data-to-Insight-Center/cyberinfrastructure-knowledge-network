@@ -36,8 +36,9 @@ echo "Launching Kafka Connect worker"
 # Wait for Kafka Connect to be ready
 wait_for_kafka_connect
 
-create_connector /app/neo4jsink-ckn-model-swap-connector.json
 create_connector /app/postgres-sink-ckn-raw-connector.json
+create_connector /app/neo4jsink-ckn-start-deployment-connector.json
+create_connector /app/neo4jsink-ckn-stop-deployment-connector.json
 
 echo "Connector setup completed"
 
