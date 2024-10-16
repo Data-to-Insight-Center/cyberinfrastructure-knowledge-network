@@ -3,9 +3,9 @@
   "config": {
     "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
     "topics": "ckn_raw",
-    "connection.url": "jdbc:postgresql://postgres:5432/ckn",
+    "connection.url": "jdbc:postgresql://postgres:5432/d2i",
     "connection.user": "d2i",
-    "connection.password": "iu",
+    "connection.password": "d2i",
     "value.converter": "org.apache.kafka.connect.json.JsonConverter",
     "table.name.format": "ckn_raw",
     "value.converter.schemas.enable": true,

@@ -1,19 +1,18 @@
-import csv
 import json
 import os
-import time
 import threading
+import time
 import uuid
 from datetime import datetime
-
 from queue import Queue
-from jtop import jtop
+
 from confluent_kafka import Producer
 from dotenv import load_dotenv
 from flask import Flask, flash, request, redirect, jsonify
-from werkzeug.utils import secure_filename
+from jtop import jtop
 
 from model import predict, pre_process, model_store
+from server_utils import save_file, process_qoe, check_file_extension
 
 load_dotenv(".env")
 
@@ -32,15 +31,20 @@ producer = Producer({'bootstrap.servers': KAFKA_BROKER})
 previous_deployment_id = None
 
 def delivery_report(err, msg):
+    """
+    Delivery report callback function.
+    :param err: Delivery error (if any).
+    :param msg: Message object.
+    """
     if err is not None:
         print(f"Message delivery failed: {err}")
     else:
         print(f"Message delivered to {msg.topic()} [{msg.partition()}] at offset {msg.offset()}")
+
 @app.route("/")
 def home():
     """
-    Home page.
-    :return:
+    Home endpoint.
     """
     return "Welcome to the SqueezeNet containerized REST server!"
 
@@ -48,7 +52,7 @@ def home():
 @app.route("/load/", methods=['GET'])
 def deploy_model():
     """
-    Loads a given model in the system.
+    Model deployment endpoint.
     """
     model_name = request.args['model_name']
     model_store.load_model(model_name)
@@ -62,23 +66,17 @@ def deploy_model():
 @app.route("/changetimestep/", methods=['GET'])
 def changeTimestep():
     """
-    Run the changing of the model evaluation
-    Returns:
-
+    Change the timestep of the model
     """
-
-    # Placement of the model
-    # new_model = random_placement()
-    # new_model = optimal_placement(avg_acc, avg_delay)
     new_model, new_model_id = model_store.load_next_model()
-
     print("Model Loaded " + str(new_model))
-
-    # send the model changed info to the knowledge graph
     send_model_change(new_model_id)
     return 'OK'
 
 def send_model_change(new_model_id):
+    """
+    Send the model change event to the Kafka topic
+    """
     global previous_deployment_id
 
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
@@ -112,22 +110,10 @@ def send_model_change(new_model_id):
     previous_deployment_id = deployment_id
 
 
-
-def check_file_extension(filename):
-    """
-    Validates the file uploaded is an image.
-    :param filename:
-    :return: if the file extension is of an image or not.
-    """
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg'}
-
-
 @app.route('/predict', methods=['POST'])
 def qoe_predict():
     """
-    Prediction endpoint with QoE parameters as input
-    Allows the images to be uploaded, pre-processed and returns the result using the designated model and saves the QoE
-    :return: {prediction, compute_time}
+    Prediction endpoint.
     """
     if request.method == 'POST':
         # if the request contains a file or not
@@ -148,30 +134,10 @@ def qoe_predict():
     return ''
 
 
-@app.route('/predict', methods=['POST'])
-def upload_predict():
-    """
-    Prediction endpoint.
-    Allows the images to be uploaded, pre-processed and returns the result using the designated model.
-    :return: {prediction, compute_time}
-    """
-    if request.method == 'POST':
-        # if the request contains a file or not
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        # if the file field is empty
-        file = request.files['file']
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-
-        if file and check_file_extension(file.filename):
-            return process_only_file(file)
-    return ''
-
-
 def measure_average_power(jetson, stop_event, cpu_power_queue, gpu_power_queue, tot_power_queue):
+    """
+    Measure the average power consumption of the CPU, GPU, and the total power consumption.
+    """
     cpu_power = 0.0
     gpu_power = 0.0
     total_power = 0.0
@@ -189,7 +155,7 @@ def measure_average_power(jetson, stop_event, cpu_power_queue, gpu_power_queue, 
 
 def process_w_qoe(file, data):
     """
-    Processes the image with the QoE parameters.
+    Process the request with QoE constraints.
     """
     total_start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
     filename = save_file(file)
@@ -223,7 +189,7 @@ def process_w_qoe(file, data):
     qoe, acc_qoe, delay_qoe = process_qoe(probability, compute_time, req_delay, req_acc)
     model = model_store.get_current_model_id()
 
-    payload = {'server_id': SERVER_ID, 'service_id': data['service_id'], 'client_id': data['client_id'],
+    payload = {'server_id': SERVER_ID, 'service_id': data['service_id'], 'device_id': data['client_id'],
                'ground_truth': data['ground_truth'], 'req_delay': req_delay, 'req_acc': req_acc,
                'prediction': prediction, 'compute_time': compute_time, 'probability': probability,
                'accuracy': accuracy, 'total_qoe': qoe, 'accuracy_qoe': acc_qoe, 'delay_qoe': delay_qoe,
@@ -235,7 +201,7 @@ def process_w_qoe(file, data):
         "fields": [
             {"type": "string", "optional": True, "field": "server_id"},
             {"type": "string", "optional": True, "field": "service_id"},
-            {"type": "string", "optional": True, "field": "client_id"},
+            {"type": "string", "optional": True, "field": "device_id"},
             {"type": "string", "optional": True, "field": "ground_truth"},
             {"type": "float", "optional": True, "field": "req_delay"},
             {"type": "float", "optional": True, "field": "req_acc"},
@@ -254,73 +220,12 @@ def process_w_qoe(file, data):
             {"type":"string", "optional": True, "field": "end_time"}
         ],
         "optional": False,
-        "name": "mydatabase"
+        "name": "d2i"
     }
 
-    pub_start_time = time.time()
-    producer.produce(RAW_EVENT_TOPIC, json.dumps({'schema': schema, 'payload': payload}), callback=delivery_report, key=payload["client_id"])
+    producer.produce(RAW_EVENT_TOPIC, json.dumps({'schema': schema, 'payload': payload}), callback=delivery_report, key=payload["device_id"])
     producer.flush(timeout=1)
-    payload['pub_time'] = time.time() - pub_start_time
-
-    # Write to csv
-    # write_csv_file(payload, RESULTS_CSV)
-
     return jsonify({"STATUS": "OK"})
-
-
-def write_csv_file(data, filename):
-    csv_columns = data.keys()
-    with open(filename, "a") as file:
-        csvwriter = csv.DictWriter(file, csv_columns)
-        # csvwriter.writeheader()
-        csvwriter.writerows([data])
-
-
-def process_qoe(probability, compute_time, req_delay, req_accuracy):
-    """
-    Processes the QoE value for a given inference.
-    :param probability:
-    :param compute_time:
-    :param req_delay:
-    :param req_accuracy:
-    :return: total QoE, accuracy QoE, delay QoE
-    """
-    acc_qoe = min(1.0, req_accuracy / probability)
-    delay_qoe = min(1.0, req_delay / compute_time)
-    return 0.5 * acc_qoe + 0.5 * delay_qoe, acc_qoe, delay_qoe
-
-
-def process_only_file(file):
-    """
-    Saves the file into the uploads directory and returns the prediction.
-    :param file:
-    :return: {prediction, compute_time}
-    """
-    filename = save_file(file)
-
-    start_time = time.time()
-    # pre-processing the image
-    preprocessed_input = pre_process(filename)
-    # prediction on the pre-processed image
-    prediction, probability = predict(preprocessed_input)
-    compute_time = time.time() - start_time
-
-    result = {'prediction': prediction, "compute_time": compute_time, "probability": probability}
-    return jsonify(result)
-
-
-def save_file(file):
-    """
-    Saves a given file and waits for it to be saved before returning.
-    :param file:
-    :return: relative file path of the image saved.
-    """
-    filename = secure_filename(file.filename)
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    file.save(file_path)
-    while not os.path.exists(file_path):
-        time.sleep(0.1)
-    return file_path
 
 
 if __name__ == "__main__":

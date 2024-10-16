@@ -17,7 +17,7 @@
     "neo4j.authentication.basic.password": "PWD_HERE",
     "neo4j.topic.cypher.ckn_stop_deployment": "
         MATCH (prev_deployment:Deployment{deployment_id: event.deployment_id})
-        SET prev_deployment.stop_time = event.stop_time,
+        SET prev_deployment.end_time = event.end_time,
             prev_deployment.status = event.status
     "
   }

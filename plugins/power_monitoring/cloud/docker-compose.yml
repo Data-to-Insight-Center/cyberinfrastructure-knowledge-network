@@ -28,9 +28,9 @@ services:
   postgres:
     image: postgres:14
     environment:
-      POSTGRES_DB: ckn
+      POSTGRES_DB: d2i
       POSTGRES_USER: d2i
-      POSTGRES_PASSWORD: iu
+      POSTGRES_PASSWORD: d2i
 #    volumes:
 #      - postgres-data:/var/lib/postgresql/data
     ports:
@@ -42,7 +42,7 @@ services:
   pgadmin:
     image: dpage/pgadmin4
     environment:
-      PGADMIN_DEFAULT_EMAIL: neelk@iu.edu
+      PGADMIN_DEFAULT_EMAIL: d2i@iu.edu
       PGADMIN_DEFAULT_PASSWORD: d2i
       PGADMIN_LISTEN_PORT: 80
     ports:
