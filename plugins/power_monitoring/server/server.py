@@ -195,7 +195,7 @@ def process_w_qoe(file, data):
         deployment_id = str(uuid.uuid4())  # Generate new deployment_id
         last_model_id = current_model_id   # Update last_model_id
 
-    payload = {'timestamp': total_start_time, 'server_id': SERVER_ID, 'model': current_model_id, 'deployment_id': deployment_id, 'service_id': data['service_id'], 'device_id': data['client_id'],
+    payload = {'timestamp': total_start_time, 'server_id': SERVER_ID, 'model_id': current_model_id, 'deployment_id': deployment_id, 'service_id': data['service_id'], 'device_id': data['client_id'],
                'ground_truth': data['ground_truth'], 'req_delay': req_delay, 'req_acc': req_acc,
                'prediction': prediction, 'compute_time': compute_time, 'probability': probability,
                'accuracy': accuracy, 'total_qoe': qoe, 'accuracy_qoe': acc_qoe, 'delay_qoe': delay_qoe,
@@ -206,7 +206,7 @@ def process_w_qoe(file, data):
         "fields": [
             {"type":"string", "optional": True, "field": "timestamp"},
             {"type": "string", "optional": True, "field": "server_id"},
-            {"type":"string",  "optional": True, "field": "model"},
+            {"type":"string",  "optional": True, "field": "model_id"},
             {"type": "string", "optional": True, "field": "deployment_id"},
             {"type": "string", "optional": True, "field": "service_id"},
             {"type": "string", "optional": True, "field": "device_id"},

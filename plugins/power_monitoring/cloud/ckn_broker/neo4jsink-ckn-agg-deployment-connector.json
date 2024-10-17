@@ -1,0 +1,34 @@
+{
+  "name": "Neo4jSinkConnectorAggDeployment",
+  "config": {
+    "topics": "ckn_agg_deployment",
+    "connector.class": "streams.kafka.connect.sink.Neo4jSinkConnector",
+    "errors.retry.timeout": "-1",
+    "errors.retry.delay.max.ms": "1000",
+    "errors.tolerance": "all",
+    "errors.log.enable": true,
+    "errors.log.include.messages": true,
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "key.converter.schemas.enable": false,
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": false,
+    "neo4j.server.uri": "bolt://neo4j:7687",
+    "neo4j.authentication.basic.username": "neo4j",
+    "neo4j.authentication.basic.password": "PWD_HERE",
+    "neo4j.topic.cypher.ckn_agg_deployment": "
+        MATCH (deployment:Deployment{deployment_id: event.deployment_id})
+        SET deployment.avg_req_delay = event.avg_req_delay,
+            deployment.avg_req_acc = event.avg_req_acc,
+            deployment.avg_compute_time = event.avg_compute_time,
+            deployment.avg_probability = event.avg_probability,
+            deployment.avg_accuracy = event.avg_accuracy,
+            deployment.avg_total_qoe = event.avg_total_qoe,
+            deployment.avg_accuracy_qoe = event.avg_accuracy_qoe,
+            deployment.avg_delay_qoe = event.avg_delay_qoe,
+            deployment.avg_cpu_power = event.avg_cpu_power,
+            deployment.avg_gpu_power = event.avg_gpu_power,
+            deployment.avg_total_power = event.avg_total_power,
+            deployment.total_requests = event.total_requests
+    "
+  }
+}

@@ -86,7 +86,7 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_CREATE_TOPICS: "ckn_raw:1:1, ckn_start_deployment:1:1, ckn_stop_deployment:1:1"
+      KAFKA_CREATE_TOPICS: "ckn_raw:1:1, ckn_start_deployment:1:1, ckn_end_deployment:1:1, ckn_agg_deployment:1:1"
     networks:
       - ckn-network
 

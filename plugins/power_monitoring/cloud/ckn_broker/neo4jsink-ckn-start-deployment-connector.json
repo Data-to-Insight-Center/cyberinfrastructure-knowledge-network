@@ -1,5 +1,5 @@
 {
-  "name": "Neo4jSinkConnectorStopDeployment",
+  "name": "Neo4jSinkConnectorStartDeployment",
   "config": {
     "topics": "ckn_start_deployment",
     "connector.class": "streams.kafka.connect.sink.Neo4jSinkConnector",

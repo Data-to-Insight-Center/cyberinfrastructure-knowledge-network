@@ -125,9 +125,9 @@ def main():
             json_requests = get_json_requests(np.asarray(split_data[split_idx]))
             requests_count = json_requests.shape[0]
 
-            if requests_count < 10:
+            if requests_count < 100:
                 continue
-            requests_count = 10
+            requests_count = 100
 
             # send each request along wih an image from the IMAGENET data
             for k in range(requests_count):
