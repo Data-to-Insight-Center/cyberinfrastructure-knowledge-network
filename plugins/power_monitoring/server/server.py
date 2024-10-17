@@ -25,10 +25,12 @@ RESULTS_CSV = os.getenv('RESULTS_CSV', '/logs/results.csv')
 
 RAW_EVENT_TOPIC = os.getenv('RAW_EVENT_TOPIC', 'ckn_raw')
 START_DEPLOYMENT_TOPIC = os.getenv('START_DEPLOYMENT_TOPIC', 'ckn_start_deployment')
-STOP_DEPLOYMENT_TOPIC = os.getenv('STOP_DEPLOYMENT_TOPIC', 'ckn_stop_deployment')
+END_DEPLOYMENT_TOPIC = os.getenv('END_DEPLOYMENT_TOPIC', 'ckn_end_deployment')
 
 producer = Producer({'bootstrap.servers': KAFKA_BROKER})
 previous_deployment_id = None
+last_model_id = None
+deployment_id = None
 
 def delivery_report(err, msg):
     """
@@ -77,14 +79,11 @@ def send_model_change(new_model_id):
     """
     Send the model change event to the Kafka topic
     """
-    global previous_deployment_id
+    global previous_deployment_id, deployment_id
 
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-    # Generate a unique deployment ID for the new deployment
-    combined_string = f"{SERVER_ID}_{new_model_id}_{timestamp}"
-    deployment_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, combined_string))
 
-    # Prepare the event with the new and previous deployment ID
+    # Prepare the start event with the current deployment ID
     start_event = {
         "server_id": SERVER_ID,
         "service_id": "imagenet_image_classification",
@@ -97,18 +96,18 @@ def send_model_change(new_model_id):
     producer.produce(START_DEPLOYMENT_TOPIC, json.dumps(start_event), callback=delivery_report, key=deployment_id)
     producer.flush(timeout=1)
 
+    # Produce an end event for the previous deployment if it exists
     if previous_deployment_id:
-        stop_event = {
-        "deployment_id": previous_deployment_id,
-        "status": "STOPPED",
-        "stop_time": timestamp
+        end_event = {
+            "deployment_id": previous_deployment_id,
+            "status": "STOPPED",
+            "end_time": timestamp
         }
-        producer.produce(STOP_DEPLOYMENT_TOPIC, json.dumps(stop_event), callback=delivery_report, key=previous_deployment_id)
+        producer.produce(END_DEPLOYMENT_TOPIC, json.dumps(end_event), callback=delivery_report, key=previous_deployment_id)
         producer.flush(timeout=1)
 
     # Update the previous_deployment_id with the current deployment_id
     previous_deployment_id = deployment_id
-
 
 @app.route('/predict', methods=['POST'])
 def qoe_predict():
@@ -157,6 +156,8 @@ def process_w_qoe(file, data):
     """
     Process the request with QoE constraints.
     """
+    global last_model_id, deployment_id
+
     total_start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
     filename = save_file(file)
 
@@ -187,19 +188,26 @@ def process_w_qoe(file, data):
     accuracy = int(data['ground_truth'] == prediction)
     req_delay, req_acc = float(data['delay']), float(data['accuracy'])
     qoe, acc_qoe, delay_qoe = process_qoe(probability, compute_time, req_delay, req_acc)
-    model = model_store.get_current_model_id()
+    current_model_id = model_store.get_current_model_id()
 
-    payload = {'server_id': SERVER_ID, 'service_id': data['service_id'], 'device_id': data['client_id'],
+    # Check if the model has changed
+    if current_model_id != last_model_id:
+        deployment_id = str(uuid.uuid4())  # Generate new deployment_id
+        last_model_id = current_model_id   # Update last_model_id
+
+    payload = {'timestamp': total_start_time, 'server_id': SERVER_ID, 'model': current_model_id, 'deployment_id': deployment_id, 'service_id': data['service_id'], 'device_id': data['client_id'],
                'ground_truth': data['ground_truth'], 'req_delay': req_delay, 'req_acc': req_acc,
                'prediction': prediction, 'compute_time': compute_time, 'probability': probability,
                'accuracy': accuracy, 'total_qoe': qoe, 'accuracy_qoe': acc_qoe, 'delay_qoe': delay_qoe,
-               'cpu_power': cpu_power, 'gpu_power': gpu_power, 'total_power': total_power,'model': model,
-               'start_time': total_start_time, 'end_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]}
+               'cpu_power': cpu_power, 'gpu_power': gpu_power, 'total_power': total_power}
 
     schema = {
         "type": "struct",
         "fields": [
+            {"type":"string", "optional": True, "field": "timestamp"},
             {"type": "string", "optional": True, "field": "server_id"},
+            {"type":"string",  "optional": True, "field": "model"},
+            {"type": "string", "optional": True, "field": "deployment_id"},
             {"type": "string", "optional": True, "field": "service_id"},
             {"type": "string", "optional": True, "field": "device_id"},
             {"type": "string", "optional": True, "field": "ground_truth"},
@@ -214,10 +222,7 @@ def process_w_qoe(file, data):
             {"type": "float", "optional": True, "field": "delay_qoe"},
             {"type": "float", "optional": True, "field": "cpu_power"},
             {"type": "float", "optional": True, "field": "gpu_power"},
-            {"type": "float", "optional": True, "field": "total_power"},
-            {"type":"string",  "optional": True, "field": "model"},
-            {"type":"string", "optional": True, "field": "start_time"},
-            {"type":"string", "optional": True, "field": "end_time"}
+            {"type": "float", "optional": True, "field": "total_power"}
         ],
         "optional": False,
         "name": "d2i"
@@ -229,4 +234,4 @@ def process_w_qoe(file, data):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080, debug=False)
+    app.run(host="0.0.0.0", port=8081, debug=False)

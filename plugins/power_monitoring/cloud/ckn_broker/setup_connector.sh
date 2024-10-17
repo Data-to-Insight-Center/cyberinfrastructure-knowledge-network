@@ -38,7 +38,7 @@ wait_for_kafka_connect
 
 create_connector /app/postgres-sink-ckn-raw-connector.json
 create_connector /app/neo4jsink-ckn-start-deployment-connector.json
-create_connector /app/neo4jsink-ckn-stop-deployment-connector.json
+create_connector /app/neo4jsink-ckn-end-deployment-connector.json
 
 echo "Connector setup completed"
 

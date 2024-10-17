@@ -1,7 +1,7 @@
 {
   "name": "Neo4jSinkConnectorStartDeployment",
   "config": {
-    "topics": "ckn_stop_deployment",
+    "topics": "ckn_end_deployment",
     "connector.class": "streams.kafka.connect.sink.Neo4jSinkConnector",
     "errors.retry.timeout": "-1",
     "errors.retry.delay.max.ms": "1000",
@@ -15,7 +15,7 @@
     "neo4j.server.uri": "bolt://neo4j:7687",
     "neo4j.authentication.basic.username": "neo4j",
     "neo4j.authentication.basic.password": "PWD_HERE",
-    "neo4j.topic.cypher.ckn_stop_deployment": "
+    "neo4j.topic.cypher.ckn_end_deployment": "
         MATCH (prev_deployment:Deployment{deployment_id: event.deployment_id})
         SET prev_deployment.end_time = event.end_time,
             prev_deployment.status = event.status
