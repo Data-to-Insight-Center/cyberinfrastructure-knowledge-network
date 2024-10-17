@@ -87,7 +87,7 @@ def send_model_change(new_model_id):
     start_event = {
         "server_id": SERVER_ID,
         "service_id": "imagenet_image_classification",
-        "device_id": "d2iedgeai2",
+        "device_id": device_id,
         "deployment_id": deployment_id,
         "status": "RUNNING",
         "model_id": new_model_id,
@@ -156,7 +156,7 @@ def process_w_qoe(file, data):
     """
     Process the request with QoE constraints.
     """
-    global last_model_id, deployment_id
+    global last_model_id, deployment_id, device_id
 
     total_start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
     filename = save_file(file)
@@ -185,6 +185,7 @@ def process_w_qoe(file, data):
             total_power = tot_power_queue.get() if not tot_power_queue.empty() else 0
 
     compute_time = compute_end_time - compute_start_time
+    device_id = data['client_id']
     accuracy = int(data['ground_truth'] == prediction)
     req_delay, req_acc = float(data['delay']), float(data['accuracy'])
     qoe, acc_qoe, delay_qoe = process_qoe(probability, compute_time, req_delay, req_acc)
@@ -195,7 +196,8 @@ def process_w_qoe(file, data):
         deployment_id = str(uuid.uuid4())  # Generate new deployment_id
         last_model_id = current_model_id   # Update last_model_id
 
-    payload = {'timestamp': total_start_time, 'server_id': SERVER_ID, 'model_id': current_model_id, 'deployment_id': deployment_id, 'service_id': data['service_id'], 'device_id': data['client_id'],
+    payload = {'timestamp': total_start_time, 'server_id': SERVER_ID, 'model_id': current_model_id,
+               'deployment_id': deployment_id, 'service_id': data['service_id'], 'device_id': device_id,
                'ground_truth': data['ground_truth'], 'req_delay': req_delay, 'req_acc': req_acc,
                'prediction': prediction, 'compute_time': compute_time, 'probability': probability,
                'accuracy': accuracy, 'total_qoe': qoe, 'accuracy_qoe': acc_qoe, 'delay_qoe': delay_qoe,

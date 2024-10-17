@@ -24,9 +24,9 @@
         ON CREATE SET
           depl.start_time = event.start_time,
           depl.status = event.status
-        MERGE (server)-[:DEPLOYED]->(depl)
-        MERGE (model)-[:DEPLOYED_IN]->(depl)
-        MERGE (device)-[:REQUESTED_TO]->(server)
+        MERGE (depl)-[:RUNS_ON]->(server)
+        MERGE (depl)-[:USES]->(model)
+        MERGE (depl)-[:REQUESTED_BY]->(device)
         MERGE (model)-[:MODEL_OF]->(service)
     "
   }

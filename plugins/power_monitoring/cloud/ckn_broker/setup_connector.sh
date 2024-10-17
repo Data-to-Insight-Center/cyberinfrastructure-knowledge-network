@@ -40,6 +40,7 @@ create_connector /app/postgres-sink-ckn-raw-connector.json
 create_connector /app/neo4jsink-ckn-start-deployment-connector.json
 create_connector /app/neo4jsink-ckn-end-deployment-connector.json
 create_connector /app/neo4jsink-ckn-agg-deployment-connector.json
+create_connector /app/neo4jsink-ckn-agg-device-connector.json
 
 echo "Connector setup completed"
 
