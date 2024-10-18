@@ -24,8 +24,13 @@
         ON CREATE SET
           depl.start_time = event.start_time,
           depl.status = event.status
-        MERGE (depl)-[:RUNS_ON]->(server)
-        MERGE (depl)-[:USES]->(model)
+        MERGE (model)-[:HAS_MODEL_CARD]->(mc:ModelCard)
+        MERGE (mc)-[:BIAS_ANALYSIS]->(ba:BiasAnalysis)
+        MERGE (mc)-[:XAI_ANALYSIS]->(ea:ExplainabilityAnalysis)
+        MERGE (ds:Datasheet)
+        MERGE (mc)-[:TRAINED_ON]->(ds)
+        MERGE (depl)-[:DEPLOYED_AT]->(server)
+        MERGE (model)-[:DEPLOYED_ON]->(depl)
         MERGE (depl)-[:REQUESTED_BY]->(device)
         MERGE (model)-[:MODEL_OF]->(service)
     "
