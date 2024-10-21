@@ -18,7 +18,7 @@
     "neo4j.topic.cypher.ckn_agg_device": "
         MATCH (device:Device {device_id: event.device_id}),
               (deployment:Deployment {deployment_id: event.deployment_id})
-        MERGE (deployment)-[r:REQUESTED_BY]->(device)
+        MERGE (deployment)-[r:requestedBy]->(device)
         SET r.avg_req_delay = event.avg_req_delay,
             r.avg_req_acc = event.avg_req_acc,
             r.avg_compute_time = event.avg_compute_time,
