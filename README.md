@@ -45,7 +45,9 @@ We use Docker Compose to create an environment with Confluent Platform component
    ```bash
    docker compose -f examples/docker-compose.yml up -d --build
    ```
-  View the streamed data on the [dashboard](http://localhost:8502/Camera_Traps) or check the [local neo4j instance](http://localhost:7474/browser/) with username `neo4j` and password `PWD_HERE`.
+  View the streamed data on the [dashboard](http://localhost:8502/Camera_Traps) or check the [local neo4j instance](http://localhost:7474/browser/) with username `neo4j` and password `PWD_HERE`. 
+
+   Run the following query to view the data: ```MATCH (n) RETURN n``` 
 
 <br>
 

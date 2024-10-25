@@ -15,6 +15,21 @@ class TestNeo4jConstraints(unittest.TestCase):
         # Close connection
         cls.driver.close()
 
+    def tearDown(self):
+        # Cleanup: Delete all test nodes created by the tests
+        with self.driver.session() as session:
+            session.run("MATCH (n:EdgeDevice {device_id: 'device_123'}) DELETE n")
+            session.run("MATCH (n:RawImage {UUID: 'uuid_123'}) DELETE n")
+            session.run("MATCH (n:Model {model_id: 'model_123'}) DELETE n")
+            session.run("MATCH (n:Experiment {experiment_id: 'experiment_123'}) DELETE n")
+            session.run("MATCH (n:User {user_id: 'user_123'}) DELETE n")
+            session.run("MATCH (n:Application {name: 'app_123'}) DELETE n")
+            session.run("MATCH (n:Profiling {uuid: 'uuid_123'}) DELETE n")
+            session.run("MATCH (n:ModelCard {external_id: 'mc_123'}) DELETE n")
+            session.run("MATCH (n:AIModel {external_id: 'ai_123'}) DELETE n")
+            session.run("MATCH (n:Datasheet {external_id: 'ds_123'}) DELETE n")
+            session.run("MATCH (n:Deployment {deployment_id: 'depl_123'}) DELETE n")
+
     def test_edge_device_id_unique(self):
         with self.driver.session() as session:
             # Create a node with a specific device_id
@@ -116,3 +131,7 @@ class TestNeo4jConstraints(unittest.TestCase):
             with self.assertRaises(Exception):
                 session.run(
                     "CREATE (depl:Deployment {deployment_id: 'depl_123'})")
+
+
+if __name__ == '__main__':
+    unittest.main()
