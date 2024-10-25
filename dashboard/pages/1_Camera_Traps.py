@@ -1,8 +1,10 @@
-from ckn_kg import CKNKnowledgeGraph
-import pandas as pd
 import os
+
+import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
+
+from ckn_kg import CKNKnowledgeGraph
 
 load_dotenv()
 

@@ -1,9 +1,9 @@
-from ckn_kg import CKNKnowledgeGraph
-import pandas as pd
 import os
+
 import streamlit as st
 from dotenv import load_dotenv
-import plotly.express as px
+
+from ckn_kg import CKNKnowledgeGraph
 
 load_dotenv()
 

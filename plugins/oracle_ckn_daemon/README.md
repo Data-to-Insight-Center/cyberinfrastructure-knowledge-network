@@ -15,7 +15,8 @@ CKN Daemon for extracting camera traps performance information from the Edge to 
    docker exec ckn-oracle-daemon touch /oracle_logs/image_mapping_final.json
    ```
 
-4. Access the [Dashboard](http://localhost:8502/Camera_Traps) to view streamed data or check the [local Neo4j instance](http://localhost:7474/browser/) with username `neo4j` and password `PWD_HERE`.
+4. Go to the [local neo4j instance](http://localhost:7474/browser/) with username `neo4j` and password `PWD_HERE`.
+   Run ```MATCH (n) RETURN n``` to view the streamed data. 
 
 5. To stop CKN-Oracle Daemon, run:
    ```bash

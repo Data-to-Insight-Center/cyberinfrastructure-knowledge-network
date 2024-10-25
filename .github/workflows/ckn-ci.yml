@@ -36,6 +36,12 @@ jobs:
           docker cp ckn_kg/constraints.cypher neo4j_server:/constraints.cypher
           docker exec neo4j_server cypher-shell -u neo4j -p PWD_HERE -f /constraints.cypher
               
+      - name: Test connection and constraints
+        run: |
+          pip install -r tests/requirements.txt
+          pytest tests/test_connection.py -v
+          pytest tests/test_constraints.py -v
+
       - name: Build CKN Oracle Daemon plugin WITHOUT power_monitoring
         run: |
           docker compose -f plugins/oracle_ckn_daemon/docker-compose.yml up -d --build

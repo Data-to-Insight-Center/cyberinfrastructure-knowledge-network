@@ -1,10 +1,11 @@
-from ckn_kg import CKNKnowledgeGraph
-from modelcards.mc_reconstructor import MCReconstructor
-from modelcards.patra_kg_server import search_kg, retrieve_mc
-import pandas as pd
 import os
+
 import streamlit as st
 from dotenv import load_dotenv
+from modelcards.mc_reconstructor import MCReconstructor
+from modelcards.patra_kg_server import search_kg, retrieve_mc
+
+from ckn_kg import CKNKnowledgeGraph
 
 load_dotenv()
 
