@@ -45,10 +45,7 @@ A **Streamlit dashboard** is provided for visualizing data from the knowledge gr
    ```bash
    docker compose -f examples/docker-compose.yml up -d --build
    ``` 
-   View the streamed data on the [CKN dashboard](http://localhost:8502/Camera_Traps). 
-  
-   Go to the [local neo4j instance](http://localhost:7474/browser/) with username `neo4j` and password `PWD_HERE`.
-   Run ```MATCH (n) RETURN n``` to view the streamed data. 
+   View the streamed data on the [CKN dashboard](http://localhost:8502/Camera_Traps) or go to the [local neo4j instance](http://localhost:7474/browser/) with username `neo4j`, password `PWD_HERE` and run ```MATCH (n) RETURN n```. 
 
 <br>
 
@@ -58,5 +55,8 @@ A **Streamlit dashboard** is provided for visualizing data from the knowledge gr
    docker compose -f examples/docker-compose.yml down
     ```
    
+### License
+CKN is licensed under the [BSD 3-Clause License](https://opensource.org/licenses/BSD-3-Clause), which allows for redistribution and use in source and binary forms with or without modification, provided certain conditions are met.
+
 ### Reference
 S. Withana and B. Plale, "CKN: An Edge AI Distributed Framework," 2023 IEEE 19th International Conference on e-Science (e-Science), Limassol, Cyprus, 2023, pp. 1-10, doi: 10.1109/e-Science58273.2023.10254827
