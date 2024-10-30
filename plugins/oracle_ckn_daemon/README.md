@@ -1,4 +1,4 @@
-# CKN Daemon - Tapis Camera Traps
+# CKN Daemon for TAPIS Camera Traps Application
 CKN Daemon for extracting camera traps performance information from the Edge to the Cloud. 
 
 ### Usage

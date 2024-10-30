@@ -49,6 +49,10 @@ jobs:
           pytest plugins/oracle_ckn_daemon/tests/test_power_monitoring_false.py -v
           docker compose -f plugins/oracle_ckn_daemon/docker-compose.yml down
 
+      - name: Test CKN Stream Processor (oracle-aggregated, oracle-alerts)
+        run: |
+          pytest plugins/oracle_ckn_daemon/tests/test_ckn_stream_processor.py -v
+
       - name: Build CKN Oracle Daemon plugin WITH power_monitoring
         run: |
           sed -i '20s/ENABLE_POWER_MONITORING=false/ENABLE_POWER_MONITORING=true/' plugins/oracle_ckn_daemon/docker-compose.yml
