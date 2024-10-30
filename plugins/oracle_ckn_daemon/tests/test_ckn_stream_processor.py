@@ -1,6 +1,6 @@
 import json
+
 from confluent_kafka import Consumer, KafkaError
-import pytest
 
 
 def consume_messages(consumer, topic, timeout=10):
