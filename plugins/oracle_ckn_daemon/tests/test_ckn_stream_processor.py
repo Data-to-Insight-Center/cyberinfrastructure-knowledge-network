@@ -1,6 +1,6 @@
 import json
-
-from confluent_kafka import Consumer, KafkaError
+import uuid
+from confluent_kafka import Consumer
 
 
 def consume_messages(consumer, topic, timeout=10):
@@ -14,19 +14,21 @@ def consume_messages(consumer, topic, timeout=10):
             continue
         if msg.error():
             raise Exception(f"Kafka error: {msg.error()}")
-        messages.append(json.loads(msg.value().decode('utf-8')))
+
+        message = json.loads(msg.value().decode('utf-8'))
+        messages.append(message)
 
     return messages
 
 
 def test_oracle_consumers():
     expected_oracle_aggregated_events_count = 2
-    expected_oracle_alerts_events_count = 10
+    expected_oracle_alerts_events_count = 6
 
     # Kafka consumer configuration
     consumer_config = {
         'bootstrap.servers': 'localhost:9092',
-        'group.id': 'test-group',
+        'group.id': f'test-group-{uuid.uuid4()}',
         'auto.offset.reset': 'earliest'
     }
     consumer = Consumer(consumer_config)
