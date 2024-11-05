@@ -35,7 +35,8 @@ A **Streamlit dashboard** is provided for visualizing data from the knowledge gr
 1. **Clone the Repository and Start Services**:
    ```bash
    git clone https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network.git
-   cd cyberinfrastructure-knowledge-network
+   ```
+   ```bash
    make up
    ```
 

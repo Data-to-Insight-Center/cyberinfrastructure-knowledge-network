@@ -56,7 +56,6 @@ class OracleEventHandler(FileSystemEventHandler):
         Reads the JSON events from the file.
         Only sends events if the image_decision component is present in the JSON entry.
         This is to make sure only the processed images are extracted.
-        :return:
         """
         logging.debug(f"Reading new image data from {self.file_path}")
         # Load the JSON data from the file. If the file is not yet written fully, wait for it to be written.
@@ -135,8 +134,6 @@ class OracleEventHandler(FileSystemEventHandler):
     def produce_event(self, event):
         """
         Adds the device_id to the event and sends it to the CKN broker.
-        :param event:
-        :return:
         """
         try:
             # add the device id
@@ -162,7 +159,6 @@ class OracleEventHandler(FileSystemEventHandler):
 def setup_logging():
     """
     Logs to both console and file.
-    :return:
     """
     log_formatter = logging.Formatter('%(asctime)s - %(message)s')
 
@@ -186,9 +182,6 @@ def setup_logging():
 def test_ckn_broker_connection(configuration, timeout=10, num_tries=5):
     """
     Checks if the CKN broker is up and running.
-    :param bootstrap_servers: CKN broker hosts
-    :param timeout: seconds to wait for the admin client to connect
-    :return:
     """
     for i in range(num_tries):
         try:
