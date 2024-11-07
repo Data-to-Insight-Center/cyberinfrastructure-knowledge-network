@@ -1,10 +1,26 @@
 # Cyberinfrastructure Knowledge Network (CKN)
 
-Cyber-infrastructure Knowledge Network (CKN) connects the Edge to the cloud by means of event streaming. It is built to push inference to the Edge, and will capture historical data about execution.
+The Cyberinfrastructure Knowledge Network (CKN) is an extensible and portable distributed framework designed to optimize AI at the edge, particularly in dynamic environments where workloads on the edge server may change suddenly, such as in response to motion detection. CKN enhances edge-cloud collaboration by using historical data, graph representations, and adaptable deployment of AI models to meet changing demands in accuracy and latency at edge devices.
+
+CKN facilitates seamless connectivity between edge devices and the cloud through event streaming, enabling real-time data capture and processing. By leveraging event stream processing, CKN captures, aggregates, and stores historical data about system performance. This data is stored in a knowledge graph and used to model application behavior and optimize model selection and deployment at the edge.
+
+The CKN framework includes several core components:
+
+- **CKN Daemon:** A lightweight service that resides on each edge server, responsible for managing communications with edge devices, handling requests, capturing performance data, and deploying AI models as needed. The daemon connects with the cloud-based CKN system via a pub/sub system. This module captures real-time events from edge devices, augmenting them with details such as model usage, resource consumption, prediction accuracy, and latency. 
+
+- **Event Streaming and Processing:** It uses stream processing techniques, like tumbling windows, to aggregate events and generate real-time alerts based on the streaming data from the edge.
+
+- **Knowledge Graph:** A **Neo4j database** that stores historical data and provenance information about the system, including applications, available models, and events from edge devices. This knowledge graph enables CKN to maintain a comprehensive view of system evolution, track model usage, and analyze performance over time.
+
+The primary objective of CKN is to provide a robust framework that optimizes AI application deployment and resource allocation at the edge. By leveraging real-time event streaming and knowledge graphs, CKN creates a system capable of efficiently handling AI workloads, adapting to changing requirements, and supporting scalable edge-cloud collaboration.
 
 <img src="ckn-design.png" alt="CKN Design" style="width:100%;">
 
 ## Components
+
+This GitHub repository includes all necessary components to set up and run CKN, including:
+
+Together, these tools offer a comprehensive setup for deploying CKN, making it easy to adapt the framework to specific edge-computing environments.
 
 ### Broker
 **Apache Kafka** is used as the message broker. It operates on a publisher-subscriber model, allowing for real-time data streaming and processing. Kafka efficiently handles data streams by storing and processing them in the order they are received.
