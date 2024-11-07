@@ -1,4 +1,4 @@
-# Cyber-infrastructure Knowledge Network (CKN)
+# Cyberinfrastructure Knowledge Network (CKN)
 
 Cyber-infrastructure Knowledge Network (CKN) connects the Edge to the cloud by means of event streaming. It is built to push inference to the Edge, and will capture historical data about execution.
 
