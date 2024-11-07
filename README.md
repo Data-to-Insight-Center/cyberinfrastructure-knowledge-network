@@ -14,6 +14,8 @@ The CKN framework includes several core components:
 
 The primary objective of CKN is to provide a robust framework that optimizes AI application deployment and resource allocation at the edge. By leveraging real-time event streaming and knowledge graphs, CKN creates a system capable of efficiently handling AI workloads, adapting to changing requirements, and supporting scalable edge-cloud collaboration.
 
+For more information on CKN, please refer to the [CKN paper](https://ieeexplore.ieee.org/document/10254827).
+
 <img src="ckn-design.png" alt="CKN Design" style="width:100%;">
 
 ## Components
