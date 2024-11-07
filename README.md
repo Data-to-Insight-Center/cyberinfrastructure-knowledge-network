@@ -10,7 +10,7 @@ The CKN framework includes several core components:
 
 - **Event Streaming and Processing:** It uses stream processing techniques, like tumbling windows, to aggregate events and generate real-time alerts based on the streaming data from the edge.
 
-- **Knowledge Graph:** A **Neo4j database** that stores historical data and provenance information about the system, including applications, available models, and events from edge devices. This knowledge graph enables CKN to maintain a comprehensive view of system evolution, track model usage, and analyze performance over time.
+- **Knowledge Graph:** A Neo4j Graph database that stores historical data and provenance information about the system, including applications, available models, and events from edge devices. This knowledge graph enables CKN to maintain a comprehensive view of system evolution, track model usage, and analyze performance over time.
 
 The primary objective of CKN is to provide a robust framework that optimizes AI application deployment and resource allocation at the edge. By leveraging real-time event streaming and knowledge graphs, CKN creates a system capable of efficiently handling AI workloads, adapting to changing requirements, and supporting scalable edge-cloud collaboration.
 
