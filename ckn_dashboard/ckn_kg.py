@@ -483,7 +483,7 @@ class CKNKnowledgeGraph:
 
         except Exception as e:
             print(f"Error fetching alerts: {e}")
-            return None
+            return pd.DataFrame()
 
     def get_result_query(self, query, parameters):
         with self.driver.session() as session:

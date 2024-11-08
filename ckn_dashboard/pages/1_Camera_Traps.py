@@ -30,7 +30,6 @@ st.markdown(
 )
 
 st.header("Camera Traps Experiments")
-st.sidebar.header("Camera Traps Analytics")
 
 users = kg.fetch_distinct_users()
 if not users:
