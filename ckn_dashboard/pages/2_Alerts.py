@@ -23,6 +23,10 @@ st.sidebar.header("Alerts from CKN Topics")
 
 alerts = kg.fetch_alerts()
 
+if not alerts:
+    st.write("No alerts found.")
+    st.stop()
+
 # Filter by topic
 topic_filter = st.sidebar.multiselect("Select Topic", options=alerts['Source Topic'].unique(), default=alerts['Source Topic'].unique())
 
