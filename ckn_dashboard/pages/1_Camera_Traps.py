@@ -30,9 +30,11 @@ st.markdown(
 )
 
 st.header("Camera Traps Experiments")
-st.sidebar.header("Camera Traps Analytics")
 
 users = kg.fetch_distinct_users()
+if not users:
+    st.write("Knowledge Graph is empty.")
+    st.stop()
 
 def get_experiment_indicators(experiment_id, experiment_df, model_id):
     selected_experiment = experiment_df.loc[experiment_id]
@@ -155,4 +157,3 @@ if selected_experiment:
 
         else:
             st.write("No power information available for this experiment.")
-

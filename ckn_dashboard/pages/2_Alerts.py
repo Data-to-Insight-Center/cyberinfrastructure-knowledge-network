@@ -19,9 +19,12 @@ st.set_page_config(
     layout="wide")
 
 st.header("CKN Alerts")
-st.sidebar.header("Alerts from CKN Topics")
 
 alerts = kg.fetch_alerts()
+
+if alerts.empty:
+    st.write("No alerts found.")
+    st.stop()
 
 # Filter by topic
 topic_filter = st.sidebar.multiselect("Select Topic", options=alerts['Source Topic'].unique(), default=alerts['Source Topic'].unique())
@@ -31,17 +34,11 @@ priority_filter = st.sidebar.multiselect("Select Priority", options=alerts['Prio
 
 min_date = alerts.index.min().date()
 max_date = alerts.index.max().date()
-# date_range = st.sidebar.date_input("Select Date Range", value=(min_date, max_date), min_value=min_date, max_value=max_date)
-
-# start_date = pd.to_datetime(date_range[0])
-# end_date = pd.to_datetime(date_range[1])
 
 # Apply Filters
 filtered_df = alerts[
     (alerts['Source Topic'].isin(topic_filter)) &
     (alerts['Priority'].isin(priority_filter))
-    # (alerts.index >= start_date) &
-    # (alerts.index <= end_date)
 ]
 
 st.write(filtered_df)
