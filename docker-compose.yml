@@ -91,7 +91,7 @@ services:
       - ckn-network
 
   ckn-dashboard:
-    image: ckn-analytics-dashboard
+    image: iud2i/ckn-analytics-dashboard:latest
     container_name: dashboard
     ports:
       - "8502:8502"
