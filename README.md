@@ -14,30 +14,9 @@ The CKN framework includes several core components:
 
 The primary objective of CKN is to provide a robust framework that optimizes AI application deployment and resource allocation at the edge. By leveraging real-time event streaming and knowledge graphs, CKN creates a system capable of efficiently handling AI workloads, adapting to changing requirements, and supporting scalable edge-cloud collaboration.
 
-For more information on CKN, please refer to the [CKN paper](https://ieeexplore.ieee.org/document/10254827).
+Refer the [CKN paper](https://ieeexplore.ieee.org/document/10254827) for more information.
 
 <img src="ckn-design.png" alt="CKN Design" style="width:100%;">
-
-## Components
-
-This GitHub repository includes all necessary components to set up and run CKN, including:
-
-Together, these tools offer a comprehensive setup for deploying CKN, making it easy to adapt the framework to specific edge-computing environments.
-
-### Broker
-**Apache Kafka** is used as the message broker. It operates on a publisher-subscriber model, allowing for real-time data streaming and processing. Kafka efficiently handles data streams by storing and processing them in the order they are received.
-
-### Knowledge Graph
-CKN employs a **Neo4j database** for its knowledge graph. Neo4j is a leading graph database known for its scalability, flexibility, and ability to handle complex relationships between data entities. It uses a property graph model with nodes and relationships, which makes it suitable for storing and querying connected data efficiently.
-
-### Stream Processors
-Stream processing in CKN is performed using a **tumbling window** approach. This method aggregates and summarizes data over fixed intervals, which is then published to a separate topic within the Kafka system.  More information is available in the [CKN Stream Processors repository](https://github.com/Data-to-Insight-Center/ckn-stream-processors).
-
-### Dashboard
-A **Streamlit dashboard** is provided for visualizing data from the knowledge graph. Streamlit is an open-source Python library that simplifies the creation of interactive web applications and dashboards. It allows users to visualize data easily and interact with machine learning models without requiring extensive front-end development skills.
-
-## Plugins
-**CKN Oracle Daemon**: Reads, processes, and sends camera trap events from Oracle Daemon and Power Measuring plugin.
 
 ---
 
