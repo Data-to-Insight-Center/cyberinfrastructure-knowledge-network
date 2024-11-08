@@ -174,8 +174,13 @@ class CKNKnowledgeGraph:
         RETURN DISTINCT u.user_id AS user_id
         """
 
-        result = self.session.run(query)
-        users = [record["user_id"] for record in result]
+        try:
+            result = self.session.run(query)
+            users = [record["user_id"] for record in result]
+
+        except Exception as e:
+            print(f"Error fetching users: {e}")
+            users = None
 
         return users
 
