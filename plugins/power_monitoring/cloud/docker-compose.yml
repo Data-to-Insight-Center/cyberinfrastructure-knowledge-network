@@ -36,8 +36,8 @@ services:
       POSTGRES_DB: d2i
       POSTGRES_USER: d2i
       POSTGRES_PASSWORD: d2i
-#    volumes:
-#      - postgres-data:/var/lib/postgresql/data
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     restart: always
@@ -135,7 +135,7 @@ services:
     ports:
       - "8502:8502"
     environment:
-      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_URI=neo4j://149.165.170.250:7688
       - NEO4J_USER=neo4j
       - NEO4J_PWD=PWD_HERE
       - OPENAI_API_KEY=''
@@ -148,6 +148,7 @@ volumes:
   neo4j_logs:
   neo4j_import:
   neo4j_plugins:
+  postgres-data:
 
 # Define Networks and Volumes
 networks:
