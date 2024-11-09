@@ -4,18 +4,18 @@ from torchvision import transforms
 from torchvision import models
 
 model_mapping = {
-    "550e8400-e29b-41d4-a716-446655440000": "resnet152",
-    "550e8400-e29b-41d4-a716-446655440001": "shufflenet_v2_x0_5",
-    "550e8400-e29b-41d4-a716-446655440002": "densenet201",
-    "550e8400-e29b-41d4-a716-446655440003": "mobilenet_v3_small",
-    "550e8400-e29b-41d4-a716-446655440004": "resnext50_32x4d",
-    "550e8400-e29b-41d4-a716-446655440005": "googlenet"
+    "0d0172ce3cc25da4697f133e19887296883e696d2604850080e7eaf9c1188ae3-model": "googlenet",
+    "975bf34ecdbd98c731b126bd8ce520879910892d2f9464bcfb4558dcf335fe5f-model": "resnet152",
+    "f6734196b613320a5823d6f326107d05a4154778fdf0d5c85c7145760bf87f2a-model": "shufflenet_v2_x0_5",
+    "86c48c6b1eca331e9c745e5d036480f4706a83b7c08ecc5cbf44a4fa12d19237-model": "densenet201",
+    "3e5344c2e2bc4e3db7ac97810c0390700a8c7d71c62d7808995d28e75be393e2-model": "mobilenet_v3_small",
+    "38db957b18993eba7120b2e55f02dde7c4cb39a5bc6bd056bfe0628a29129e11-model": "resnext50_32x4d"
 }
 
 class ModelStore:
     def __init__(self):
         self.model_index = 0
-        self.current_model_id = "550e8400-e29b-41d4-a716-446655440000"
+        self.current_model_id = "975bf34ecdbd98c731b126bd8ce520879910892d2f9464bcfb4558dcf335fe5f-model"
 
     def get_current_model_id(self):
         return self.current_model_id

@@ -6,8 +6,8 @@ services:
     image: neo4j:5.21.0-community
     container_name: neo4j_server
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - "7475:7474"
+      - "7688:7687"
     environment:
       - NEO4J_AUTH=neo4j/PWD_HERE
       - NEO4J_apoc_export_file_enabled=true
@@ -16,6 +16,11 @@ services:
       - NEO4JLABS_PLUGINS=["apoc", "graph-data-science"]
       - NEO4J_dbms_security_procedures_whitelist=gds.*, apoc.*
       - NEO4J_dbms_security_procedures_unrestricted=gds.*, apoc.*
+    volumes:
+      - ./neo4j/data:/data
+      - ./neo4j/logs:/logs
+      - ./neo4j/import:/import
+      - ./neo4j/plugins:/plugins
     healthcheck:
       test: ["CMD-SHELL", "neo4j status"]
       interval: 10s
@@ -82,7 +87,7 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://10.21.118.161:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://149.165.170.250:9092,PLAINTEXT_HOST://localhost:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
@@ -138,7 +143,12 @@ services:
     networks:
       - ckn-network
 
+volumes:
+  neo4j_data:
+  neo4j_logs:
+  neo4j_import:
+  neo4j_plugins:
+
 # Define Networks and Volumes
 networks:
   ckn-network:
-    external: True
