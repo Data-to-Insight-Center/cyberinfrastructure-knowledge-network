@@ -1,7 +1,8 @@
+import time
+from collections import deque
+
 import streamlit as st
 from llm_graph import run_langraph
-from collections import deque
-import time
 
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = deque(maxlen=3)

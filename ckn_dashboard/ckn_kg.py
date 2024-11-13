@@ -174,8 +174,13 @@ class CKNKnowledgeGraph:
         RETURN DISTINCT u.user_id AS user_id
         """
 
-        result = self.session.run(query)
-        users = [record["user_id"] for record in result]
+        try:
+            result = self.session.run(query)
+            users = [record["user_id"] for record in result]
+
+        except Exception as e:
+            print(f"Error fetching users: {e}")
+            users = None
 
         return users
 
@@ -459,21 +464,26 @@ class CKNKnowledgeGraph:
             ORDER BY alert.timestamp DESC
             LIMIT $limit
             """
-        result = self.session.run(query, limit=limit)
-        records = [record["alert"] for record in result]
+        try:
+            result = self.session.run(query, limit=limit)
+            records = [record["alert"] for record in result]
 
-        if not records:
+            if not records:
+                return pd.DataFrame()
+
+            df = pd.DataFrame(records)
+            df['timestamp'] = df['timestamp'].apply(self.convert_to_datetime)
+            df = df[[
+                'timestamp', 'alert_name', 'priority', 'source_topic',
+                'description', 'UUID', 'event_data'
+            ]]
+            df.columns = ['Timestamp', 'Alert Name', 'Priority', 'Source Topic', 'Description', 'UUID', 'Event Data']
+            df.set_index('Timestamp', inplace=True)
+            return df
+
+        except Exception as e:
+            print(f"Error fetching alerts: {e}")
             return pd.DataFrame()
-
-        df = pd.DataFrame(records)
-        df['timestamp'] = df['timestamp'].apply(self.convert_to_datetime)
-        df = df[[
-            'timestamp', 'alert_name', 'priority', 'source_topic',
-            'description', 'UUID', 'event_data'
-        ]]
-        df.columns = ['Timestamp', 'Alert Name', 'Priority', 'Source Topic', 'Description', 'UUID', 'Event Data']
-        df.set_index('Timestamp', inplace=True)
-        return df
 
     def get_result_query(self, query, parameters):
         with self.driver.session() as session:

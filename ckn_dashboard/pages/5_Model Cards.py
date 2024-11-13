@@ -1,10 +1,11 @@
-from ckn_kg import CKNKnowledgeGraph
-from modelcards.mc_reconstructor import MCReconstructor
-from modelcards.patra_kg_server import search_kg, retrieve_mc
-import pandas as pd
 import os
+
 import streamlit as st
 from dotenv import load_dotenv
+from modelcards.mc_reconstructor import MCReconstructor
+from modelcards.patra_kg_server import search_kg, retrieve_mc
+
+from ckn_kg import CKNKnowledgeGraph
 
 load_dotenv()
 
@@ -24,12 +25,13 @@ st.set_page_config(
     layout="wide")
 
 st.header("Model Cards")
-st.sidebar.header("Model Cards Access")
-
-text_search = st.text_input("Search Model Cards", value="")
 
 model_card_ids = kg.get_model_card_ids()
+if model_card_ids.empty:
+    st.write("No model cards found.")
+    st.stop()
 
+text_search = st.text_input("Search Model Cards", value="")
 if text_search:
     if text_search != "":
         model_card_ids = search_kg(text_search, PATRA_SERVER)

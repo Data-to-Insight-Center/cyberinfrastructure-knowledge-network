@@ -1,9 +1,8 @@
+import os
+
 from dotenv import load_dotenv
-from langchain_community.chat_models import ChatOllama
-#from langchain_ollama.llms import OllamaLLM
 from langchain_community.graphs import Neo4jGraph
 from langchain_openai import ChatOpenAI
-import os
 
 load_dotenv()
 

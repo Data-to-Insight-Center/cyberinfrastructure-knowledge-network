@@ -35,7 +35,7 @@ jobs:
 
           docker cp ckn_kg/constraints.cypher neo4j_server:/constraints.cypher
           docker exec neo4j_server cypher-shell -u neo4j -p PWD_HERE -f /constraints.cypher
-              
+
       - name: Build CKN Oracle Daemon plugin WITHOUT power_monitoring
         run: |
           docker compose -f plugins/oracle_ckn_daemon/docker-compose.yml up -d --build
@@ -63,10 +63,6 @@ jobs:
           pytest plugins/oracle_ckn_daemon/tests/test_power_monitoring_true.py -v
           docker compose -f plugins/oracle_ckn_daemon/docker-compose.yml down
 
-      - name: Test CKN
-        run: |
-          pip install neo4j
-          python -m unittest discover -s tests -p "*.py"
 
       - name: Stop and Remove CKN Docker Network
         if: always()

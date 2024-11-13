@@ -54,7 +54,7 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_CREATE_TOPICS: "oracle-events:1:1,oracle-alerts:1:1,oracle-aggregated:1:1,compiler-data:1:1,compiler-optimization:1:1,cameratraps-power-summary:1:1,ckn-qoe:1:1"
+      KAFKA_CREATE_TOPICS: "oracle-events:1:1,oracle-alerts:1:1,oracle-aggregated:1:1,compiler-data:1:1,compiler-optimization:1:1,cameratraps-power-summary:1:1"
     networks:
       - ckn-network
 
@@ -101,6 +101,34 @@ services:
       - NEO4J_PWD=PWD_HERE
       - OPENAI_API_KEY=''
       - PATRA_SERVER=''
+    networks:
+      - ckn-network
+
+  oracle-alert-processor:
+    image: iud2i/ckn-cameratraps-acc-alert:latest
+    depends_on:
+      broker:
+        condition: service_healthy
+    environment:
+      - CKN_BROKERS=broker:29092
+      - ORACLE_ACC_CRITICAL_THRESHOLD=0.5
+      - ORACLE_INPUT_TOPIC=oracle-events
+      - ORACLE_ACC_ALERT_TOPIC=oracle-alerts
+      - APP_ID=ckn-camera-traps-oracle-processor
+    networks:
+      - ckn-network
+
+  oracle-aggr-processor:
+    image: iud2i/ckn-cameratraps-agg:latest
+    depends_on:
+      broker:
+        condition: service_healthy
+    environment:
+      - CKN_BROKERS=broker:29092
+      - CKN_ORACLE_WINDOW_TIME=1
+      - ORACLE_INPUT_TOPIC=oracle-events
+      - ORACLE_AGG_ALERT_TOPIC=oracle-aggregated
+      - APP_ID=ckn-camera-traps-oracle-aggreg
     networks:
       - ckn-network
 
