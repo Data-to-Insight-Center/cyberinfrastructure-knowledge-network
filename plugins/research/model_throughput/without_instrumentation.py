@@ -3,20 +3,25 @@ import time
 from statistics import mean
 
 import torch
+from PIL import Image
+from torchvision import transforms
 
-from model import pre_process
-
-IMAGE_PATH =  '/Users/neeleshkarthikeyan/d2i/cyberinfrastructure-knowledge-network/plugins/power_monitoring/device/data/images/abacus.jpg'
-MODEL = torch.hub.load('pytorch/vision:v0.10.0', 'resnet152', pretrained=True)
-MODEL.eval()
-
-# Use GPU if available
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-MODEL = MODEL.to(device)
-
-# Load labels
-with open("imagenet_classes.txt", "r") as f:
-    labels = [s.strip() for s in f.readlines()]
+def pre_process(filename):
+    """
+    Pre-processes the image to allow the image to be fed into the PyTorch model.
+    :param filename: Path to the image file.
+    :return: Pre-processed image tensor.
+    """
+    input_image = Image.open(filename).convert("RGB")  # Ensure the image is in RGB format
+    preprocess = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ])
+    input_tensor = preprocess(input_image)
+    input_batch = input_tensor.unsqueeze(0)
+    return input_batch
 
 async def async_pre_process(filename):
     """Async wrapper for pre_process to enable concurrent execution."""
@@ -57,17 +62,33 @@ async def measure_throughput(requests_per_second):
     times = await asyncio.gather(*tasks)
 
     # Calculate averages for queue time and compute time
-    avg_queue_time = mean([t[0] for t in times])
-    avg_compute_time = mean([t[1] for t in times])
+    avg_queue_time = round(mean([t[0] for t in times]), 3)
+    avg_compute_time = round(mean([t[1] for t in times]), 3)
     return avg_queue_time, avg_compute_time
 
 async def find_max_throughput(rps_values):
     """Test throughput limit by using specific RPS values."""
     for rps in rps_values:
+        # Show Start time for this rps
+        print(f"Start time for RPS {rps}: {time.strftime('%X')}")
         avg_queue_time, avg_compute_time = await measure_throughput(rps)
-        print(f"RPS: {rps}, Mean Queue Time: {avg_queue_time:.4f}s, Mean Compute Time: {avg_compute_time:.4f}s")
+        print(rps, avg_queue_time, avg_compute_time)
+        # Show End time for this rps
+        print(f"End time for RPS {rps}: {time.strftime('%X')}")
 
 # Run asyncio event loop to find throughput limit for specific RPS values
 if __name__ == '__main__':
-    rps_values = [10, 50, 100, 500, 1000]  # Specific RPS values
+    IMAGE_PATH = '../client/abacus.jpg'
+    MODEL = torch.hub.load('pytorch/vision:v0.10.0', 'mobilenet_v3_small', pretrained=True)
+    MODEL.eval()
+
+    # Use GPU if available
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    MODEL = MODEL.to(device)
+
+    # Load labels
+    with open("imagenet_classes.txt", "r") as f:
+        labels = [s.strip() for s in f.readlines()]
+
+    rps_values = [10, 50, 100, 500, 1000, 2000]  # Specific RPS values
     asyncio.run(find_max_throughput(rps_values))

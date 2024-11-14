@@ -1,11 +1,10 @@
-import torch
-import numpy as np
+import logging
+import traceback
 
+import torch
 from PIL import Image
 from fastapi import FastAPI, HTTPException, File, UploadFile
 from torchvision import transforms
-import logging
-import traceback
 
 # Initialize FastAPI app
 app = FastAPI()

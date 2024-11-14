@@ -9,7 +9,7 @@ import logging
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 
-URL = "http://172.17.0.2:8000/process-image/"
+URL = "http://149.165.172.62:8000/process-image/"
 IMAGE_PATH = "abacus.jpg"
 
 
