@@ -20,7 +20,7 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = './uploads'
 SERVER_ID = os.getenv('SERVER_ID', 'd2iedgeai3')
 
-KAFKA_BROKER = '149.165.170.250:9092'
+KAFKA_BROKER = os.getenv('CKN_KAFKA_BROKER', '172.18.0.5:9092')
 
 RAW_EVENT_TOPIC = os.getenv('RAW_EVENT_TOPIC', 'ckn_raw')
 START_DEPLOYMENT_TOPIC = os.getenv('START_DEPLOYMENT_TOPIC', 'ckn_start_deployment')
@@ -235,4 +235,4 @@ def process_w_qoe(file, data):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080, debug=False)
+    app.run(host="0.0.0.0", port=8081, debug=False)

@@ -1,0 +1,23 @@
+services:
+  ckn-daemon:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ckn-daemon
+    ports:
+      - "8080:8080"
+    privileged: true
+    pid: host
+    environment:
+      - POWER_CSV=/logs/power.csv
+      - RESULTS_CSV=/logs/results.csv
+      - TRAPS_POWER_BACKEND=tegrastats
+      - TZ=America/New_York
+      - KAFKA_BROKER=172.18.0.5:9092
+    volumes:
+      - .:/logs
+      - ./uploads:/app/uploads
+      - /run/jtop.sock:/run/jtop.sock
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: >
+      bash -c "python3 /app/power_logger.py & python3 /app/server.py"
