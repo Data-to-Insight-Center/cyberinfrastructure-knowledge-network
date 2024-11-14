@@ -9,7 +9,7 @@ from queue import Queue
 from confluent_kafka import Producer
 from dotenv import load_dotenv
 from flask import Flask, flash, request, redirect, jsonify
-from jtop import jtop
+# from jtop import jtop
 
 from model import predict, pre_process, model_store
 from server_utils import save_file, process_qoe, check_file_extension
@@ -20,7 +20,7 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = './uploads'
 SERVER_ID = os.getenv('SERVER_ID', 'd2iedgeai3')
 
-KAFKA_BROKER = os.getenv('CKN_KAFKA_BROKER', '172.18.0.5:9092')
+KAFKA_BROKER = os.getenv('CKN_KAFKA_BROKER', '149.165.170.250:9092')
 
 RAW_EVENT_TOPIC = os.getenv('RAW_EVENT_TOPIC', 'ckn_raw')
 START_DEPLOYMENT_TOPIC = os.getenv('START_DEPLOYMENT_TOPIC', 'ckn_start_deployment')
@@ -108,6 +108,7 @@ def send_model_change(new_model_id):
     # Update the previous_deployment_id with the current deployment_id
     previous_deployment_id = deployment_id
 
+
 @app.route('/predict', methods=['POST'])
 def qoe_predict():
     """
@@ -160,28 +161,28 @@ def process_w_qoe(file, data):
     total_start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
     filename = save_file(file)
 
-    with jtop() as jetson:
-        if jetson.ok():
-            stop_event = threading.Event()
-            cpu_power_queue = Queue()
-            gpu_power_queue = Queue()
-            tot_power_queue = Queue()
-
-            power_thread = threading.Thread(target=measure_average_power, args=(jetson, stop_event, cpu_power_queue, gpu_power_queue, tot_power_queue))
-            power_thread.start()
-
-            try:
-                compute_start_time = time.time()
-                preprocessed_input = pre_process(filename)
-                prediction, probability = predict(preprocessed_input)
-                compute_end_time = time.time()
-            finally:
-                stop_event.set()
-                power_thread.join()
-
-            cpu_power = cpu_power_queue.get() if not cpu_power_queue.empty() else 0
-            gpu_power = gpu_power_queue.get() if not gpu_power_queue.empty() else 0
-            total_power = tot_power_queue.get() if not tot_power_queue.empty() else 0
+    # with jtop() as jetson:
+    #     if jetson.ok():
+    #         stop_event = threading.Event()
+    cpu_power_queue = Queue()
+    gpu_power_queue = Queue()
+    tot_power_queue = Queue()
+    #
+    #         power_thread = threading.Thread(target=measure_average_power, args=(jetson, stop_event, cpu_power_queue, gpu_power_queue, tot_power_queue))
+    #         power_thread.start()
+    #
+    #         try:
+    preprocessed_input = pre_process(filename)
+    compute_start_time = time.time()
+    prediction, probability = predict(preprocessed_input)
+    compute_end_time = time.time()
+    #         finally:
+    #             stop_event.set()
+    #             power_thread.join()
+    #
+    cpu_power = cpu_power_queue.get() if not cpu_power_queue.empty() else 0
+    gpu_power = gpu_power_queue.get() if not gpu_power_queue.empty() else 0
+    total_power = tot_power_queue.get() if not tot_power_queue.empty() else 0
 
     compute_time = compute_end_time - compute_start_time
     device_id = data['client_id']
@@ -235,4 +236,4 @@ def process_w_qoe(file, data):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8081, debug=False)
+    app.run(host="0.0.0.0", port=8080, debug=False)

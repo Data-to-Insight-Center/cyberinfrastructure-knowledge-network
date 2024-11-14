@@ -79,6 +79,7 @@ def send_request(filename, file_location, payload):
     ]
     headers = {}
 
+    print(URL, headers, payload, files)
     response = requests.request("POST", URL, headers=headers, data=payload, files=files)
     total_time = datetime.datetime.now().microsecond/1000 - start_time
 
@@ -132,7 +133,7 @@ def main():
             # send each request along wih an image from the IMAGENET data
             for k in range(requests_count):
                 filename, file_location, payload = images_raspi_1[k], image_paths[k], json_requests[k]
-
+                print(filename, file_location, payload)
                 payload['ground_truth'] = filename.split('.')[0]
                 response, r_time = send_request(filename, file_location, payload)
 
