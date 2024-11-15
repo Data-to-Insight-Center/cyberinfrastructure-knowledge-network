@@ -1,2 +1,0 @@
-Method,Name,Error,Occurrences
-POST,/predict,CatchResponseError('Failed with status code: 500'),1861
