@@ -1,5 +1,7 @@
 # Cyberinfrastructure Knowledge Network (CKN)
 
+[![Build Status](https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network/actions/workflows/ci.yml/badge.svg)](https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network/actions)
+
 The Cyberinfrastructure Knowledge Network (CKN) is an extensible and portable distributed framework designed to optimize AI at the edge, particularly in dynamic environments where workloads on the edge server may change suddenly, such as in response to motion detection. CKN enhances edge-cloud collaboration by using historical data, graph representations, and adaptable deployment of AI models to meet changing demands in accuracy and latency at edge devices.
 
 CKN facilitates seamless connectivity between edge devices and the cloud through event streaming, enabling real-time data capture and processing. By leveraging event stream processing, CKN captures, aggregates, and stores historical data about system performance. This data is stored in a knowledge graph and used to model application behavior and optimize model selection and deployment at the edge.
@@ -24,8 +26,8 @@ Refer the [CKN paper](https://ieeexplore.ieee.org/document/10254827) for more in
 
 ### Prerequisites
 
-- **Docker** and **Docker Compose**: Ensure both are installed and running.
-- **Available Ports**: Ensure the following ports are available: `7474`, `7687`, `2181`, `9092`, `8083`, `8502`.
+- Ensure **Docker** and **Docker Compose** are installed.
+- Ensure the following ports are available: `7474`, `7687`, `2181`, `9092`, `8083`, `8502`.
 
 ### Quickstart
 
@@ -43,15 +45,17 @@ Refer the [CKN paper](https://ieeexplore.ieee.org/document/10254827) for more in
    ```
 
 2. **Produce an Example Event**:
-   To stream a sample event, navigate to the `examples` directory and run:
+   To stream a sample event, run the docker-compose in the `examples` directory:
     ```bash
    docker compose -f examples/docker-compose.yml up -d --build
    ```
    
-   View streamed data on the [CKN dashboard](http://localhost:8502/Camera_Traps) or via the [Neo4j Browser](http://localhost:7474/browser/). Use `neo4j` as the username and replace `PWD_HERE` with your password, then run:
-   ```cypher
-   MATCH (n) RETURN n
-   ```
+   View streamed data on the [CKN dashboard](http://localhost:8502/Camera_Traps) or via the [Neo4j Browser](http://localhost:7474/browser/). 
+
+   Use `neo4j` as the username and replace `PWD_HERE` with your password, then run:
+         ```cypher
+         MATCH (n) RETURN n
+         ```
 
 3. **Shut Down and Clean Up**:
    To stop and remove all running containers:
