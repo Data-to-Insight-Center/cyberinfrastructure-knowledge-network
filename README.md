@@ -55,7 +55,16 @@ Refer the [CKN paper](https://ieeexplore.ieee.org/document/10254827) for more in
    Access the [Neo4j Browser](http://localhost:7474/browser/) using `neo4j`and `PWD_HERE` as the username and password. 
    Run ```MATCH (n) RETURN n``` to view the streamed data in the knowledge graph.
 
-Shut down the services using ```make down``` and ```docker compose -f examples/docker-compose.yml down```
+  Shut down the services using ```make down``` and ```docker compose -f examples/docker-compose.yml down```
+
+---
+
+To create a custom plugin for CKN and stream events to the knowledge graph, follow the steps in the [documentation](https://cyberinfrastructure-knowledge-network.readthedocs.io/en/latest/). This includes:
+- Creating a Kafka topic for event storage.
+- Setting up a Neo4j Sink Connector to map events to the graph.
+- Registering the connector and restarting services.
+- Sending events to the Kafka topic.
+- Visualizing data on the CKN Dashboard and Neo4j Browser.
 
 ---
 
