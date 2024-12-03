@@ -19,3 +19,4 @@ env/
 # Configuration directories
 ckn_kg/neo4j/
 neo4j/
+/docs/build/

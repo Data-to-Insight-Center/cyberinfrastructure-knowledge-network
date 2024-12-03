@@ -1,6 +1,7 @@
 # Cyberinfrastructure Knowledge Network (CKN)
 
 [![Build Status](https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network/actions/workflows/ci.yml/badge.svg)](https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network/actions)
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 The Cyberinfrastructure Knowledge Network (CKN) is an extensible and portable distributed framework designed to optimize AI at the edge, particularly in dynamic environments where workloads on the edge server may change suddenly, such as in response to motion detection. CKN enhances edge-cloud collaboration by using historical data, graph representations, and adaptable deployment of AI models to meet changing demands in accuracy and latency at edge devices.
 
