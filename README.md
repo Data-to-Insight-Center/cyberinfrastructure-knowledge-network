@@ -31,38 +31,30 @@ Refer the [CKN paper](https://ieeexplore.ieee.org/document/10254827) for more in
 
 ### Quickstart
 
-1. **Clone the Repository and Start Services**:
+- **Clone the Repository and Start Services**
    ```bash
    git clone https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network.git
    ```
    ```bash
    make up
    ```
-
+   
    Once setup is complete, verify that all modules are running:
    ```bash
    docker compose ps
    ```
 
-2. **Produce an Example Event**:
-   To stream a sample event, run the docker-compose in the `examples` directory:
+- **Stream an example [camera-trap event](examples/event.json)**
     ```bash
    docker compose -f examples/docker-compose.yml up -d --build
    ```
    
-   View streamed data on the [CKN dashboard](http://localhost:8502/Camera_Traps) or via the [Neo4j Browser](http://localhost:7474/browser/). 
+   You can view the streamed data on the [CKN dashboard](http://localhost:8502/Camera_Traps).
+   
+   Access the [Neo4j Browser](http://localhost:7474/browser/) using `neo4j`and `PWD_HERE` as the username and password. 
+   Run ```MATCH (n) RETURN n``` to view the streamed data in the knowledge graph.
 
-   Use `neo4j` as the username and replace `PWD_HERE` with your password, then run:
-         ```cypher
-         MATCH (n) RETURN n
-         ```
-
-3. **Shut Down and Clean Up**:
-   To stop and remove all running containers:
-    ```bash
-   make down
-   docker compose -f examples/docker-compose.yml down
-    ```
+Shut down the services using ```make down``` and ```docker compose -f examples/docker-compose.yml down```
 
 ---
 
