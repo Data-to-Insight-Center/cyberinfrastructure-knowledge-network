@@ -1,8 +1,3 @@
-.. Cyberinfrastructure Knowledge Network documentation master file, created by
-   sphinx-quickstart on Tue Dec  3 17:43:28 2024.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Cyberinfrastructure Knowledge Network (CKN)
 ============================================
 .. image:: https://img.shields.io/badge/license-BSD%203--Clause-blue.svg
@@ -10,13 +5,13 @@ Cyberinfrastructure Knowledge Network (CKN)
    :alt: License: BSD 3-Clause
 
 Create your own plugin for CKN
----------------------------------
+------------------------------
 
 Follow these steps to stream custom events to the CKN knowledge graph:
 
 1. **Create a Kafka topic to store your events**
 
-   Update the `KAFKA_CREATE_TOPICS` environment variable in the `docker-compose.yml <https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network/blob/main/docker-compose.yml>`_ to include a new topic for your events.
+   Update the ``KAFKA_CREATE_TOPICS`` environment variable in the `docker-compose.yml <https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network/blob/main/docker-compose.yml>`_ to include a new topic for your events.
 
    .. code-block:: yaml
 
@@ -24,13 +19,13 @@ Follow these steps to stream custom events to the CKN knowledge graph:
         environment:
           KAFKA_CREATE_TOPICS: "my-custom-topic:1:1"
 
-   Replace `my-custom-topic` with the desired topic name. Ensure the format follows: `topic_name:partitions:replication_factor`.
+   Replace ``my-custom-topic`` with the desired topic name. Ensure the format follows: ``topic_name:partitions:replication_factor``.
 
 2. **Define a Neo4j connector**
 
    Create a Neo4j Sink Connector configuration file in the `ckn_broker <https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network/tree/main/ckn_broker>`_ directory.
 
-   For example, create a file named `neo4jsink-my-custom-topic-connector.json` with the following content:
+   For example, create a file named ``neo4jsink-my-custom-topic-connector.json`` with the following content:
 
    .. code-block:: json
 
@@ -62,11 +57,11 @@ Follow these steps to stream custom events to the CKN knowledge graph:
         }
       }
 
-   Replace `my-custom-topic` with your topic name and customize the Cypher query to map your event structure to the Neo4j schema.
+   Replace ``my-custom-topic`` with your topic name and customize the Cypher query to map your event structure to the Neo4j schema.
 
 3. **Register the connector**
 
-   Update the `setup_connector.sh <https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network/blob/main/ckn_broker/setup_connector.sh>`_ script in the `ckn_broker` directory to include a `curl` command for registering the new connector:
+   Update the `setup_connector.sh <https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network/blob/main/ckn_broker/setup_connector.sh>`_ script in the ``ckn_broker`` directory to include a ``curl`` command for registering the new connector:
 
    .. code-block:: bash
 
@@ -74,16 +69,64 @@ Follow these steps to stream custom events to the CKN knowledge graph:
            --data @/app/neo4jsink-my-custom-topic-connector.json \
            http://localhost:8083/connectors
 
-4. **Restart services**
+4. **Restart services if not already running**
 
-   Navigate to the root directory and restart the Docker Compose setup to apply the changes:
+   If the services are not already running, navigate to the root directory and start the Docker Compose setup to apply the changes:
 
    .. code-block:: bash
-
-      docker-compose down
       make up
 
 5. **Produce events to the topic**
+
+   **Option 1: Using Python**
+
+   Use the ``confluent_kafka`` library to write a script that reads event data from a JSON file and produces it to your Kafka topic. Below is an example script:
+
+   .. code-block:: python
+
+      from confluent_kafka import Producer
+      import json
+
+      # Kafka configuration
+      kafka_conf = {
+          'bootstrap.servers': 'localhost:9092',
+      }
+
+      producer = Producer(kafka_conf)
+
+      def delivery_report(err, msg):
+          """Callback for delivery reports."""
+          if err is not None:
+              print(f"Delivery failed: {err}")
+          else:
+              print(f"Message delivered to {msg.topic()} [{msg.partition()}]")
+
+      # Read JSON file and produce to Kafka topic
+      with open('events.json', 'r') as file:
+          events = json.load(file)
+          for event in events:
+              producer.produce('my-custom-topic', key=event['event_id'], value=json.dumps(event), callback=delivery_report)
+
+      # Wait for all messages to be delivered
+      producer.flush()
+
+   Save the script (e.g., ``produce_events.py``) and create a file named ``events.json`` with your event data:
+
+   .. code-block:: json
+
+      [
+          {"event_id": "123", "name": "Test Event", "timestamp": "2024-12-03T12:34:56Z", "data": {"key": "value"}},
+          {"event_id": "124", "name": "Another Event", "timestamp": "2024-12-03T12:35:56Z", "data": {"key2": "value2"}}
+      ]
+
+   Run the script to produce events:
+
+   .. code-block:: bash
+
+      python produce_events.py
+
+
+   **Option 2: Using Kafka CLI**
 
    Use a Kafka producer to send events to your custom topic. For example:
 
@@ -97,8 +140,10 @@ Follow these steps to stream custom events to the CKN knowledge graph:
 
       {"event_id": "123", "name": "Test Event", "timestamp": "2024-12-03T12:34:56Z", "data": {"key": "value"}}
 
+
 6. **Visualize the data**
+
    You can view the streamed data on the `CKN dashboard <http://localhost:8502/Camera_Traps>`_.
 
-   Access the `Neo4j Browser <http://localhost:7474/browser/>`_ using `neo4j`and `PWD_HERE` as the username and password.
-   Run ```MATCH (n) RETURN n``` to view the streamed data in the knowledge graph.
+   Access the `Neo4j Browser <http://localhost:7474/browser/>`_ using ``neo4j`` and ``PWD_HERE`` as the username and password.
+   Run ``MATCH (n) RETURN n`` to view the streamed data in the knowledge graph.
