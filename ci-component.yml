@@ -2,7 +2,7 @@
   name: Cyberinfrastructure Knowledge Network
   status: Release
   website: https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network
-  description: The Cyberinfrastructure Knowledge Network (CKN) is a distributed framework designed to optimize AI at the edge, particularly in dynamic environments where workloads on the edge server may change suddenly.
+  description: The Cyberinfrastructure Knowledge Network is a distributed framework designed to optimize AI at the edge.
   owner: Beth Plale
   primaryThrust: core/AI4CI
   sourceCodeUrl: https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network
@@ -23,6 +23,6 @@
   developerDocumentationAvailable: true
   developerDocumentationUrl: https://cyberinfrastructure-knowledge-network.readthedocs.io/en/latest/
   trainingTutorialsAvailable: false
-  trainingTutorialsUrl: false
+  trainingTutorialsUrl:
   usageMetricsCollected: false
   publicAccess: true
