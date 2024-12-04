@@ -73,8 +73,7 @@ To create a custom plugin for CKN and stream events to the knowledge graph, foll
 The Cyberinfrastructure Knowledge Network is copyrighted by the Indiana University Board of Trustees and is distributed under the BSD 3-Clause License. See `LICENSE.txt` for more information.
 
 ## Acknowledgements
-This work has been funded by grants from the National Science Foundation, including the ICICLE AI Institute (OAC 2112606).
-
+This research is funded in part through the National Science Foundation under award #2112606, AI Institute for Intelligent CyberInfrastructure with Computational Learning in the Environment (ICICLE).
 ## Reference
 
 S. Withana and B. Plale, "CKN: An Edge AI Distributed Framework," *2023 IEEE 19th International Conference on e-Science (e-Science)*, Limassol, Cyprus, 2023, pp. 1-10, doi: 10.1109/e-Science58273.2023.10254827.

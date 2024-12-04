@@ -8,11 +8,11 @@ services:
       - "7474:7474"
       - "7687:7687"
     environment:
-      - NEO4J_AUTH=neo4j/PWD_HERE
+      - NEO4J_AUTH=neo4j/#d2i-patra-llm-test#21
       - NEO4J_apoc_export_file_enabled=true
       - NEO4J_apoc_import_file_enabled=true
       - NEO4J_apoc_import_file_use__neo4j__config=true
-      - NEO4JLABS_PLUGINS=["apoc", "graph-data-science"]
+      - NEO4J_PLUGINS=["apoc", "graph-data-science"]
       - NEO4J_dbms_security_procedures_whitelist=gds.*, apoc.*
       - NEO4J_dbms_security_procedures_unrestricted=gds.*, apoc.*
     volumes:
