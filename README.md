@@ -1,5 +1,6 @@
 # Cyberinfrastructure Knowledge Network (CKN)
 
+[![Documentation Status](https://img.shields.io/badge/docs-latest-blue.svg)](https://cyberinfrastructure-knowledge-network.readthedocs.io/en/latest/)
 [![Build Status](https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network/actions/workflows/ci.yml/badge.svg)](https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network/actions)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
@@ -19,7 +20,7 @@ The primary objective of CKN is to provide a robust framework that optimizes AI 
 
 Refer the [CKN paper](https://ieeexplore.ieee.org/document/10254827) for more information.
 
-<img src="ckn-design.png" alt="CKN Design" style="width:100%;">
+<img src="docs/ckn-design.png" alt="CKN Design" style="width:100%;">
 
 ---
 
@@ -57,9 +58,8 @@ Refer the [CKN paper](https://ieeexplore.ieee.org/document/10254827) for more in
 
   Shut down the services using ```make down``` and ```docker compose -f examples/docker-compose.yml down```
 
----
 
-To create a custom plugin for CKN and stream events to the knowledge graph, refer to the `CKN Documentation <https://cyberinfrastructure-knowledge-network.readthedocs.io/en/latest/>`_.
+To create a custom plugin for CKN and stream events to the knowledge graph, refer to the [documentation](https://cyberinfrastructure-knowledge-network.readthedocs.io/en/latest/).
 
 ---
 
