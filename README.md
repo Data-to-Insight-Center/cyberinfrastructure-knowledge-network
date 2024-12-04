@@ -59,12 +59,7 @@ Refer the [CKN paper](https://ieeexplore.ieee.org/document/10254827) for more in
 
 ---
 
-To create a custom plugin for CKN and stream events to the knowledge graph, follow the steps in the [documentation](https://cyberinfrastructure-knowledge-network.readthedocs.io/en/latest/). This includes:
-- Creating a Kafka topic for event storage.
-- Setting up a Neo4j Sink Connector to map events to the graph.
-- Registering the connector and restarting services.
-- Sending events to the Kafka topic.
-- Visualizing data on the CKN Dashboard and Neo4j Browser.
+To create a custom plugin for CKN and stream events to the knowledge graph, refer to the `CKN Documentation <https://cyberinfrastructure-knowledge-network.readthedocs.io/en/latest/>`_.
 
 ---
 
