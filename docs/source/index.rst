@@ -9,17 +9,12 @@ Welcome to the **Cyberinfrastructure Knowledge Network (CKN)**! This guide will 
 Table of Contents
 ------------------
 
-1. `Prerequisites <#prerequisites>`_
-2. `Step 1: Set Up Your Environment <#step-1-set-up-your-environment>`_
-3. `Step 2: Create a Kafka Topic for Temperature Events <#step-2-create-a-kafka-topic-for-temperature-events>`_
-4. `Step 3: Produce Temperature Events <#step-3-produce-temperature-events>`_
-5. `Step 4: Consume and View Events <#step-4-consume-and-view-events>`_
-6. `Step 5: Connect Kafka to Neo4j <#step-5-connect-kafka-to-neo4j>`_
-7. `Step 6: Visualize Data in Neo4j <#step-6-visualize-data-in-neo4j>`_
-8. `Troubleshooting <#troubleshooting>`_
-9. `Next Steps <#next-steps>`_
-
-.. _prerequisites:
+1. `Set Up Your Environment <#step-1>`_
+2. `Create a Kafka Topic for Temperature Events <#step-2>`_
+3. `Produce Temperature Events <#step-3>`_
+4. `Consume and View Events <#step-4>`_
+5. `Connect Kafka to Neo4j <#step-5>`_
+6. `Visualize Data in Neo4j <#step-6>`_
 
 Prerequisites
 -------------
@@ -30,7 +25,7 @@ Before you begin, ensure you have the following installed on your machine:
 - **Git**: To clone the CKN repository.
 - **Basic Command-Line Knowledge**: Familiarity with terminal commands.
 
-.. _step-1-set-up-your-environment:
+.. _step-1:
 
 Step 1: Set Up Your Environment
 -------------------------------
@@ -51,16 +46,16 @@ Step 1: Set Up Your Environment
 
    *Wait a few moments for all services to initialize.*
 
-.. _step-2-create-a-kafka-topic-for-temperature-events:
+.. _step-2:
 
 Step 2: Create a Kafka Topic for Temperature Events
 ---------------------------------------------------
 
 We'll create a Kafka topic named ``temperature-sensor-data`` to store temperature events from various sensors.
 
-1. **Update ``docker-compose.yml``**
+1. **Update `docker-compose.yml`**
 
-   Open the ``docker-compose.yml`` file and add the new topic to the Kafka broker configuration.
+   Open the ``docker-compose.yml`` file in the root directory and add the new topic to the Kafka broker configuration.
 
    .. code-block:: yaml
 
@@ -75,12 +70,12 @@ We'll create a Kafka topic named ``temperature-sensor-data`` to store temperatur
 
    .. code-block:: bash
 
-      docker compose down
+      make down
       make up
 
-   *Alternatively, you can use Kafka CLI tools to create the topic without modifying ``docker-compose.yml``. But this is not persistent and will be removed once CKN broker is restarted.*
+   *Alternatively, you can use Kafka CLI tools to create the topic without modifying `docker-compose.yml`. But this is not persistent and will be removed once CKN broker is restarted.*
 
-.. _step-3-produce-temperature-events:
+.. _step-3:
 
 Step 3: Produce Temperature Events
 ----------------------------------
@@ -89,11 +84,11 @@ We'll use a Python script to simulate temperature data from different sensors an
 
 1. **Install Required Python Libraries**
 
-   Ensure you have ``confluent_kafka`` installed.
+   In this tutorial, we'll use the `confluent-kafka <https://pypi.org/project/confluent-kafka/>`_ library. You can use other Kafka libraries if you prefer.
 
    .. code-block:: bash
 
-      pip install confluent_kafka
+      pip install confluent-kafka
 
 2. **Create the Producer Script**
 
@@ -140,7 +135,7 @@ We'll use a Python script to simulate temperature data from different sensors an
 
    *You should see a confirmation message indicating that 10 events have been produced.*
 
-.. _step-4-consume-and-view-events:
+.. _step-4:
 
 Step 4: Consume and View Events
 -------------------------------
@@ -149,7 +144,7 @@ To verify that your events are being sent correctly, use a Kafka consumer to vie
 
 1. **Access Kafka CLI**
 
-   Enter the Kafka container.
+   Enter the Kafka container to run the consumer.
 
    .. code-block:: bash
 
@@ -165,9 +160,9 @@ To verify that your events are being sent correctly, use a Kafka consumer to vie
 
 3. **Exit the Consumer**
 
-   Press ``Ctrl + C`` to stop the consumer.
+    In Mac or Linux, press ``Ctrl + C`` to stop the consumer. Or in Windows, press ``Ctrl + Break``.
 
-.. _step-5-connect-kafka-to-neo4j:
+.. _step-5:
 
 Step 5: Connect Kafka to Neo4j
 ------------------------------
@@ -226,12 +221,12 @@ We'll set up a Kafka Connector to stream temperature events into the Neo4j knowl
 
    .. code-block:: bash
 
-      docker compose down
+      make down
       make up
 
    *CKN will automatically register the new connector upon startup.*
 
-.. _step-6-visualize-data-in-neo4j:
+.. _step-6:
 
 Step 6: Visualize Data in Neo4j
 -------------------------------
@@ -262,8 +257,6 @@ With the connector in place, temperature events are now being streamed to Neo4j.
 
    Use Neo4j's visualization tools to explore relationships, filter data, and gain insights from your temperature monitoring use case.
 
-.. _troubleshooting:
-
 Troubleshooting
 ---------------
 
@@ -279,8 +272,6 @@ Troubleshooting
   - Confirm that the producer is sending events to the correct Kafka topic.
   - Check the Kafka consumer to ensure events are being published.
   - Review connector logs for any errors.
-
-.. _next-steps:
 
 Next Steps
 ----------

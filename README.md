@@ -26,6 +26,8 @@ Refer the [CKN paper](https://ieeexplore.ieee.org/document/10254827) for more in
 
 ## Getting Started
 
+Refer the [documentation](https://cyberinfrastructure-knowledge-network.readthedocs.io/en/latest/) for a detailed guide on creating a custom plugin and streaming events to the knowledge graph.
+
 ### Prerequisites
 
 - Ensure **Docker** and **Docker Compose** are installed.
@@ -41,10 +43,7 @@ Refer the [CKN paper](https://ieeexplore.ieee.org/document/10254827) for more in
    make up
    ```
    
-   Once setup is complete, verify that all modules are running:
-   ```bash
-   docker compose ps
-   ```
+   Once setup is complete, verify that all modules are running with `docker compose ps`
 
 - **Stream an example [camera-trap event](examples/event.json)**
     ```bash
@@ -58,17 +57,13 @@ Refer the [CKN paper](https://ieeexplore.ieee.org/document/10254827) for more in
 
   Shut down the services using ```make down``` and ```docker compose -f examples/docker-compose.yml down```
 
-
-To create a custom plugin for CKN and stream events to the knowledge graph, refer to the [documentation](https://cyberinfrastructure-knowledge-network.readthedocs.io/en/latest/).
-
 ---
 
 ## License
-
 The Cyberinfrastructure Knowledge Network is copyrighted by the Indiana University Board of Trustees and is distributed under the BSD 3-Clause License. See `LICENSE.txt` for more information.
 
 ## Acknowledgements
 This research is funded in part through the National Science Foundation under award #2112606, AI Institute for Intelligent CyberInfrastructure with Computational Learning in the Environment (ICICLE).
-## Reference
 
+## Reference
 S. Withana and B. Plale, "CKN: An Edge AI Distributed Framework," *2023 IEEE 19th International Conference on e-Science (e-Science)*, Limassol, Cyprus, 2023, pp. 1-10, doi: 10.1109/e-Science58273.2023.10254827.
