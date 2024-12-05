@@ -152,7 +152,7 @@ To verify that your events are being sent correctly, use a Kafka consumer to vie
 
       docker exec -it broker bash
 
-    *Ensure to modify the container name (broker) in the command if your Kafka container has a different name.*
+   *Ensure to modify the container name (broker) in the command if your Kafka container has a different name.*
 
 2. **Start a Kafka Consumer**
 
@@ -215,7 +215,7 @@ We'll set up a Kafka Connector to stream temperature events into the Neo4j knowl
 
    .. code-block:: bash
 
-      curl -X POST -H "Content-Type: application/json" --data @/app/@neo4jsink-temperature-connector.json http://localhost:8083/connectors
+      curl -X POST -H "Content-Type: application/json" --data @/app/neo4jsink-temperature-connector.json http://localhost:8083/connectors
 
 4. **Restart Docker Compose to Register the Connector**
 
