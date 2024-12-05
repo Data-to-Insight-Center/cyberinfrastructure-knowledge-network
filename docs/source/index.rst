@@ -86,6 +86,8 @@ We'll use a Python script to simulate temperature data from different sensors an
 
    In this tutorial, we'll use the `confluent-kafka <https://pypi.org/project/confluent-kafka/>`_ library. You can use other Kafka libraries if you prefer.
 
+   We recommend creating a new virtual environment using venv before installing confluent-kafka. To do so, please follow instructions `here<https://docs.python.org/3/library/venv.html>`_.
+
    .. code-block:: bash
 
       pip install confluent-kafka
@@ -148,7 +150,9 @@ To verify that your events are being sent correctly, use a Kafka consumer to vie
 
    .. code-block:: bash
 
-      docker exec -it cyberinfrastructure-knowledge-network_broker_1 bash
+      docker exec -it broker bash
+
+    *Ensure to modify the container name (broker) in the command if your Kafka container has a different name.*
 
 2. **Start a Kafka Consumer**
 
@@ -211,9 +215,7 @@ We'll set up a Kafka Connector to stream temperature events into the Neo4j knowl
 
    .. code-block:: bash
 
-      curl -X POST -H "Content-Type: application/json" \
-         --data @neo4jsink-temperature-connector.json \
-         http://localhost:8083/connectors
+      curl -X POST -H "Content-Type: application/json" --data @/app/@neo4jsink-temperature-connector.json http://localhost:8083/connectors
 
 4. **Restart Docker Compose to Register the Connector**
 
@@ -225,6 +227,12 @@ We'll set up a Kafka Connector to stream temperature events into the Neo4j knowl
       make up
 
    *CKN will automatically register the new connector upon startup.*
+
+5. **Execute the script to send temperature events.**
+
+   .. code-block:: bash
+
+      python produce_temperature_events.py
 
 .. _step-6:
 
