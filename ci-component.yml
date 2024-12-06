@@ -1,6 +1,6 @@
 - id: CKN:0.1.0
   name: Cyberinfrastructure Knowledge Network
-  status: Release
+  status: ProductionRelease
   website: https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network
   description: The Cyberinfrastructure Knowledge Network is a distributed framework designed to optimize AI at the edge.
   owner: Beth Plale
