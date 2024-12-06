@@ -86,7 +86,7 @@ We'll use a Python script to simulate temperature data from different sensors an
 
    In this tutorial, we'll use the `confluent-kafka <https://pypi.org/project/confluent-kafka/>`_ library. You can use other Kafka libraries if you prefer.
 
-   We recommend creating a new virtual environment using venv before installing confluent-kafka. To do so, please follow instructions `here<https://docs.python.org/3/library/venv.html>`_.
+   We recommend creating a new virtual environment using venv before installing confluent-kafka. To do so, please follow instructions `here <https://docs.python.org/3/library/venv.html>`_.
 
    .. code-block:: bash
 
@@ -161,6 +161,9 @@ To verify that your events are being sent correctly, use a Kafka consumer to vie
       kafka-console-consumer --bootstrap-server localhost:9092 --topic temperature-sensor-data --from-beginning
 
    *You should see JSON-formatted temperature events being printed.*
+
+    .. image:: ../consumer.png
+
 
 3. **Exit the Consumer**
 
@@ -259,7 +262,11 @@ With the connector in place, temperature events are now being streamed to Neo4j.
       MATCH (s:Sensor)-[:REPORTED]->(r:TemperatureReading)
       RETURN s, r
 
-   *You should see nodes representing sensors connected to their respective temperature readings.*
+   *You should see nodes representing sensors connected to their respective temperature readings like the image below:*
+
+    .. image:: ../graph.png
+
+
 
 4. **Explore the Graph**
 
