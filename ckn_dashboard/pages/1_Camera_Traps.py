@@ -3,6 +3,7 @@ import os
 import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
+import json
 
 from ckn_kg import CKNKnowledgeGraph
 
@@ -57,6 +58,63 @@ def get_experiment_indicators(experiment_id, experiment_df, model_id):
     device_info = kg.get_device_type(experiment_id)
 
     return date_str, time_str, model_name, device_info, average_accuracy
+
+def calculate_accuracy_from_experiment(experiment_details):
+    """
+    Calculate the accuracy of model predictions against ground truth labels.
+    """
+
+    total = 0
+    correct = 0
+    missing_ground_truth = 0
+    missing_or_invalid_scores = 0
+
+    for index, row in experiment_details.iterrows():
+        ground_truth = row.get("Ground Truth")
+        scores_str = row.get("Scores", "")
+
+        # Check for missing Ground Truth
+        if pd.isna(ground_truth):
+            missing_ground_truth += 1
+            continue
+
+        # Check for missing or empty Scores
+        if pd.isna(scores_str) or not isinstance(scores_str, str) or not scores_str.strip():
+            missing_or_invalid_scores += 1
+            continue
+
+        try:
+            # Parse the JSON string in Scores
+            scores = json.loads(scores_str)
+        except json.JSONDecodeError:
+            missing_or_invalid_scores += 1
+            continue
+
+        # Aggregate probabilities per label
+        label_prob = {}
+        for entry in scores:
+            label = entry.get("label")
+            probability = entry.get("probability", 0)
+            if label:
+                label_prob[label] = label_prob.get(label, 0) + probability
+
+        if not label_prob:
+            missing_or_invalid_scores += 1
+            continue
+
+        # Determine the predicted label with the highest aggregated probability
+        predicted_label = max(label_prob, key=label_prob.get)
+
+        # Update total and correct counts
+        total += 1
+        if predicted_label.lower() == ground_truth.lower():
+            correct += 1
+
+    # Calculate accuracy
+    accuracy = (correct / total) * 100 if total > 0 else 0
+
+    return accuracy
+
 
 def get_power_info(deployment_info):
     """
@@ -123,6 +181,9 @@ if selected_experiment:
         # get the experiment details for the selected experiment
         experiment_info = kg.get_exp_info_raw(selected_experiment)
 
+        # calculate experiment accuracy
+        experiment_accuracy = calculate_accuracy_from_experiment(experiment_info)
+
         # extracting model id and drop
         model_id = experiment_info['Model'].iloc[0]
         experiment_info = experiment_info.drop(columns=['Model'])
@@ -140,7 +201,7 @@ if selected_experiment:
         columns[0].metric(label="Start Time", value=f"{date_str} {time_str} EDT")
         columns[1].metric(label="Model", value=model_name)
         columns[2].metric(label="Device Type", value=device_info)
-        columns[3].metric(label="Average Accuracy [%]", value=average_accuracy)
+        columns[3].metric(label="Average Accuracy [%]", value=experiment_accuracy)
 
         if end_date and end_time:
             columns[-1].metric(label="End time", value=f"{end_date} {end_time} EDT")
