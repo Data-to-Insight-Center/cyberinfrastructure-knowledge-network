@@ -182,7 +182,7 @@ if selected_experiment:
         experiment_info = kg.get_exp_info_raw(selected_experiment)
 
         # calculate experiment accuracy
-        experiment_accuracy = calculate_accuracy_from_experiment(experiment_info)
+        # experiment_accuracy = calculate_accuracy_from_experiment(experiment_info)
 
         # extracting model id and drop
         model_id = experiment_info['Model'].iloc[0]
@@ -201,7 +201,7 @@ if selected_experiment:
         columns[0].metric(label="Start Time", value=f"{date_str} {time_str} EDT")
         columns[1].metric(label="Model", value=model_name)
         columns[2].metric(label="Device Type", value=device_info)
-        columns[3].metric(label="Average Accuracy [%]", value=experiment_accuracy)
+        columns[3].metric(label="Average Accuracy [%]", value=average_accuracy)
 
         if end_date and end_time:
             columns[-1].metric(label="End time", value=f"{end_date} {end_time} EDT")
