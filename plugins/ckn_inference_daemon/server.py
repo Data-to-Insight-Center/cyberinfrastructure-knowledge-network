@@ -4,6 +4,8 @@ import logging
 import uvicorn
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.responses import JSONResponse
+from util import get_model_id
+from datetime import datetime
 
 from model import predict, pre_process, load_model
 from message_broker.ingester import KafkaIngester
@@ -22,15 +24,16 @@ logger = logging.getLogger(__name__)
 # Read configuration from environment variables
 UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "./uploads")
 ACCEPTED_EXTENSIONS = set(os.getenv("ACCEPTED_EXTENSIONS", "png,jpg,jpeg").split(","))
-EDGE_ID = os.getenv("SERVER_ID", "EDGE-1")
+SERVER_ID = os.getenv("SERVER_ID", "EDGE-1")
 SERVER_LIST = os.getenv("SERVER_LIST", "localhost:9092")
 INFERENCE_TOPIC = os.getenv("INFERENCE_TOPIC", "edge-inference")
+MODEL = os.getenv("MODEL_URL", "http://<IP>:5002/download_mc?id=e8a5ce7ef628be00617e36b32e45c84bc961f32f502b4d71c391bc686bfc6cb0")
 # PERF_FILENAME = os.getenv("PERF_FILENAME", "./timers.csv")
 # INFERENCE_QOE_TOPIC = os.getenv("INFERENCE_QOE_TOPIC", "edge-inference-qoe")
 # MODEL_DEPLOYMENT_TOPIC = os.getenv("MODEL_DEPLOYMENT_TOPIC", "model-deployments")
 
 # Instantiate Kafka producers
-# edge_pred_producer = KafkaIngester(SERVER_LIST, INFERENCE_TOPIC)
+edge_pred_producer = KafkaIngester(SERVER_LIST, INFERENCE_TOPIC)
 # producer = KafkaIngester(SERVER_LIST, INFERENCE_QOE_TOPIC)
 # model_producer = KafkaIngester(SERVER_LIST, MODEL_DEPLOYMENT_TOPIC)
 
@@ -39,7 +42,6 @@ INFERENCE_TOPIC = os.getenv("INFERENCE_TOPIC", "edge-inference")
 # current_window = Window()
 
 app = FastAPI()
-
 
 @app.post("/predict")
 async def predict_endpoint(
@@ -76,12 +78,16 @@ async def predict_endpoint(
 
     # send event to edge-predictions topic
     edge_prediction_event = {
-        "server_id": EDGE_ID,
+        "server_id": SERVER_ID,
         "prediction": prediction,
         "probability": probability,
-        "compute_time": compute_time
+        "compute_time": compute_time,
+        "model_name": get_model_id(MODEL),
+        "ground_truth": label if label is not None else None,
+        "accuracy": result.get("accuracy", None),
+        "timestamp": int(datetime.now().timestamp() * 1000)
     }
-    # edge_pred_producer.send_request(edge_prediction_event, key=EDGE_ID)
+    edge_pred_producer.send_request(edge_prediction_event, key=SERVER_ID)
 
     return JSONResponse(content=result)
 
@@ -197,6 +203,7 @@ async def predict_endpoint(
 #     current_window.num_requests = 0
 #
 #     return {"message": "Model changed", "new_model": new_model}
+
 
 
 if __name__ == "__main__":

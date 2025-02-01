@@ -3,8 +3,20 @@ import time
 import csv
 import logging
 from werkzeug.utils import secure_filename
+from urllib.parse import urlparse, parse_qs
 
 logger = logging.getLogger(__name__)
+
+def get_model_id(url: str) -> str:
+    """
+    Extracts and returns the model_id from the given URL string.
+    """
+    parsed_url = urlparse(url)
+    query_params = parse_qs(parsed_url.query)
+    uuid_list = query_params.get("id")
+    if not uuid_list:
+        raise ValueError("UUID not found in the URL.")
+    return uuid_list[0] + '-model'
 
 def check_file_extension(filename: str, accepted_extensions: set) -> bool:
     """Ensure the uploaded file has one of the accepted image extensions."""
