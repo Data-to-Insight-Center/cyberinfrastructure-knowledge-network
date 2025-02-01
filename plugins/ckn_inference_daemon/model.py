@@ -1,5 +1,5 @@
 import os
-from plugins.ckn_inference_daemon.models.model_store import ModelStore
+from models.model_store import ModelStore
 
 # Read the model type from configuration (defaulting to imagenet)
 MODEL_TYPE = os.getenv("MODEL_TYPE", "imagenet").lower()

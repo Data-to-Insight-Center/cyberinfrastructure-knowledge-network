@@ -8,7 +8,7 @@ import json
 class ModelStore:
     def __init__(self):
         # Read configuration for model loading
-        self.model_info_endpoint = os.getenv("MODEL_URL", "http://149.165.172.217:5002/download_mc?id=e8a5ce7ef628be00617e36b32e45c84bc961f32f502b4d71c391bc686bfc6cb0")
+        self.model_info_endpoint = os.getenv("MODEL_URL", "http://<IP>:5002/download_mc?id=e8a5ce7ef628be00617e36b32e45c84bc961f32f502b4d71c391bc686bfc6cb0")
         self.loader_type = os.getenv("MODEL_LOAD_TYPE", "pt")  # Either "pt" or "transformers"
 
         # get the model details

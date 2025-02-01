@@ -10,4 +10,4 @@ uvicorn~=0.34.0
 fastapi~=0.115.8
 kafka-python~=2.0.2
 huggingface-hub~=0.28.1
-python-multipart
+python-multipart~=0.0.20

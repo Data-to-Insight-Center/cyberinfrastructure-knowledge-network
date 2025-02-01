@@ -6,7 +6,7 @@ from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.responses import JSONResponse
 
 from model import predict, pre_process, load_model
-from plugins.ckn_inference_daemon.message_broker.ingester import KafkaIngester
+from message_broker.ingester import KafkaIngester
 # from ckn.src.daemon.controller import predictive_placement
 # from ckn.src.messagebroker.kafka_ingester import KafkaIngester
 
