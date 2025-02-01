@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  ckn-inference-daemon:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ckn-inference-daemon
+    environment:
+      - UPLOAD_FOLDER=./uploads
+      - ACCEPTED_EXTENSIONS=png,jpg,jpeg
+      - SERVER_ID=EDGE-1
+      - SERVER_LIST=localhost:9092
+      - INFERENCE_TOPIC=edge-inference
+      - MODEL_URL=http://149.165.172.217:5002/download_mc?id=e8a5ce7ef628be00617e36b32e45c84bc961f32f502b4d71c391bc686bfc6cb0
+      - MODEL_LOAD_TYPE=pt
+      - MODEL_TYPE=imagenet
+      - IMAGENET_CLASSES_PATH=./imagenet_classes.txt
+#    volumes:
+#      - ./events:/oracle_logs:rw
+#      - ./events:/power_logs:rw
+
+    networks:
+      - ckn-network
+
+networks:
+  ckn-network:
+    external: true
