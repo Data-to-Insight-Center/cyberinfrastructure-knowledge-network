@@ -2,10 +2,10 @@ version: '3.8'
 
 services:
   ckn-inference-daemon:
-    image: sha256:44878e7ed4f40a6a66924c8f064faf2e9cac00ffb4e0e3db9d05828da212575c
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
+#    image: sha256:44878e7ed4f40a6a66924c8f064faf2e9cac00ffb4e0e3db9d05828da212575c
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: ckn-inference-daemon
     environment:
       - UPLOAD_FOLDER=./uploads
