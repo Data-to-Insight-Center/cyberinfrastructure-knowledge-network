@@ -5,18 +5,43 @@ import logging
 from werkzeug.utils import secure_filename
 from urllib.parse import urlparse, parse_qs
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)  # Get logger for this module
 
-def get_model_id(url: str) -> str:
+def setup_logging(log_file="ckn_inference_daemon.log", log_level=logging.INFO):
+    """Sets up logging for the application."""
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+    # Create handlers
+    # fh = logging.FileHandler(log_file)  # Log to file
+    # fh.setFormatter(formatter)
+    ch = logging.StreamHandler()      # Log to console
+    ch.setFormatter(formatter)
+
+    logger = logging.getLogger()
+    logger.setLevel(log_level)
+    # logger.addHandler(fh)
+    logger.addHandler(ch)
+    return logger
+
+
+def get_model_id(input_str: str) -> str:
     """
-    Extracts and returns the model_id from the given URL string.
+    Extracts and returns the model_id from the given string.
+    If the input is a URL, it extracts the 'id' parameter and appends '-model'.
+    If the input is not a URL, it returns the input string as is.
     """
-    parsed_url = urlparse(url)
-    query_params = parse_qs(parsed_url.query)
-    uuid_list = query_params.get("id")
-    if not uuid_list:
-        raise ValueError("UUID not found in the URL.")
-    return uuid_list[0] + '-model'
+    try:
+        parsed_url = urlparse(input_str)
+        if parsed_url.scheme and parsed_url.netloc:
+            query_params = parse_qs(parsed_url.query)
+            uuid_list = query_params.get("id")
+            if not uuid_list:
+                raise ValueError("UUID not found in the URL.")
+            return uuid_list[0] + '-model'
+        else:
+            return input_str
+    except ValueError:
+        return input_str
 
 def check_file_extension(filename: str, accepted_extensions: set) -> bool:
     """Ensure the uploaded file has one of the accepted image extensions."""

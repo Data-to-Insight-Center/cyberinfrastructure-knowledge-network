@@ -1,8 +1,10 @@
+import logging
 import os
 from models.model_store import ModelStore
+logger = logging.getLogger(__name__)
 
 # Read the model type from configuration (defaulting to imagenet)
-MODEL_TYPE = os.getenv("MODEL_TYPE", "imagenet").lower()
+MODEL_TYPE = os.getenv("MODEL_TYPE", "vision_transformer").lower()
 
 # Instantiate the model store (which handles model retrieval and loading).
 model_store = ModelStore()
@@ -16,6 +18,11 @@ def _get_plugin_instance():
         return ImageNetModel(
             model_store.model,
             getattr(model_store, "feature_extractor", None)
+        )
+    elif MODEL_TYPE == "vision_transformer":
+        from models.hf_transformer_vision_llm import HFTransformerVisionLLM
+        return HFTransformerVisionLLM(
+            model_store.model
         )
     # elif MODEL_TYPE == "sound":
     #     from sound_model import SoundModel

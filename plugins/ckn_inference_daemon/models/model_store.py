@@ -8,15 +8,19 @@ import json
 class ModelStore:
     def __init__(self):
         # Read configuration for model loading
-        self.model_info_endpoint = os.getenv("MODEL_URL", "http://<IP>:5002/download_mc?id=e8a5ce7ef628be00617e36b32e45c84bc961f32f502b4d71c391bc686bfc6cb0")
-        self.loader_type = os.getenv("MODEL_LOAD_TYPE", "pt")  # Either "pt" or "transformers"
+        # self.model_info_endpoint = os.getenv("MODEL_URL", "http://<IP>:5002/download_mc?id=e8a5ce7ef628be00617e36b32e45c84bc961f32f502b4d71c391bc686bfc6cb0")
+        self.model_info_endpoint = os.getenv("MODEL_URL", "HuggingFaceTB/SmolVLM-500M-Instruct")
+        self.loader_type = os.getenv("MODEL_LOAD_TYPE", "transformer")  # Either "pt" or "transformer"
 
-        # get the model details
-        self.repo, self.filename = self.get_model(self.model_info_endpoint)
+        if self.loader_type == "pt":
+            # get the model details
+            self.repo, self.filename = self.get_model(self.model_info_endpoint)
 
-        # Load the model based on the specified loader type
-        self.model = self.load_model(self.repo, self.filename)
-        self.model.eval()
+            # Load the model based on the specified loader type
+            self.model = self.load_model(self.repo, self.filename)
+            self.model.eval()
+        elif self.loader_type == "transformer":
+            self.model = self.model_info_endpoint
 
     def get_model(self, model_url):
         # Retrieve the model location from the Patra HTTP endpoint

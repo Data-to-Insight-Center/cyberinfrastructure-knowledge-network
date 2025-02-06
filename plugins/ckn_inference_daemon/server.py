@@ -4,9 +4,8 @@ import logging
 import uvicorn
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.responses import JSONResponse
-from util import get_model_id
+from util import get_model_id, setup_logging
 from datetime import datetime
-
 from model import predict, pre_process, load_model
 from message_broker.ingester import KafkaIngester
 # from ckn.src.daemon.controller import predictive_placement
@@ -18,8 +17,6 @@ from util import (
     send_summary_event, write_perf_file, Window
 )
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 # Read configuration from environment variables
 UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "./uploads")
@@ -27,7 +24,7 @@ ACCEPTED_EXTENSIONS = set(os.getenv("ACCEPTED_EXTENSIONS", "png,jpg,jpeg").split
 SERVER_ID = os.getenv("SERVER_ID", "EDGE-1")
 SERVER_LIST = os.getenv("SERVER_LIST", "localhost:9092")
 INFERENCE_TOPIC = os.getenv("INFERENCE_TOPIC", "edge-inference")
-MODEL = os.getenv("MODEL_URL", "http://<IP>:5002/download_mc?id=e8a5ce7ef628be00617e36b32e45c84bc961f32f502b4d71c391bc686bfc6cb0")
+MODEL = "test_model"
 # PERF_FILENAME = os.getenv("PERF_FILENAME", "./timers.csv")
 # INFERENCE_QOE_TOPIC = os.getenv("INFERENCE_QOE_TOPIC", "edge-inference-qoe")
 # MODEL_DEPLOYMENT_TOPIC = os.getenv("MODEL_DEPLOYMENT_TOPIC", "model-deployments")
@@ -207,4 +204,5 @@ async def predict_endpoint(
 
 
 if __name__ == "__main__":
+    logger = setup_logging()
     uvicorn.run(app, host="0.0.0.0", port=8080)
