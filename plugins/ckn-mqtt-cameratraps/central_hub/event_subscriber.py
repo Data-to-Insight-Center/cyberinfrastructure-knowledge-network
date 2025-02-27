@@ -23,9 +23,8 @@ def on_connect(client, userdata, flags, rc, properties=None):
 def on_message(client, userdata, msg):
     try:
         payload = msg.payload.decode("utf-8")
-        logging.info("Received message on topic %s: %s", msg.topic, payload)
         data = json.loads(payload)
-        logging.info(f"Event message received:\n {json.dumps(data, indent=2)}")
+        logging.info(f"Event message received on topic {msg.topic}:\n {json.dumps(data, indent=2)}")
     except Exception as e:
         logging.exception("Error processing message: %s", e)
 
