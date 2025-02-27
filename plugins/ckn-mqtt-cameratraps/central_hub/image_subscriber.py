@@ -4,8 +4,10 @@ import json
 import base64
 import logging
 import time
-
 import paho.mqtt.client as mqtt
+
+# This script subscribes to the IMAGES_TOPIC on the MQTT broker and saves received images locally.
+# It extracts image data from incoming messages, decodes it, determines the image type, and then stores the image in the SAVED_IMAGES_DIR.
 
 SAVED_IMAGES_DIR = os.environ.get("SAVED_IMAGES_DIR", "./saved_images")
 IMAGES_TOPIC = os.environ.get("IMAGES_TOPIC", "cameratrap/images")

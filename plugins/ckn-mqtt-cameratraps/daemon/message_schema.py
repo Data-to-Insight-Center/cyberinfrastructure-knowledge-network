@@ -9,7 +9,7 @@ def create_event_data(camera_trap_id: str, row_data: Dict[str, Any], timestamp: 
     Create the event data dictionary using the given parameters.
     """
     if timestamp is None:
-        timestamp = time.time()
+        timestamp = int(time.time() * 1000)
     event_data = {"camera_trap_id": camera_trap_id, "timestamp": timestamp}
     event_data.update(row_data)
     return event_data
