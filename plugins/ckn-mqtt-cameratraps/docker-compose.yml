@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  ckn-daemon:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ckn-mqtt-daemon
+    environment:
+      - DETECTED_EVENTS_FILE=/logs/detected-events.csv
+      - CKN_LOG_FILE=/logs/ckn.log
+      - MQTT_BROKER=localhost
+      - MQTT_PORT=1883
+      - EVENTS_TOPIC=cameratrap/events
+      - CAMERA_TRAP_ID=MLEDGE_1
+      - CONCURRENT_WORKERS=2
+      - POWER_SUMMARY_FILE=/logs/power_summary_report.json
+      - POWER_SUMMARY_TOPIC=cameratrap/power_summary
+      - ENABLE_POWER_MONITORING=false
+
+    volumes:
+      - ./events:/logs:rw
+
+    networks:
+      - ckn-network
+
+networks:
+  ckn-network:
+    external: true
