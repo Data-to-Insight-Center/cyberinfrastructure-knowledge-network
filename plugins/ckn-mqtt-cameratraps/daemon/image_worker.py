@@ -9,15 +9,13 @@ import message_schema
 CAMERA_TRAP_ID = os.environ.get("CAMERA_TRAP_ID", "MLEDGE_1")
 IMAGES_TOPIC = os.environ.get("IMAGES_TOPIC", "cameratrap/images")
 
-def create_image_payload(event: dict, encoded_image: str, image_id: int) -> dict:
+def create_image_payload(event: dict, encoded_image: str) -> dict:
     """
     Create the image payload using the shared message schema.
     """
-    image_id = f"{CAMERA_TRAP_ID}_{image_id}"
 
     payload = message_schema.create_event_data(CAMERA_TRAP_ID, event, timestamp=time.time())
     payload.update({
-        "image_id": image_id,
         "image_data": encoded_image,
     })
     return payload
@@ -34,15 +32,13 @@ def process_image_event(event: dict, mqtt_client: mqtt.Client) -> None:
             logging.error("Invalid event data for image processing: %s", event)
             return
 
-        unique_image_id = int(time.time() * 1000)
-
         # read the image
         with open(file_path, "rb") as f:
             image_bytes = f.read()
         encoded_image = base64.b64encode(image_bytes).decode("utf-8")
 
         # create the image payload
-        image_payload = create_image_payload(event, encoded_image, unique_image_id)
+        image_payload = create_image_payload(event, encoded_image)
         payload = json.dumps(image_payload)
 
         # publish the image payload
