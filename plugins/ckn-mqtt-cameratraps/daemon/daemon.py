@@ -10,7 +10,7 @@ from typing import Any, Dict
 import paho.mqtt.client as mqtt
 from dotenv import load_dotenv
 
-# import image_worker
+import image_worker
 import message_schema
 
 
@@ -115,8 +115,7 @@ def start_image_worker_pool(mqtt_client: mqtt.Client, num_workers: int = IMAGE_W
     """
     executor = ThreadPoolExecutor(max_workers=num_workers)
     for _ in range(num_workers):
-        # TODO: add the image worker for image transfer - this is a placeholder
-        # executor.submit(image_worker.image_worker, image_event_queue, mqtt_client)
+        executor.submit(image_worker.image_worker, image_event_queue, mqtt_client)
         pass
     return executor
 
@@ -124,8 +123,7 @@ def start_image_worker_pool(mqtt_client: mqtt.Client, num_workers: int = IMAGE_W
 def main() -> None:
     """
     Sets up the MQTT client, starts the network loop, initiates the image worker pool,
-    and begins tailing the CSV event file. Runs indefinitely until a KeyboardInterrupt,
-    upon which it gracefully shuts down the workers and the MQTT client.
+    and begins tailing the CSV event file.
     """
     mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=f"{CAMERA_TRAP_ID}_combined_worker")
     mqtt_client.on_connect = on_connect

@@ -12,6 +12,7 @@ services:
       - MQTT_BROKER=localhost
       - MQTT_PORT=1883
       - EVENTS_TOPIC=cameratrap/events
+      - IMAGES_TOPIC=cameratrap/images
       - CAMERA_TRAP_ID=MLEDGE_1
       - CONCURRENT_WORKERS=2
       - POWER_SUMMARY_FILE=/logs/power_summary_report.json
