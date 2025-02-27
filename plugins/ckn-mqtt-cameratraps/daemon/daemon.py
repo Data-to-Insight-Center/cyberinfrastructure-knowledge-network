@@ -127,7 +127,7 @@ def main() -> None:
     and begins tailing the CSV event file. Runs indefinitely until a KeyboardInterrupt,
     upon which it gracefully shuts down the workers and the MQTT client.
     """
-    mqtt_client = mqtt.Client(client_id=f"{CAMERA_TRAP_ID}_combined_worker")
+    mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=f"{CAMERA_TRAP_ID}_combined_worker")
     mqtt_client.on_connect = on_connect
 
     try:
