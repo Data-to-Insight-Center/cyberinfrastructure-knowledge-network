@@ -1,0 +1,3 @@
+DETECTION, 4b5d738e-9c8a-5097-96e7-3c78a00e0f31, [{'label': 'animal', 'probability': 0.9409999847412109}]
+STORING, 4b5d738e-9c8a-5097-96e7-3c78a00e0f31, /Users/swithana/git/d2i/icicle-ckn/plugins/ckn-mqtt-cameratraps/test/resources/images/dog.png, Save
+STORING, 804f22de-8a90-52af-8baf-cda2cd66385f, /Users/swithana/git/d2i/icicle-ckn/plugins/ckn-mqtt-cameratraps/test/resources/images/dog.png, Save
