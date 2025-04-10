@@ -8,13 +8,14 @@ from queue import Queue
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict
 import paho.mqtt.client as mqtt
-from dotenv import load_dotenv
+import ast
+# from dotenv import load_dotenv
 
 import image_worker
 import message_schema
 
 
-load_dotenv()
+# load_dotenv()
 
 CAMERA_TRAP_ID: str = os.environ.get("CAMERA_TRAP_ID", "MLEDGE_1")
 MQTT_BROKER: str = os.environ.get("MQTT_BROKER", "localhost")
@@ -81,26 +82,54 @@ def tail_and_process_events(mqtt_client: mqtt.Client) -> None:
                 try:
                     reader = csv.reader([line])
                     row = next(reader)
-                    expected_fields = message_schema.schema_fields
 
-                    if len(row) < len(expected_fields):
-                        logging.warning("CSV row has insufficient data: %s", row)
-                        continue
+                    event_type = row[0]
 
-                    row_data = {key: row[idx] for idx, key in enumerate(expected_fields)}
-
-                    if "classification" in row_data:
+                    if event_type == "DETECTION":
+                        if len(row) < 3:
+                            logging.warning("Incomplete DETECTION row: %s", row)
+                            continue
+                        uuid = row[1].strip()
+                        parts = line.split(',', 2)
+                        if len(parts) < 3:
+                            logging.warning("Incomplete row: %s", line)
+                            continue
+                        event_type, event_id, classification_raw = parts
                         try:
-                            row_data["classification"] = json.loads(row_data["classification"])
-                        except json.JSONDecodeError:
-                            logging.warning("Classification field is not valid JSON: %s", row_data["classification"])
+                            classification = ast.literal_eval(classification_raw.strip())
+                        except Exception as e:
+                            logging.warning("Invalid classification format: %s", row[2])
+                            continue
+                        event_data = {
+                            "event_type": "DETECTION",
+                            "uuid": uuid,
+                            "classification": classification,
+                        }
 
+                    elif event_type == "STORING":
+                        if len(row) < 4:
+                            logging.warning("Incomplete STORING row: %s", row)
+                            continue
+                        uuid = row[1].strip()
+                        file_location = row[2].strip()
+                        action = row[3].strip()
+                        event_data = {
+                            "event_type": "STORING",
+                            "uuid": uuid,
+                            "file_location": file_location,
+                            "action": action,
+                        }
+                    else:
+                        logging.warning("Unknown event type: %s", event_type)
+                        continue
                     # create the event
-                    event_data = message_schema.create_event_data(CAMERA_TRAP_ID, row_data)
-                    # publish the event
-                    publish_event(mqtt_client, event_data)
-                    # enqueue the event for image transfer
-                    image_event_queue.put(event_data)
+                    message = message_schema.create_event_data(CAMERA_TRAP_ID, event_data)
+                    if event_type == "DETECTION":
+                        # publish the event
+                        publish_event(mqtt_client, message)
+                    elif event_type == "STORING":
+                        # enqueue the event for image transfer
+                        image_event_queue.put(message)
                 except Exception as e:
                     logging.exception("Error processing CSV line: %s", line)
     except Exception as e:

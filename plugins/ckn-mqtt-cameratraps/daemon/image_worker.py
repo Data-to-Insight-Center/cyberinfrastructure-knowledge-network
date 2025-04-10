@@ -27,10 +27,6 @@ def process_image_event(event: dict, mqtt_client: mqtt.Client) -> None:
     """
     try:
         file_path = event.get("file_location")
-        file_name = event.get("file_name")
-        if not file_path or not file_name:
-            logging.error("Invalid event data for image processing: %s", event)
-            return
 
         # read the image
         with open(file_path, "rb") as f:
