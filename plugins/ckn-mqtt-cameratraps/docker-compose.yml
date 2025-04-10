@@ -18,9 +18,10 @@ services:
       - POWER_SUMMARY_FILE=/logs/power_summary_report.json
       - POWER_SUMMARY_TOPIC=cameratrap/power_summary
       - ENABLE_POWER_MONITORING=false
+      - MQTT_QOS=1
 
     volumes:
-      - ./events:/logs:rw
+      - ./smartfields_logs/:/logs:r
 
     networks:
       - ckn-network

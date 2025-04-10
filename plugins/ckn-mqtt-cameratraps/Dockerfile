@@ -2,7 +2,7 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-COPY daemon/daemon.py /app/
+COPY daemon/ /app/
 COPY requirements.txt /app/
 
 RUN pip install -r /app/requirements.txt
