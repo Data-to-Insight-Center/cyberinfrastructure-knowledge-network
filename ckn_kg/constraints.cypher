@@ -39,7 +39,6 @@ FOR (m:ModelCard)
 ON m.embedding
 OPTIONS {indexConfig: {`vector.dimensions`: 300, `vector.similarity_function`: 'cosine'}};
 
-CREATE INDEX experiment_id_idx FOR (e:Experiment) ON (e.experiment_id);
 CREATE INDEX deployment_end_time_idx FOR (d:Deployment) ON (d.end_time);
 CREATE INDEX experiment_end_time_idx FOR (e:Experiment) ON (e.end_time);
 CREATE INDEX experiment_accuracy_idx FOR (e:Experiment) ON (e.accuracy);
