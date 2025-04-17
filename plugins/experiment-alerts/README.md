@@ -45,24 +45,23 @@ The service is designed to be run as a containerized application using Docker.
 
 The service is configured using environment variables. You can set these in a `.env` file in the project root or directly within the `environment` section of the `ckn-exp-monitor` service in `docker-compose.yml`.
 
-| Variable                           | Description                                                                 | Default Value (in script)                     | Example `docker-compose.yml` Value |
-| :--------------------------------- | :-------------------------------------------------------------------------- |:----------------------------------------------| :--------------------------------- |
-| `REDIS_HOST`                       | Hostname or IP of the Redis server.                                         | `localhost`                                   | `redis`                            |
-| `REDIS_PORT`                       | Port for the Redis server.                                                  | `6379`                                        | `6379`                             |
-| `REDIS_DB`                         | Redis database number.                                                      | `0`                                           | `0`                                |
-| `REDIS_ALERTED_SET_KEY`            | Redis key for the set storing IDs of already alerted experiments.           | `experiment_monitor:alerted_experiments`      | `experiment_monitor:alerted_experiments` |
-| `REDIS_ALERTED_TTL_SECONDS`        | Expiration time (seconds) for alerted IDs in Redis (e.g., 7 days).          | `604800`                                      | `604800`                           |
-| `REDIS_ALERT_LAST_START_TIME_KEY`  | Redis key storing the `start_time` (ms) of the last experiment checked for alerts. | `experiment_monitor:alert_last_start_time_ms` | `experiment_monitor:alert_last_start_time_ms` |
-| `NEO4J_URI`                        | Bolt URI for the Neo4j database.                                            | `bolt://localhost:7687`                       | `bolt://neo4j:7687`                |
-| `NEO4J_USER`                       | Username for Neo4j authentication.                                          | `neo4j`                                       | `neo4j`                            |
-| `NEO4J_PASSWORD`                   | Password for Neo4j authentication.                                          | `password`                                    | `your_strong_password`             |
-| `KAFKA_BOOTSTRAP_SERVERS`          | Comma-separated list of Kafka broker addresses.                             | `localhost:9092`                              | `kafka:9092`                       |
-| `KAFKA_TOPIC`                      | Kafka topic to send low-accuracy alerts to.                                 | `experiment-accuracy-alerts`                  | `cameratraps-accuracy-alerts`      |
-| `KAFKA_CLIENT_ID`                  | Client ID for the Kafka producer instance.                                  | `experiment-monitor-accuracy`                 | `experiment-accuracy-monitor`      |
-| `ACCURACY_THRESHOLD`               | Accuracy percentage below which an alert is triggered.                      | `80.0`                                        | `80.0`                             |
-| `PREDICTION_CONFIDENCE_THRESHOLD`  | Confidence threshold used during accuracy calculation.                      | `0.2`                                         | `0.2`                              |
-| `ALERT_INITIAL_LOOKBACK_MINUTES` | How many minutes back to check for alerts on the very first run.            | `60`                                          | `60`                               |
-| `SCHEDULE_IN_MIN`                  | How often (in minutes) the monitoring tasks should run.                     | `15` (Script default if not set)              | `15`                               |
+| Variable                           | Description                                                        | Default Value (in script)                | Example `docker-compose.yml` Value       |
+| :--------------------------------- |:-------------------------------------------------------------------|:-----------------------------------------|:-----------------------------------------|
+| `REDIS_HOST`                       | Hostname or IP of the Redis server.                                | `localhost`                              | `redis`                                  |
+| `REDIS_PORT`                       | Port for the Redis server.                                         | `6379`                                   | `6379`                                   |
+| `REDIS_DB`                         | Redis database number.                                             | `0`                                      | `0`                                      |
+| `REDIS_ALERTED_SET_KEY`            | Redis key for the set storing IDs of already alerted experiments.  | `experiment_monitor:alerted_experiments` | `experiment_monitor:alerted_experiments` |
+| `REDIS_ALERTED_TTL_SECONDS`        | Expiration time (seconds) for alerted IDs in Redis (e.g., 7 days). | `604800`                                 | `604800`                                 |
+| `NEO4J_URI`                        | Bolt URI for the Neo4j database.                                   | `bolt://localhost:7687`                  | `bolt://neo4j:7687`                      |
+| `NEO4J_USER`                       | Username for Neo4j authentication.                                 | `neo4j`                                  | `neo4j`                                  |
+| `NEO4J_PASSWORD`                   | Password for Neo4j authentication.                                 | `password`                               | `your_strong_password`                   |
+| `KAFKA_BOOTSTRAP_SERVERS`          | Comma-separated list of Kafka broker addresses.                    | `localhost:9092`                         | `kafka:9092`                             |
+| `KAFKA_TOPIC`                      | Kafka topic to send low-accuracy alerts to.                        | `experiment-accuracy-alerts`             | `cameratraps-accuracy-alerts`            |
+| `KAFKA_CLIENT_ID`                  | Client ID for the Kafka producer instance.                         | `experiment-monitor-accuracy`            | `experiment-accuracy-monitor`            |
+| `ACCURACY_THRESHOLD`               | Accuracy percentage below which an alert is triggered.             | `80.0`                                   | `80.0`                                   |
+| `PREDICTION_CONFIDENCE_THRESHOLD`  | Confidence threshold used during accuracy calculation.             | `0.2`                                    | `0.2`                                    |
+| `HISTORICAL_ALERT_CHECK_RANGE` | How long ago experiments to consider for alerts (in days)          | `1`                                      | `1`                                      |
+| `SCHEDULE_IN_MIN`                  | How often (in minutes) the monitoring tasks should run.            | `15` (Script default if not set)         | `15`                                     |
 
 ## How to Run (Using Docker Compose)
 
@@ -106,15 +105,16 @@ Each run executes two main steps sequentially:
     * This process automatically skips experiments that have already been successfully completed because their `ex.end_time` will no longer be NULL.
 
 2.  **`check_low_accuracy_alerts()`:**
-    * Retrieves the `start_time` timestamp (epoch ms) of the last experiment checked from Redis (`REDIS_ALERT_LAST_START_TIME_KEY`). Uses an initial lookback window if the key doesn't exist.
-    * Queries Neo4j using `CYPHER_FIND_LOW_ACCURACY_FOR_ALERT` for experiments where `ex.average_accuracy` is set, is below `ACCURACY_THRESHOLD`, and `ex.start_time` is greater than the retrieved timestamp.
+    * Checks if required connections (Redis, Neo4j, Kafka) are available; exits if not.
+    * Calculates a time threshold based on the current time minus `HISTORICAL_ALERT_CHECK_RANGE` days to define the lookback window.
+    * Queries Neo4j using `CYPHER_FIND_LOW_ACCURACY_FOR_ALERT` for experiments completed *after* the calculated time threshold and with accuracy below `ACCURACY_THRESHOLD`.
     * Iterates through the found experiments:
-        * Checks if the `experiment_id` exists in the Redis set (`REDIS_ALERTED_SET_KEY`). If yes, skips (prevents duplicate alerts).
-        * If not alerted, constructs an alert message (including `experiment_id`, `accuracy`, `model_id`, metadata).
-        * Sends the message to the configured Kafka topic (`KAFKA_TOPIC`).
-        * Adds the `experiment_id` to the Redis alerted set (`REDIS_ALERTED_SET_KEY`) with a TTL.
-    * After processing all found experiments, updates the timestamp in Redis (`REDIS_ALERT_LAST_START_TIME_KEY`) to the maximum `start_time` encountered in the processed batch.
-
+        * Checks if the `experiment_id` exists in the Redis set (`REDIS_ALERTED_SET_KEY`) using `sismember`. If yes, skips (prevents duplicate alerts).
+        * If not alerted, constructs an alert event using `create_low_accuracy_kafka_event` (including `experiment_id`, `accuracy`, `model_id`, processed `metadata`, and a `UUID`).
+        * Sends the event to the configured Kafka topic (`KAFKA_TOPIC`) with error handling.
+        * Adds the `experiment_id` to the Redis alerted set (`REDIS_ALERTED_SET_KEY`) using `sadd` and sets an expiration time using `expire` and `REDIS_ALERTED_TTL_SECONDS`.
+    * Logs the results of the check, including the number of candidates found and the number of new alerts sent.
+    
 ## Important Notes & Considerations
 
 * **Data Assumptions:** The script assumes:

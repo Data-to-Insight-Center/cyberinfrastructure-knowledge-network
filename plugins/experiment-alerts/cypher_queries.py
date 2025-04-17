@@ -41,9 +41,15 @@ RETURN ex.experiment_id as id, ex.experiment_duration as duration, ex.average_ac
 # Find experiments with low accuracy that haven't been alerted yet
 CYPHER_FIND_LOW_ACCURACY_FOR_ALERT = """
 MATCH (e:Experiment)
-WHERE e.accuracy IS NOT NULL AND e.accuracy < $accuracy_threshold
+WHERE e.end_datetime IS NOT NULL
+  AND e.average_accuracy IS NOT NULL
+  AND e.average_accuracy < $accuracy_threshold
+  AND e.end_datetime >= datetime($time_range)
 MATCH (e)-[:USED]->(m:Model)
-RETURN e.id AS experiment_id, e.accuracy AS accuracy, properties(e) AS metadata, m.model_id AS model_id
-LIMIT $batch_size 
+RETURN e.experiment_id AS experiment_id,
+       e.average_accuracy AS accuracy, 
+       properties(e) AS metadata,      
+       m.model_id AS model_id
+LIMIT 500
 """
 
