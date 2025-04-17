@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - monitoring_net
+
+  ckn-exp-monitor:
+#    build: .
+    image: sha256:e07ec2c39daae2bfc4ec64a5b41b7c9c432dd47028475c92a8838730ac361b9e
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - REDIS_ALERTED_SET_KEY=experiment_monitor:alerted_experiments
+      - REDIS_ALERTED_TTL_SECONDS=604800 # defaulted to 7 days
+
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=PWD_HERE
+
+      - KAFKA_BOOTSTRAP_SERVERS=localhost:9092
+      - KAFKA_TOPIC=cameratraps-accuracy-alerts
+      - KAFKA_CLIENT_ID=experiment-accuracy-monitor
+
+      # Thresholds
+      - ACCURACY_THRESHOLD=80.0
+      - PREDICTION_CONFIDENCE_THRESHOLD=0.2
+      - ALERT_BATCH_SIZE=500
+
+      # SCHEDULING
+      - SCHEDULE_IN_MIN=1 # run the monitor every 15 mins
+      - HISTORICAL_ALERT_CHECK_RANGE=100 # number of days back to check the experiments for
+    depends_on:
+      - redis
+
+    networks:
+      - monitoring_net
+
+volumes:
+  redis_data:
+
+networks:
+  monitoring_net:
+    driver: bridge
