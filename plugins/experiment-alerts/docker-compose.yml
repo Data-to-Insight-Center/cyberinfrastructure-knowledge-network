@@ -34,8 +34,8 @@ services:
       - ALERT_BATCH_SIZE=500
 
       # SCHEDULING
-      - SCHEDULE_IN_MIN=1 # run the monitor every 15 mins
-      - HISTORICAL_ALERT_CHECK_RANGE=100 # number of days back to check the experiments for
+      - SCHEDULE_IN_MIN=15 # run the monitor every 15 mins
+      - HISTORICAL_ALERT_CHECK_RANGE=1 # number of days back to check the experiments for
     depends_on:
       - redis
 
