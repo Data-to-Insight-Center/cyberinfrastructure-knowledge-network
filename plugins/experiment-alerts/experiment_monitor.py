@@ -42,7 +42,7 @@ redis_pool = ConnectionPool(
 # Neo4j config
 NEO4J_URI = os.getenv('NEO4J_URI', 'bolt://localhost:7687')
 NEO4J_USER = os.getenv('NEO4J_USER', 'neo4j')
-NEO4J_PASSWORD = os.getenv('NEO4J_PASSWORD', '#ckn_tacc_neo4j#223#21')
+NEO4J_PASSWORD = os.getenv('NEO4J_PASSWORD', 'PWD_HERE')
 
 # Kafka config
 KAFKA_BOOTSTRAP_SERVERS = os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'localhost:9092')
