@@ -27,7 +27,7 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_CREATE_TOPICS: "oracle-events:1:1,oracle-alerts:1:1,oracle-aggregated:1:1,compiler-data:1:1,compiler-optimization:1:1,cameratraps-power-summary:1:1"
+      KAFKA_CREATE_TOPICS: "oracle-events:1:1,oracle-alerts:1:1,oracle-aggregated:1:1,compiler-data:1:1,compiler-optimization:1:1,cameratraps-power-summary:1:1,cameratraps-accuracy-alerts:1:1"
 
   kafka-connect:
     image: confluentinc/cp-kafka-connect:latest
@@ -57,27 +57,27 @@ services:
       - ./:/app
     command: [ "sh", "-c", "chmod +x /app/setup_connector.sh && /app/setup_connector.sh" ]
 
-  oracle-alert-processor:
-    image: iud2i/ckn-cameratraps-acc-alert:v0.0.1
-    depends_on:
-      broker:
-        condition: service_healthy
-    environment:
-      - CKN_BROKERS=broker:29092
-      - ORACLE_ACC_CRITICAL_THRESHOLD=0.5
-      - ORACLE_INPUT_TOPIC=oracle-events
-      - ORACLE_ACC_ALERT_TOPIC=oracle-alerts
-      - APP_ID=ckn-camera-traps-oracle-processor
-
-  oracle-aggr-processor:
-    image: iud2i/ckn-cameratraps-agg:v0.0.1
-    depends_on:
-      broker:
-        condition: service_healthy
-    environment:
-      - CKN_BROKERS=broker:29092
-        # Size of the tumbling window in minutes
-      - CKN_ORACLE_WINDOW_TIME=1
-      - ORACLE_INPUT_TOPIC=oracle-events
-      - ORACLE_AGG_ALERT_TOPIC=oracle-aggregated
-      - APP_ID=ckn-camera-traps-oracle-aggregator
+#  oracle-alert-processor:
+#    image: iud2i/ckn-cameratraps-acc-alert:v0.0.1
+#    depends_on:
+#      broker:
+#        condition: service_healthy
+#    environment:
+#      - CKN_BROKERS=broker:29092
+#      - ORACLE_ACC_CRITICAL_THRESHOLD=0.5
+#      - ORACLE_INPUT_TOPIC=oracle-events
+#      - ORACLE_ACC_ALERT_TOPIC=oracle-alerts
+#      - APP_ID=ckn-camera-traps-oracle-processor
+#
+#  oracle-aggr-processor:
+#    image: iud2i/ckn-cameratraps-agg:v0.0.1
+#    depends_on:
+#      broker:
+#        condition: service_healthy
+#    environment:
+#      - CKN_BROKERS=broker:29092
+#        # Size of the tumbling window in minutes
+#      - CKN_ORACLE_WINDOW_TIME=1
+#      - ORACLE_INPUT_TOPIC=oracle-events
+#      - ORACLE_AGG_ALERT_TOPIC=oracle-aggregated
+#      - APP_ID=ckn-camera-traps-oracle-aggregator

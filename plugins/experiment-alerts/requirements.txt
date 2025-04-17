@@ -1,0 +1,5 @@
+redis
+neo4j
+kafka-python
+python-dotenv
+apscheduler
