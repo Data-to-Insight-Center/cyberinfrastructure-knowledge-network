@@ -11,8 +11,8 @@ services:
       - monitoring_net
 
   ckn-exp-monitor:
-#    build: .
-    image: sha256:e07ec2c39daae2bfc4ec64a5b41b7c9c432dd47028475c92a8838730ac361b9e
+    build: .
+#    image:
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
