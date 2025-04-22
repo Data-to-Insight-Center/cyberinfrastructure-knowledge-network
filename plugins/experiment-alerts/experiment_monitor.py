@@ -137,7 +137,6 @@ def process_completed_experiments():
                      continue
 
                 try:
-                    # Use an explicit transaction for accuracy calculation + update
                     with session.begin_transaction() as tx:
                         # Calculate Accuracy
                         accuracy_result = tx.run(
