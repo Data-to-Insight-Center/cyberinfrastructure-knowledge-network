@@ -9,23 +9,22 @@ services:
     environment:
       - DETECTED_EVENTS_FILE=/logs/detected-events.csv
       - CKN_LOG_FILE=/logs/ckn.log
-      - MQTT_BROKER=localhost
+      - MQTT_BROKER=host.docker.internal
       - MQTT_PORT=1883
       - EVENTS_TOPIC=cameratrap/events
       - IMAGES_TOPIC=cameratrap/images
+      - IMAGE_DIR=/images
       - CAMERA_TRAP_ID=MLEDGE_1
       - CONCURRENT_WORKERS=2
       - POWER_SUMMARY_FILE=/logs/power_summary_report.json
       - POWER_SUMMARY_TOPIC=cameratrap/power_summary
       - ENABLE_POWER_MONITORING=false
       - MQTT_QOS=1
-
     volumes:
-      - ./smartfields_logs/:/logs:r
-
+      - ./smartfields_logs/:/logs:ro
+      - ./camera_trap_images/:/images:ro
     networks:
       - ckn-network
 
 networks:
   ckn-network:
-    external: true

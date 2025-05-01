@@ -21,7 +21,8 @@ CAMERA_TRAP_ID: str = os.environ.get("CAMERA_TRAP_ID", "MLEDGE_1")
 MQTT_BROKER: str = os.environ.get("MQTT_BROKER", "localhost")
 MQTT_PORT: int = int(os.environ.get("MQTT_PORT", 1883))
 EVENTS_TOPIC: str = os.environ.get("EVENTS_TOPIC", "cameratrap/events")
-DETECTED_EVENTS_FILE: str = os.environ.get("DETECTED_EVENTS_FILE", "detected-events.csv")
+DETECTED_EVENTS_FILE: str = os.environ.get("DETECTED_EVENTS_FILE", "../test/resources/example.csv")
+IMAGE_FOLDER_PATH: str = os.environ.get("IMAGE_DIR", "../test/resources/images")
 IMAGE_WORKER_COUNT: int = int(os.environ.get("CONCURRENT_WORKERS", 2))
 MQTT_QOS: int = int(os.environ.get("MQTT_QOS", 1))  # do not change this unless absolutely required.
 
@@ -111,12 +112,12 @@ def tail_and_process_events(mqtt_client: mqtt.Client) -> None:
                             logging.warning("Incomplete STORING row: %s", row)
                             continue
                         uuid = row[1].strip()
-                        file_location = row[2].strip()
+                        file_id = row[2].strip()
                         action = row[3].strip()
                         event_data = {
                             "event_type": "STORING",
                             "uuid": uuid,
-                            "file_location": file_location,
+                            "file_location": os.path.join(IMAGE_FOLDER_PATH, file_id),
                             "action": action,
                         }
                     else:

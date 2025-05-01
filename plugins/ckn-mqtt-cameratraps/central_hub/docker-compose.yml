@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  event-subscriber:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: event-subscriber
+    environment:
+      - SUBSCRIBER_TYPE=event
+      - MQTT_BROKER=host.docker.internal
+      - MQTT_PORT=1883
+      - EVENTS_TOPIC=cameratrap/events
+      - CLIENT_ID=ckn_event_subscriber
+    networks:
+      - ckn-mqtt-cameratraps_ckn-network
+
+  image-subscriber:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: image-subscriber
+    environment:
+      - SUBSCRIBER_TYPE=image
+      - MQTT_BROKER=host.docker.internal
+      - MQTT_PORT=1883
+      - IMAGES_TOPIC=cameratrap/images
+      - SAVED_IMAGES_DIR=/images
+      - CLIENT_ID=ckn_image_subscriber
+    volumes:
+      - ./saved_images:/images:rw
+    networks:
+      - ckn-mqtt-cameratraps_ckn-network
+
+networks:
+  ckn-mqtt-cameratraps_ckn-network :
+    external: true
