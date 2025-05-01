@@ -69,6 +69,11 @@ def tail_and_process_events(mqtt_client: mqtt.Client) -> None:
     and the event is enqueued for image file transfer to the central drone hub.
     """
     try:
+        # Wait until the file exists
+        while not os.path.exists(DETECTED_EVENTS_FILE):
+            logging.info(f"Waiting for {DETECTED_EVENTS_FILE} to exist...")
+            time.sleep(1)
+
         with open(DETECTED_EVENTS_FILE, 'r') as f:
             f.seek(0, os.SEEK_END)
             while True:
