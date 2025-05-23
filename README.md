@@ -264,7 +264,7 @@ You have successfully set up a temperature‑monitoring use case with **CKN**, *
 
 ## License
 
-The Cyberinfrastructure Knowledge Network is © Indiana University Board of Trustees and distributed under the **BSD 3‑Clause License**. See `LICENSE.txt` for details.
+The Cyberinfrastructure Knowledge Network is copyrighted by the Indiana University Board of Trustees and is distributed under the BSD 3-Clause License. See `LICENSE.txt` for more information.
 
 ## Acknowledgements
 
