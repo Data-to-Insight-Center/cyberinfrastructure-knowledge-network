@@ -26,7 +26,7 @@ CKN comprises several core components:
 
 The primary objective of CKN is to provide a robust framework for optimising AI‑application deployment and resource allocation at the edge. Leveraging real‑time event streaming and knowledge graphs, CKN efficiently handles AI workloads, adapts to changing requirements, and supports scalable edge–cloud collaboration.
 
-Refer to the CKN paper for more information: [https://ieeexplore.ieee.org/document/10254827](https://ieeexplore.ieee.org/document/10254827).
+Refer to this paper for more information: [https://ieeexplore.ieee.org/document/10254827](https://ieeexplore.ieee.org/document/10254827).
 
 ![CKN Design](docs/ckn-design.png)
 
@@ -264,7 +264,7 @@ You have successfully set up a temperature‑monitoring use case with **CKN**, *
 
 ## License
 
-The Cyberinfrastructure Knowledge Network is copyrighted by the Indiana University Board of Trustees and is distributed under the BSD 3-Clause License. See `LICENSE.txt` for more information.
+The Cyberinfrastructure Knowledge Network (CKN) is copyrighted by the Indiana University Board of Trustees and is distributed under the BSD 3-Clause License. See `LICENSE.txt` for more information.
 
 ## Acknowledgements
 
