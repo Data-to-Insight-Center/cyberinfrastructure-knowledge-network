@@ -14,15 +14,15 @@ The **Cyberinfrastructure Knowledge Network (CKN)** is an extensible and portabl
 
 ---
 
-# Explanation
+## Explanation
 
 CKN facilitates seamless connectivity between edge devices and the cloud through event streaming, enabling real‑time data capture and processing. By leveraging event‑stream processing, it captures, aggregates, and stores historical system‑performance data in a knowledge graph that models application behaviour and guides model selection and deployment at the edge.
 
 CKN comprises several core components:
 
-* **CKN Daemon** – A lightweight service that resides on each edge server. It manages communication with edge devices, handles requests, captures performance data, and deploys AI models as needed. The daemon connects with the cloud‑based CKN system via a pub/sub system, capturing real‑time events from edge devices (model usage, resource consumption, prediction accuracy, latency, and more).
-* **Event Streaming & Processing** – Stream‑processing techniques (for example, tumbling windows) aggregate events and generate real‑time alerts from edge‑device streams.
-* **Knowledge Graph** – A Neo4j graph database that stores historical and provenance information about applications, models, and edge events. This comprehensive view of the system enables CKN to track model usage and analyse performance over time.
+- **CKN Daemon** – A lightweight service that resides on each edge server. It manages communication with edge devices, handles requests, captures performance data, and deploys AI models as needed. The daemon connects with the cloud‑based CKN system via a pub/sub system, capturing real‑time events from edge devices (model usage, resource consumption, prediction accuracy, latency, and more).
+- **Event Streaming & Processing** – Stream‑processing techniques (for example, tumbling windows) aggregate events and generate real‑time alerts from edge‑device streams.
+- **Knowledge Graph** – A Neo4j graph database that stores historical and provenance information about applications, models, and edge events. This comprehensive view of the system enables CKN to track model usage and analyse performance over time.
 
 The primary objective of CKN is to provide a robust framework for optimising AI‑application deployment and resource allocation at the edge. Leveraging real‑time event streaming and knowledge graphs, CKN efficiently handles AI workloads, adapts to changing requirements, and supports scalable edge–cloud collaboration.
 
@@ -30,58 +30,75 @@ Refer to this paper for more information: [https://ieeexplore.ieee.org/document/
 
 ![CKN Design](docs/ckn-design.png)
 
+
 ---
 
-# How‑To Guide
+## Topics Overview
+
+| Topic Name                   | Pub/Sub System | Plugin Directory          | Topic Purpose                                                                        |
+|------------------------------|----------------|--------------------------|--------------------------------------------------------------------------------------|
+| oracle-events                | Kafka          | oracle_ckn_daemon        | Ground‑truth labels & image life‑cycle metadata                                      |
+| cameratraps-power-summary    | Kafka          | oracle_ckn_daemon        | Aggregated power usage across plug‑ins                                               |
+| cameratraps-accuracy-alerts  | Kafka          | experiment-alerts        | Alerts for experiments with accuracy below threshold (ID, accuracy, model ID, meta)  |
+| deployment_info              | Kafka          | ckn_inference_daemon     | Per‑inference result & resource metrics                                              |
+| start_deployment             | Kafka          | ckn_inference_daemon     | Marks start of a deployment run                                                      |
+| end_deployment               | Kafka          | ckn_inference_daemon     | Marks graceful or abnormal termination                                               |
+| cameratrap/events            | MQTT           | ckn-mqtt-cameratraps     | Publishes camera trap event data (detections, storage actions, etc.)                 |
+| cameratrap/images            | MQTT           | ckn-mqtt-cameratraps     | Publishes image data captured by camera traps                                        |
+| cameratrap/power_summary     | MQTT           | ckn-mqtt-cameratraps     | Publishes aggregated power usage summaries from camera trap plugins
+
+More details [here](https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network/blob/main/docs/topics.md).
+
+---
+
+## How‑To Guide
 
 See the full [documentation](https://cyberinfrastructure-knowledge-network.readthedocs.io/en/latest/) for detailed instructions on creating custom plug‑ins and streaming events to the knowledge graph.
 
-## Prerequisites
+### Prerequisites
 
-* **Docker** and **Docker Compose** installed.
-* The following ports available: `7474`, `7687`, `2181`, `9092`, `8083`, `8502`.
+- **Docker** and **Docker Compose** installed.
+- The following ports available: `7474`, `7687`, `2181`, `9092`, `8083`, `8502`.
 
-## Quick‑Start
+### Quick‑Start
 
-1. **Clone the repository and start services**
+#### 1. Clone the repository and start services
 
-   ```bash
-   git clone https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network.git
-   make up
-   ```
+```bash
+git clone https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network.git
+make up
+```
 
-   After setup completes, verify that all modules are running:
+After setup completes, verify that all modules are running:
 
-   ```bash
-   docker compose ps
-   ```
+```bash
+docker compose ps
+```
 
-2. **Stream an example camera‑trap event**
+#### 2. Stream an example camera‑trap event
 
-   ```bash
-   docker compose -f examples/docker-compose.yml up -d --build
-   ```
+```bash
+docker compose -f examples/docker-compose.yml up -d --build
+```
 
-   * View the streamed data on the CKN dashboard: [http://localhost:8502/Camera\_Traps](http://localhost:8502/Camera_Traps)
+- View the streamed data on the CKN dashboard: [http://localhost:8502/Camera\_Traps](http://localhost:8502/Camera_Traps)
 
-   * Access the Neo4j Browser: [http://localhost:7474/browser/](http://localhost:7474/browser/) (username `neo4j`, password `PWD_HERE`). Run:
+- Access the Neo4j Browser: [http://localhost:7474/browser/](http://localhost:7474/browser/) (username `neo4j`, password `PWD_HERE`). Run:
 
-     ```cypher
-     MATCH (n) RETURN n;
-     ```
+  ```cypher
+  MATCH (n) RETURN n;
+  ```
 
-   * Shut down services:
+- Shut down services:
 
-     ```bash
-     make down
-     docker compose -f examples/docker-compose.yml down
-     ```
+  ```bash
+  make down
+  docker compose -f examples/docker-compose.yml down
+  ```
 
----
+## Tutorial
 
-# Tutorial
-
-## Step 1  |  Set Up Your Environment
+### Step 1 | Set Up Your Environment
 
 ```bash
 git clone https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network.git
@@ -91,9 +108,9 @@ make up  # launches Kafka, Neo4j, and supporting services
 
 *Wait a few moments for all services to initialise.*
 
-## Step 2  |  Create a Kafka Topic for Temperature Events
+### Step 2 | Create a CKN Topic
 
-We will create a Kafka topic named `temperature-sensor-data` to store temperature events.
+We will create a CKN topic named `temperature-sensor-data` to store temperature events.
 
 **Update `docker-compose.yml`** (root directory) and add the topic to the broker environment:
 
@@ -111,11 +128,10 @@ make down
 make up
 ```
 
-*(Alternatively, create the topic with Kafka CLI, noting that it will disappear when the broker restarts.)*
 
-## Step 3  |  Produce Temperature Events
+### Step 3 | Produce Events
 
-### Install required libraries
+#### Install required libraries
 
 ```bash
 python -m venv venv
@@ -123,7 +139,7 @@ source venv/bin/activate  # or .\venv\Scripts\activate on Windows
 pip install confluent-kafka  # <https://pypi.org/project/confluent-kafka/>
 ```
 
-### Create the producer script – `produce_temperature_events.py`
+#### Create the producer script – `produce_temperature_events.py`
 
 ```python
 from confluent_kafka import Producer
@@ -156,15 +172,15 @@ Run the producer:
 python produce_temperature_events.py
 ```
 
-## Step 4  |  Consume and View Events
+### Step 4 | Consume and View Events
 
-1. **Open a shell inside the Kafka container**
+1. **Open a shell inside the broker container**
 
    ```bash
    docker exec -it broker bash  # replace "broker" with the container name if different
    ```
 
-2. **Start a Kafka consumer**
+2. **Start the consumer**
 
    ```bash
    kafka-console-consumer --bootstrap-server localhost:9092 --topic temperature-sensor-data --from-beginning
@@ -174,9 +190,9 @@ python produce_temperature_events.py
 
 Press **Ctrl +C** (or **Ctrl + Break** on Windows) to exit.
 
-## Step 5  |  Connect Kafka to Neo4j
+### Step 5 | Connect to a Data Sink
 
-### Create connector configuration – `neo4jsink-temperature-connector.json`
+#### Create connector configuration – `neo4jsink-temperature-connector.json`
 
 ```json
 {
@@ -203,7 +219,7 @@ Press **Ctrl +C** (or **Ctrl + Break** on Windows) to exit.
 
 Place the file in `ckn_broker/connectors/` (or your chosen directory).
 
-### Register the connector – `setup_connector.sh`
+#### Register the connector – `setup_connector.sh`
 
 ```bash
 curl -X POST -H "Content-Type: application/json" \
@@ -224,7 +240,7 @@ Run the temperature‑event producer again:
 python produce_temperature_events.py
 ```
 
-## Step 6  |  Visualise Data in Neo4j
+### Step 6 | Visualise Data
 
 1. **Open the Neo4j browser:** [http://localhost:7474/browser/](http://localhost:7474/browser/)
 
@@ -237,28 +253,17 @@ python produce_temperature_events.py
    RETURN s, r;
    ```
 
-
 4. **Explore** the graph using Neo4j visual tools.
 
 ---
 
-### Troubleshooting
-
-| Issue                            | Checks                                                                                                    |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| **Kafka services not starting**  | • Docker running?<br>• Port conflicts on `9092` or `7474`?                                                |
-| **Connector registration fails** | • Correct Neo4j credentials in JSON?<br>• Is Kafka Connect running on `localhost:8083`?                   |
-| **No data in Neo4j**             | • Producer sending to the right topic?<br>• Consumer shows events?<br>• Review connector logs for errors. |
-
----
-
-### Next Steps
+## Next Steps
 
 You have successfully set up a temperature‑monitoring use case with **CKN**, **Kafka**, and **Neo4j**. Consider:
 
-* **Adding more sensors** to simulate a larger network.
-* Extending the cypher mapping to handle additional event attributes.
-* Integrating alerting or dashboarding tools for real‑time monitoring.
+- **Adding more sensors** to simulate a larger network.
+- Extending the cypher mapping to handle additional event attributes.
+- Integrating alerting or dashboarding tools for real‑time monitoring.
 
 ---
 
