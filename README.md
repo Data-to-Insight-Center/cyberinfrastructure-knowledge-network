@@ -134,7 +134,7 @@ kafka-console-consumer --bootstrap-server localhost:9092 --topic temperature-sen
 
 #### 3. Connect to a Data Sink
 
-Create the connector configuration `neo4jsink-temperature-connector.json` and place the file in `broker/connectors/` (or your chosen directory).
+Create the connector configuration `neo4jsink-temperature-connector.json` and place the file in `ckn_broker/connectors/` (or your chosen directory).
 
 ```json
 {
@@ -187,4 +187,4 @@ The Cyberinfrastructure Knowledge Network (CKN) is copyrighted by the Indiana Un
 
 ## Acknowledgements
 
-This research is funded in part by the National Science Foundation (award #2112606 – *AI Institute for Intelligent CyberInfrastructure with Computational Learning in the Environment* \[ICICLE]) and by the *Data to Insight Center* (D2I) at Indiana University.
+This research is funded in part by the National Science Foundation (award #2112606 – *AI Institute for Intelligent CyberInfrastructure with Computational Learning in the Environment* \[ICICLE]) and by the *Data to Insight Center* (D2I) at Indiana University.
