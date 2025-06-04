@@ -83,7 +83,7 @@ docker compose -f examples/docker-compose.yml up -d --build
   docker compose -f examples/docker-compose.yml down
   ```
 
-## Tutorial
+## Tutorial: Create a Custom CKN Plug-in
 
 #### 1. Create a CKN Topic
 
@@ -185,9 +185,8 @@ make up
 python produce_temperature_events.py
 ```
 
-Access the Neo4j Browser: [http://localhost:7474/browser/](http://localhost:7474/browser/) (username = `neo4j`, password = `PWD_HERE`). Run `MATCH (n) RETURN n` to view the streamed data.
-
-You have successfully set up a temperature‑monitoring use case with CKN!
+Access the Neo4j Browser: [http://localhost:7474/browser/](http://localhost:7474/browser/) (username = `neo4j`, password = `PWD_HERE`). Run `MATCH (n) RETURN n` to view the streamed data. 
+You have successfully set up a temperature‑monitoring plugin with CKN!
 ---
 
 ## License
