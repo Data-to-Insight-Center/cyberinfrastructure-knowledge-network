@@ -172,14 +172,13 @@ Restart CKN and run the `temperature‑event` producer again.
 ```bash
 make down
 make up
-```
 
-```bash
 python produce_temperature_events.py
 ```
 
-Open [neo4j browser](http://localhost:7474/browser/) and log in with the credentials mentioned in the docker-compose file. Run `MATCH (n) RETURN n` to view the streamed data. 
+Open [neo4j browser](http://localhost:7474/browser/) and log in with the credentials mentioned in the docker-compose file to view the streamed data. 
 You have successfully set up a temperature‑monitoring plugin with CKN!
+
 ---
 
 ## License
