@@ -24,30 +24,12 @@ CKN comprises several core components:
 - **Event Streaming & Processing** – Stream‑processing techniques (for example, tumbling windows) aggregate events and generate real‑time alerts from edge‑device streams.
 - **Knowledge Graph** – A Neo4j graph database that stores historical and provenance information about applications, models, and edge events. This comprehensive view of the system enables CKN to track model usage and analyse performance over time.
 
-The primary objective of CKN is to provide a robust framework for optimising AI‑application deployment and resource allocation at the edge. Leveraging real‑time event streaming and knowledge graphs, CKN efficiently handles AI workloads, adapts to changing requirements, and supports scalable edge–cloud collaboration.
+The primary objective of CKN is to provide a robust framework for optimising AI‑application deployment and resource allocation at the edge. Leveraging real‑time event streaming and knowledge graphs, CKN efficiently handles AI workloads, adapts to changing requirements, and supports scalable edge–cloud collaboration. 
+The CKN topics and their details are mentioned [here](https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network/blob/main/docs/topics.md).
 
 Refer to this paper for more information: [https://ieeexplore.ieee.org/document/10254827](https://ieeexplore.ieee.org/document/10254827).
 
 ![CKN Design](docs/ckn-design.png)
-
-
----
-
-## Topics Overview
-
-| Topic Name                   | Pub/Sub System | Plugin Directory          | Topic Purpose                                                                        |
-|------------------------------|----------------|--------------------------|--------------------------------------------------------------------------------------|
-| oracle-events                | Kafka          | oracle_ckn_daemon        | Ground‑truth labels & image life‑cycle metadata                                      |
-| cameratraps-power-summary    | Kafka          | oracle_ckn_daemon        | Aggregated power usage across plug‑ins                                               |
-| cameratraps-accuracy-alerts  | Kafka          | experiment-alerts        | Alerts for experiments with accuracy below threshold (ID, accuracy, model ID, meta)  |
-| deployment_info              | Kafka          | ckn_inference_daemon     | Per‑inference result & resource metrics                                              |
-| start_deployment             | Kafka          | ckn_inference_daemon     | Marks start of a deployment run                                                      |
-| end_deployment               | Kafka          | ckn_inference_daemon     | Marks graceful or abnormal termination                                               |
-| cameratrap/events            | MQTT           | ckn-mqtt-cameratraps     | Publishes camera trap event data (detections, storage actions, etc.)                 |
-| cameratrap/images            | MQTT           | ckn-mqtt-cameratraps     | Publishes image data captured by camera traps                                        |
-| cameratrap/power_summary     | MQTT           | ckn-mqtt-cameratraps     | Publishes aggregated power usage summaries from camera trap plugins
-
-More details [here](https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network/blob/main/docs/topics.md).
 
 ---
 
@@ -57,8 +39,14 @@ See the full [documentation](https://cyberinfrastructure-knowledge-network.readt
 
 ### Prerequisites
 
-- **Docker** and **Docker Compose** installed.
-- The following ports available: `7474`, `7687`, `2181`, `9092`, `8083`, `8502`.
+- [Docker](https://www.docker.com/get-started) and [Docker Compose](https://docs.docker.com/compose) installed and running.
+- Open network access to the following ports:
+  - `7474` (Neo4j Web UI)
+  - `7687` (Neo4j Bolt)
+  - `2181` (ZooKeeper)
+  - `9092` (Kafka Broker)
+  - `8083` (Kafka Connect)
+  - `8502` (CKN dashboard)
 
 ### Quick‑Start
 
