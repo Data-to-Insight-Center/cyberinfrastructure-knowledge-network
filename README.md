@@ -68,20 +68,13 @@ docker compose ps
 docker compose -f examples/docker-compose.yml up -d --build
 ```
 
-- View the streamed data on the CKN dashboard: [http://localhost:8502/Camera\_Traps](http://localhost:8502/Camera_Traps)
+View the streamed data on the [CKN dashboard](http://localhost:8502/Camera_Traps) or open the [neo4j browser](http://localhost:7474/browser/) and log in with the credentials mentioned in the docker-compose file. Run `MATCH (n) RETURN n` to view the streamed data.
 
-- Access the Neo4j Browser: [http://localhost:7474/browser/](http://localhost:7474/browser/) (username = `neo4j`, password = `PWD_HERE`). Run:
-
-  ```cypher
-  MATCH (n) RETURN n;
-  ```
-
-- Shut down services:
-
-  ```bash
-  make down
-  docker compose -f examples/docker-compose.yml down
-  ```
+Shut down services using:
+```bash
+make down
+docker compose -f examples/docker-compose.yml down
+```
 
 ## Tutorial: Create a Custom CKN Plug-in
 
@@ -89,7 +82,7 @@ docker compose -f examples/docker-compose.yml up -d --build
 
 We will create a CKN topic named `temperature-sensor-data` to store temperature events. The CKN topics and their details are mentioned [here](https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network/blob/main/docs/topics.md).
 
-**Update `docker-compose.yml`** (root directory) and add the topic to the broker environment:
+Update `docker-compose.yml` (root directory) and add the topic to the broker environment:
 
 ```yaml
 services:
@@ -185,7 +178,7 @@ make up
 python produce_temperature_events.py
 ```
 
-Access the Neo4j Browser: [http://localhost:7474/browser/](http://localhost:7474/browser/) (username = `neo4j`, password = `PWD_HERE`). Run `MATCH (n) RETURN n` to view the streamed data. 
+Open [neo4j browser](http://localhost:7474/browser/) and log in with the credentials mentioned in the docker-compose file. Run `MATCH (n) RETURN n` to view the streamed data. 
 You have successfully set up a temperature‑monitoring plugin with CKN!
 ---
 
