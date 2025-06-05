@@ -80,7 +80,7 @@ docker compose -f examples/docker-compose.yml down
 
 #### 1. Create a CKN Topic
 
-We will create a CKN topic named `temperature-sensor-data` to store temperature events. The CKN topics and their details are mentioned [here](https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network/blob/main/docs/topics.md).
+We will create a CKN topic named `temperature-sensor-data` to store temperature events. The CKN topics and their details are mentioned [here](docs/topics.md).
 
 Update `docker-compose.yml` (root directory) and add the topic to the broker environment:
 
