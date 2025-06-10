@@ -1,17 +1,52 @@
-| Topic Name                   | Pub/Sub System | Plugin Directory          | Topic Purpose                                                                        |
-|------------------------------|----------------|--------------------------|--------------------------------------------------------------------------------------|
-| oracle-events                | Kafka          | oracle_ckn_daemon        | Ground‑truth labels & image life‑cycle metadata                                      |
-| cameratraps-power-summary    | Kafka          | oracle_ckn_daemon        | Aggregated power usage across plug‑ins                                               |
-| cameratraps-accuracy-alerts  | Kafka          | experiment-alerts        | Alerts for experiments with accuracy below threshold (ID, accuracy, model ID, meta)  |
-| deployment_info              | Kafka          | ckn_inference_daemon     | Per‑inference result & resource metrics                                              |
-| start_deployment             | Kafka          | ckn_inference_daemon     | Marks start of a deployment run                                                      |
-| end_deployment               | Kafka          | ckn_inference_daemon     | Marks graceful or abnormal termination                                               |
-| cameratrap/events            | MQTT           | ckn-mqtt-cameratraps     | Publishes camera trap event data (detections, storage actions, etc.)                 |
-| cameratrap/images            | MQTT           | ckn-mqtt-cameratraps     | Publishes image data captured by camera traps                                        |
-| cameratrap/power_summary     | MQTT           | ckn-mqtt-cameratraps     | Publishes aggregated power usage summaries from camera trap plugins                  |
+| Topic Name                   | Pub/Sub System | Plugin Directory          | Topic Purpose                                                                                               |
+|------------------------------|----------------|--------------------------|-------------------------------------------------------------------------------------------------------------|
+| oracle-events                | Kafka          | oracle_ckn_daemon        | Inference data from the [camera-traps application](https://github.com/tapis-project/camera-traps)           |
+| cameratraps-power-summary    | Kafka          | oracle_ckn_daemon        | Aggregated power summary from the [camera-traps application](https://github.com/tapis-project/camera-traps) |
+| cameratraps-accuracy-alerts  | Kafka          | experiment-alerts        | Alerts for experiments with accuracy below threshold (ID, accuracy, model ID, meta)                         |
+| deployment_info              | Kafka          | ckn_inference_daemon     | Per‑inference result & resource metrics                                                                     |
+| start_deployment             | Kafka          | ckn_inference_daemon     | Marks start of a deployment run                                                                             |
+| end_deployment               | Kafka          | ckn_inference_daemon     | Marks graceful or abnormal termination                                                                      |
+| cameratrap/events            | MQTT           | ckn-mqtt-cameratraps     | Publishes camera trap event data (detections, storage actions, etc.)                                        |
+| cameratrap/images            | MQTT           | ckn-mqtt-cameratraps     | Publishes image data captured by camera traps                                                               |
+| cameratrap/power_summary     | MQTT           | ckn-mqtt-cameratraps     | Publishes aggregated power usage summaries from camera trap plugins                                         |
 
 
 ## Event Types and Formats
+
+### cameratraps-power-summary
+
+| Field                                             | Description                                           | Example                     |
+|---------------------------------------------------|-------------------------------------------------------|-----------------------------|
+| experiment_id                                     | Identifier for the experiment                         | googlenet-iu-animal-classification |
+| image_generating_plugin_cpu_power_consumption     | CPU power usage for the image-generating plugin       | 2.63                        |
+| image_generating_plugin_gpu_power_consumption     | GPU power usage for the image-generating plugin       | 0.076                       |
+| power_monitor_plugin_cpu_power_consumption        | CPU power usage for the power-monitor plugin          | 2.59                        |
+| power_monitor_plugin_gpu_power_consumption        | GPU power usage for the power-monitor plugin          | 0.071                       |
+| image_scoring_plugin_cpu_power_consumption        | CPU power usage for the image-scoring plugin          | 2.57                        |
+| image_scoring_plugin_gpu_power_consumption        | GPU power usage for the image-scoring plugin          | 0.082                       |
+| total_cpu_power_consumption                       | Total CPU power usage across all plugins              | 7.79                        |
+| total_gpu_power_consumption                       | Total GPU power usage across all plugins              | 0.229                       |
+
+### oracle-events
+
+| Field                    | Description                                        | Example                                 |
+|--------------------------|----------------------------------------------------|-----------------------------------------|
+| UUID                     | Unique identifier for the image/event              | 67b83445-2622-50a3-be3b-f7030259576e   |
+| image_count              | Sequence number of the image                       | 2                                       |
+| image_name               | File path or name of the image                     | /example_images/baby-red-fox.jpg        |
+| ground_truth             | Expected (actual) label for the image              | animal                                  |
+| model_id                 | Model identifier used for inference                | 0                                       |
+| image_receiving_timestamp| Timestamp when the image was received              | 2024-08-06T20:46:14.130079257+00:00     |
+| image_scoring_timestamp  | Timestamp when inference (scoring) was completed   | 2024-08-06T20:34:47.430327              |
+| image_store_delete_time  | Time the image data was removed from storage       | 2024-08-06T20:34:47.438858883+00:00     |
+| image_decision           | Action taken on the image (e.g., Save / Deleted)   | Save                                    |
+| label                    | Predicted label with the highest probability       | animal                                  |
+| probability              | Highest confidence score corresponding to label    | 0.924                                   |
+| flattened_scores         | JSON-stringified array of all label-probability pairs | [{"label":"animal","probability":0.924}]|
+| device_id                | The device that generated the event                | iu-edge-server-cib                      |
+| experiment_id            | Identifier for the experiment                      | googlenet-iu-animal-classification      |
+| user_id                  | User or owner of the experiment                    | jstubbs                                 |
+
 
 ### deployment_info  
 
@@ -57,40 +92,6 @@
 | deployment_id | Unique ID of the deployment instance        | 123e4567-e89b-12d3-a456-426614174001    |
 | status        | Indicates the deployment has stopped        | STOPPED                                 |
 | end_time      | Timestamp of deployment termination         | 2025-01-29T13:20:10.100Z                |
-
-### cameratraps-power-summary
-
-| Field                                             | Description                                           | Example                     |
-|---------------------------------------------------|-------------------------------------------------------|-----------------------------|
-| experiment_id                                     | Identifier for the experiment                         | googlenet-iu-animal-classification |
-| image_generating_plugin_cpu_power_consumption     | CPU power usage for the image-generating plugin       | 2.63                        |
-| image_generating_plugin_gpu_power_consumption     | GPU power usage for the image-generating plugin       | 0.076                       |
-| power_monitor_plugin_cpu_power_consumption        | CPU power usage for the power-monitor plugin          | 2.59                        |
-| power_monitor_plugin_gpu_power_consumption        | GPU power usage for the power-monitor plugin          | 0.071                       |
-| image_scoring_plugin_cpu_power_consumption        | CPU power usage for the image-scoring plugin          | 2.57                        |
-| image_scoring_plugin_gpu_power_consumption        | GPU power usage for the image-scoring plugin          | 0.082                       |
-| total_cpu_power_consumption                       | Total CPU power usage across all plugins              | 7.79                        |
-| total_gpu_power_consumption                       | Total GPU power usage across all plugins              | 0.229                       |
-
-### oracle-events
-
-| Field                    | Description                                        | Example                                 |
-|--------------------------|----------------------------------------------------|-----------------------------------------|
-| UUID                     | Unique identifier for the image/event              | 67b83445-2622-50a3-be3b-f7030259576e   |
-| image_count              | Sequence number of the image                       | 2                                       |
-| image_name               | File path or name of the image                     | /example_images/baby-red-fox.jpg        |
-| ground_truth             | Expected (actual) label for the image              | animal                                  |
-| model_id                 | Model identifier used for inference                | 0                                       |
-| image_receiving_timestamp| Timestamp when the image was received              | 2024-08-06T20:46:14.130079257+00:00     |
-| image_scoring_timestamp  | Timestamp when inference (scoring) was completed   | 2024-08-06T20:34:47.430327              |
-| image_store_delete_time  | Time the image data was removed from storage       | 2024-08-06T20:34:47.438858883+00:00     |
-| image_decision           | Action taken on the image (e.g., Save / Deleted)   | Save                                    |
-| label                    | Predicted label with the highest probability       | animal                                  |
-| probability              | Highest confidence score corresponding to label    | 0.924                                   |
-| flattened_scores         | JSON-stringified array of all label-probability pairs | [{"label":"animal","probability":0.924}]|
-| device_id                | The device that generated the event                | iu-edge-server-cib                      |
-| experiment_id            | Identifier for the experiment                      | googlenet-iu-animal-classification      |
-| user_id                  | User or owner of the experiment                    | jstubbs                                 |
 
 ---
 

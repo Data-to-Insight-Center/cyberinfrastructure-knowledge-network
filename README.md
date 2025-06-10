@@ -20,12 +20,11 @@ CKN facilitates seamless connectivity between edge devices and the cloud through
 
 CKN comprises several core components:
 
-- **CKN Daemon** – A lightweight service that resides on each edge server. It manages communication with edge devices, handles requests, captures performance data, and deploys AI models as needed. The daemon connects with the cloud‑based CKN system via a pub/sub system, capturing real‑time events from edge devices (model usage, resource consumption, prediction accuracy, latency, and more).
+- **CKN Daemon** – A lightweight service that resides on each edge server. It manages communication with edge devices, handles requests, captures performance data, and deploys AI models as needed. The daemon connects with the cloud‑based CKN system via a pub/sub system, capturing real‑time events from edge devices (model usage, resource consumption, prediction accuracy, latency, and more).
 - **Event Streaming & Processing** – Stream‑processing techniques (for example, tumbling windows) aggregate events and generate real‑time alerts from edge‑device streams.
 - **Knowledge Graph** – A Neo4j graph database that stores historical and provenance information about applications, models, and edge events. This comprehensive view of the system enables CKN to track model usage and analyse performance over time.
 
-The primary objective of CKN is to provide a robust framework for optimising AI‑application deployment and resource allocation at the edge. Leveraging real‑time event streaming and knowledge graphs, CKN efficiently handles AI workloads, adapts to changing requirements, and supports scalable edge–cloud collaboration. 
-The CKN topics and their details are mentioned [here](https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network/blob/main/docs/topics.md).
+The primary objective of CKN is to provide a robust framework for optimising AI‑application deployment and resource allocation at the edge. Leveraging real‑time event streaming and knowledge graphs, CKN efficiently handles AI workloads, adapts to changing requirements, and supports scalable edge–cloud collaboration.
 
 Refer to this paper for more information: [https://ieeexplore.ieee.org/document/10254827](https://ieeexplore.ieee.org/document/10254827).
 
@@ -33,7 +32,7 @@ Refer to this paper for more information: [https://ieeexplore.ieee.org/document/
 
 ---
 
-## How‑To Guide
+## How‑To Guide
 
 See the full [documentation](https://cyberinfrastructure-knowledge-network.readthedocs.io/en/latest/) for detailed instructions on creating custom plug‑ins and streaming events to the knowledge graph.
 
@@ -69,38 +68,21 @@ docker compose ps
 docker compose -f examples/docker-compose.yml up -d --build
 ```
 
-- View the streamed data on the CKN dashboard: [http://localhost:8502/Camera\_Traps](http://localhost:8502/Camera_Traps)
+View the streamed data on the [CKN dashboard](http://localhost:8502/Camera_Traps) or open the [neo4j browser](http://localhost:7474/browser/) and log in with the credentials mentioned in the docker-compose file. Run `MATCH (n) RETURN n` to view the streamed data.
 
-- Access the Neo4j Browser: [http://localhost:7474/browser/](http://localhost:7474/browser/) (username `neo4j`, password `PWD_HERE`). Run:
-
-  ```cypher
-  MATCH (n) RETURN n;
-  ```
-
-- Shut down services:
-
-  ```bash
-  make down
-  docker compose -f examples/docker-compose.yml down
-  ```
-
-## Tutorial
-
-### Step 1 | Set Up Your Environment
-
+Shut down services using:
 ```bash
-git clone https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network.git
-cd cyberinfrastructure-knowledge-network
-make up  # launches Kafka, Neo4j, and supporting services
+make down
+docker compose -f examples/docker-compose.yml down
 ```
 
-*Wait a few moments for all services to initialise.*
+## Tutorial: Create a Custom CKN Plug-in
 
-### Step 2 | Create a CKN Topic
+#### 1. Create a CKN Topic
 
-We will create a CKN topic named `temperature-sensor-data` to store temperature events.
+We will create a CKN topic named `temperature-sensor-data` to store temperature events. The CKN topics and their details are mentioned [here](docs/topics.md).
 
-**Update `docker-compose.yml`** (root directory) and add the topic to the broker environment:
+Update `docker-compose.yml` (root directory) and add the topic to the broker environment:
 
 ```yaml
 services:
@@ -117,30 +99,19 @@ make up
 ```
 
 
-### Step 3 | Produce Events
+#### 2. Produce Events
 
-#### Install required libraries
-
-```bash
-python -m venv venv
-source venv/bin/activate  # or .\venv\Scripts\activate on Windows
-pip install confluent-kafka  # <https://pypi.org/project/confluent-kafka/>
-```
-
-#### Create the producer script – `produce_temperature_events.py`
+Create a producer script `produce_temperature_events.py` and run it.
 
 ```python
 from confluent_kafka import Producer
 import json, time
 
-kafka_conf = {"bootstrap.servers": "localhost:9092"}
-producer = Producer(kafka_conf)
-
-sensors = ["sensor_1", "sensor_2", "sensor_3"]
+producer = Producer({"bootstrap.servers": "localhost:9092"})
 
 try:
     for i in range(10):
-        for sensor_id in sensors:
+        for sensor_id in ["sensor_1", "sensor_2", "sensor_3"]:
             event = {
                 "sensor_id": sensor_id,
                 "temperature": round(20 + 10 * (0.5 - time.time() % 1), 2),
@@ -154,33 +125,16 @@ except Exception as e:
     print(f"An error occurred: {e}")
 ```
 
-Run the producer:
+Open a shell inside the broker container and start the consumer. You should see JSON‑formatted temperature events.
 
 ```bash
-python produce_temperature_events.py
+kafka-console-consumer --bootstrap-server localhost:9092 --topic temperature-sensor-data --from-beginning
 ```
 
-### Step 4 | Consume and View Events
 
-1. **Open a shell inside the broker container**
+#### 3. Connect to a Data Sink
 
-   ```bash
-   docker exec -it broker bash  # replace "broker" with the container name if different
-   ```
-
-2. **Start the consumer**
-
-   ```bash
-   kafka-console-consumer --bootstrap-server localhost:9092 --topic temperature-sensor-data --from-beginning
-   ```
-
-   You should see JSON‑formatted temperature events.
-
-Press **Ctrl +C** (or **Ctrl + Break** on Windows) to exit.
-
-### Step 5 | Connect to a Data Sink
-
-#### Create connector configuration – `neo4jsink-temperature-connector.json`
+Create the connector configuration `neo4jsink-temperature-connector.json` and place the file in `ckn_broker/connectors/` (or your chosen directory).
 
 ```json
 {
@@ -205,9 +159,7 @@ Press **Ctrl +C** (or **Ctrl + Break** on Windows) to exit.
 }
 ```
 
-Place the file in `ckn_broker/connectors/` (or your chosen directory).
-
-#### Register the connector – `setup_connector.sh`
+#### 4. Register the connector
 
 ```bash
 curl -X POST -H "Content-Type: application/json" \
@@ -215,43 +167,17 @@ curl -X POST -H "Content-Type: application/json" \
      http://localhost:8083/connectors
 ```
 
-Restart CKN:
+Restart CKN and run the `temperature‑event` producer again.
 
 ```bash
 make down
 make up
-```
 
-Run the temperature‑event producer again:
-
-```bash
 python produce_temperature_events.py
 ```
 
-### Step 6 | Visualise Data
-
-1. **Open the Neo4j browser:** [http://localhost:7474/browser/](http://localhost:7474/browser/)
-
-2. **Log in** – username `neo4j`, password `PWD_HERE`.
-
-3. **Query the graph:**
-
-   ```cypher
-   MATCH (s:Sensor)-[:REPORTED]->(r:TemperatureReading)
-   RETURN s, r;
-   ```
-
-4. **Explore** the graph using Neo4j visual tools.
-
----
-
-## Next Steps
-
-You have successfully set up a temperature‑monitoring use case with **CKN**, **Kafka**, and **Neo4j**. Consider:
-
-- **Adding more sensors** to simulate a larger network.
-- Extending the cypher mapping to handle additional event attributes.
-- Integrating alerting or dashboarding tools for real‑time monitoring.
+Open [neo4j browser](http://localhost:7474/browser/) and log in with the credentials mentioned in the docker-compose file to view the streamed data. 
+You have successfully set up a temperature‑monitoring plugin with CKN!
 
 ---
 
@@ -261,4 +187,4 @@ The Cyberinfrastructure Knowledge Network (CKN) is copyrighted by the Indiana Un
 
 ## Acknowledgements
 
-This research is funded in part by the National Science Foundation (award #2112606 – *AI Institute for Intelligent CyberInfrastructure with Computational Learning in the Environment* \[ICICLE]) and by the *Data to Insight Center* (D2I) at Indiana University.
+This research is funded in part by the National Science Foundation (award #2112606 – *AI Institute for Intelligent CyberInfrastructure with Computational Learning in the Environment* \[ICICLE]) and by the *Data to Insight Center* (D2I) at Indiana University.
