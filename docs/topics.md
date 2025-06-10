@@ -6,9 +6,9 @@
 | deployment_info              | Kafka          | ckn_inference_daemon     | Per‑inference result & resource metrics                                                                     |
 | start_deployment             | Kafka          | ckn_inference_daemon     | Marks start of a deployment run                                                                             |
 | end_deployment               | Kafka          | ckn_inference_daemon     | Marks graceful or abnormal termination                                                                      |
-| cameratrap/events            | MQTT           | ckn-mqtt-cameratraps     | Publishes camera trap event data (detections, storage actions, etc.)                                        |
-| cameratrap/images            | MQTT           | ckn-mqtt-cameratraps     | Publishes image data captured by camera traps                                                               |
-| cameratrap/power_summary     | MQTT           | ckn-mqtt-cameratraps     | Publishes aggregated power usage summaries from camera trap plugins                                         |
+| cameratrap/events            | MQTT           | ckn-mqtt-cameratraps     | Camera trap event data (detections, storage actions, etc.)                                        |
+| cameratrap/images            | MQTT           | ckn-mqtt-cameratraps     | Image data captured by camera traps                                                               |
+| cameratrap/power_summary     | MQTT           | ckn-mqtt-cameratraps     | Aggregated power usage summaries from camera trap plugins                                         |
 
 
 ## Event Types and Formats
