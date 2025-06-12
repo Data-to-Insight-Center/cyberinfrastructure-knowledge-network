@@ -1,4 +1,8 @@
-| Topic Name                   | Pub/Sub System | Plugin Directory          | Topic Purpose                                                                                               |
+## Topic Names
+
+A topic is a string used to identify and route messages between publishers and subscribers. The following topics are used by CKN daemons and recognized by CKN as subscriber. 
+
+| Topic Name                   | Pub/Sub System | Publisher          | Topic Purpose                                                                                               |
 |------------------------------|----------------|--------------------------|-------------------------------------------------------------------------------------------------------------|
 | oracle-events                | Kafka          | oracle_ckn_daemon        | Inference data from the [camera-traps application](https://github.com/tapis-project/camera-traps)           |
 | cameratraps-power-summary    | Kafka          | oracle_ckn_daemon        | Aggregated power summary from the [camera-traps application](https://github.com/tapis-project/camera-traps) |
