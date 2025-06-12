@@ -1,6 +1,6 @@
 ## Topic Names
 
-A topic is a string used to identify and route messages between publishers and subscribers. The following topics are used by CKN daemons and recognized by CKN as subscriber. 
+A topic is a string used to identify and route messages between publishers and subscribers. These are the topics used by the CKN publisher and recognized by the CKN subscriber. 
 
 | Topic Name                   | System used by Publisher | Publisher          | Topic Purpose                                                                                               |
 |------------------------------|----------------|--------------------------|-------------------------------------------------------------------------------------------------------------|
