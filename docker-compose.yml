@@ -44,7 +44,7 @@ services:
       - "9092:9092"
       - "29092:29092"
     healthcheck:
-      test: kafka-topics --bootstrap-server broker:9092 --list
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server broker:29092 --list"]
       interval: 30s
       timeout: 10s
       retries: 3
