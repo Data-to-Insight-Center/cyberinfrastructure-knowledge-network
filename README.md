@@ -10,7 +10,7 @@
 
 The **Cyberinfrastructure Knowledge Network (CKN)** is an extensible and portable distributed framework designed to optimize AI at the edge—particularly in dynamic environments where workloads may change suddenly (for example, in response to motion detection). CKN enhances edge–cloud collaboration by using historical data, graph representations, and adaptable deployment of AI models to satisfy changing accuracy‑and‑latency demands on edge devices.
 
-*Tag: CI4AI, Software, PADI*
+*Tag: CI4AI, PADI*
 
 ---
 
