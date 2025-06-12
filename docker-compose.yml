@@ -42,6 +42,7 @@ services:
       - neo4j
     ports:
       - "9092:9092"
+      - "29092:29092"
     healthcheck:
       test: kafka-topics --bootstrap-server broker:9092 --list
       interval: 30s
