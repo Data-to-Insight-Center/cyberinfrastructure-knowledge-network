@@ -35,7 +35,7 @@ services:
       - ckn-network
 
   broker:
-    image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-kafka:7.9.2
     container_name: broker
     depends_on:
       - zookeeper
