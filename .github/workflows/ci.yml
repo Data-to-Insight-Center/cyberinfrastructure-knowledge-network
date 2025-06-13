@@ -20,13 +20,15 @@ jobs:
             -o /usr/local/bin/docker-compose
           sudo chmod +x /usr/local/bin/docker-compose
 
-      - name: Disable Kafka broker healthcheck
+      - name: Disable Kafka broker healthcheck and set required env
         run: |
           cat <<EOF > docker-compose.override.yml
           version: '3.8'
           services:
             broker:
               healthcheck: {}
+              environment:
+                - KAFKA_PROCESS_ROLES=broker
           EOF
 
       - name: Build CKN
