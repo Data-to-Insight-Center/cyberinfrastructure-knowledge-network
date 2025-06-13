@@ -29,6 +29,7 @@ jobs:
               healthcheck: {}
               environment:
                 - KAFKA_PROCESS_ROLES=broker
+                - CLUSTER_ID=your_cluster_id_here # Add this line
           EOF
 
       - name: Build CKN
