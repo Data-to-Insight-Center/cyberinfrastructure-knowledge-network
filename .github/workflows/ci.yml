@@ -16,35 +16,13 @@ jobs:
 
       - name: Install Docker Compose
         run: |
-          sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" \
-            -o /usr/local/bin/docker-compose
+          sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
           sudo chmod +x /usr/local/bin/docker-compose
-
-      - name: Disable Kafka broker healthcheck and set required env
-        run: |
-          cat <<EOF > docker-compose.override.yml
-          version: '3.8'
-          services:
-            broker:
-              healthcheck: {}
-              environment:
-                - KAFKA_PROCESS_ROLES=broker
-                - CLUSTER_ID=your_cluster_id_here # Add this line
-          EOF
 
       - name: Build CKN
         run: |
           docker network create ckn-network || true
-          docker compose \
-            -f docker-compose.yml \
-            -f docker-compose.override.yml \
-            up -d --build
-
-      - name: Dump broker logs (on failure)
-        if: failure()
-        run: |
-          echo "=== Broker logs ==="
-          docker logs broker || true
+          docker compose -f docker-compose.yml up -d --build
 
       - name: Apply neo4j Constraints
         run: |
@@ -73,8 +51,7 @@ jobs:
 
       - name: Build CKN Oracle Daemon plugin WITH power_monitoring
         run: |
-          sed -i '20s/ENABLE_POWER_MONITORING=false/ENABLE_POWER_MONITORING=true/' \
-            plugins/oracle_ckn_daemon/docker-compose.yml
+          sed -i '20s/ENABLE_POWER_MONITORING=false/ENABLE_POWER_MONITORING=true/' plugins/oracle_ckn_daemon/docker-compose.yml
 
           docker compose -f plugins/oracle_ckn_daemon/docker-compose.yml up -d --build
           sleep 5
@@ -85,6 +62,7 @@ jobs:
         run: |
           pytest plugins/oracle_ckn_daemon/tests/test_power_monitoring_true.py -v
           docker compose -f plugins/oracle_ckn_daemon/docker-compose.yml down
+
 
       - name: Stop and Remove CKN Docker Network
         if: always()
