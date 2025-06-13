@@ -20,7 +20,7 @@ jobs:
             -o /usr/local/bin/docker-compose
           sudo chmod +x /usr/local/bin/docker-compose
 
-      - name: Disable broker healthcheck
+      - name: Disable Kafka broker healthcheck
         run: |
           cat <<EOF > docker-compose.override.yml
           version: '3.8'
@@ -32,21 +32,26 @@ jobs:
       - name: Build CKN
         run: |
           docker network create ckn-network || true
-          # include the override so the broker healthcheck is disabled
           docker compose \
             -f docker-compose.yml \
             -f docker-compose.override.yml \
             up -d --build
 
+      - name: Dump broker logs (on failure)
+        if: failure()
+        run: |
+          echo "=== Broker logs ==="
+          docker logs broker || true
+
       - name: Apply neo4j Constraints
         run: |
           echo "Waiting for neo4j to be ready..."
-          while ! docker exec neo4j_server cypher-shell -u neo4j -p PWD_HERE "RETURN 1" \
-            > /dev/null 2>&1; do
-            echo "neo4j-server starting..."
-            sleep 5
+          while ! docker exec neo4j_server cypher-shell -u neo4j -p PWD_HERE "RETURN 1" > /dev/null 2>&1; do \
+            echo "neo4j-server starting..."; \
+            sleep 5; \
           done
           echo "neo4j is ready"
+
           docker cp ckn_kg/constraints.cypher neo4j_server:/constraints.cypher
           docker exec neo4j_server cypher-shell -u neo4j -p PWD_HERE -f /constraints.cypher
 
@@ -67,6 +72,7 @@ jobs:
         run: |
           sed -i '20s/ENABLE_POWER_MONITORING=false/ENABLE_POWER_MONITORING=true/' \
             plugins/oracle_ckn_daemon/docker-compose.yml
+
           docker compose -f plugins/oracle_ckn_daemon/docker-compose.yml up -d --build
           sleep 5
           docker exec ckn-oracle-daemon touch /oracle_logs/image_mapping_final.json
