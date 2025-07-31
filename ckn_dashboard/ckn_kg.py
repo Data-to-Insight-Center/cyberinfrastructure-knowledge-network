@@ -326,6 +326,49 @@ class CKNKnowledgeGraph:
         df.set_index("Ingestion Time", inplace=True)
         return df
 
+    def get_exp_info_with_bbox(self, experiment_id):
+        """
+        Get experiment information for object detection metrics.
+        This method fetches experiment data without ground truth bounding boxes.
+        """
+        query = """
+        MATCH (e:Experiment {experiment_id: '""" + experiment_id + """'})-[r:PROCESSED_BY]-(img:RawImage)
+        RETURN {
+            image_name: img.image_name,
+            ground_truth: img.ground_truth,
+            image_scoring_timestamp: r.image_scoring_timestamp, 
+            model_id: r.model_id, 
+            ingestion_timestamp: r.ingestion_timestamp, 
+            image_store_delete_time: r.image_store_delete_time, 
+            image_decision: r.image_decision, 
+            scores: r.scores
+        } AS processed_by_detail
+        """
+        result = self.session.run(query)
+        records = [record["processed_by_detail"] for record in result]
+
+        df = pd.DataFrame(records, columns=[
+            "image_name",
+            "ground_truth",
+            "image_scoring_timestamp",
+            "ingestion_timestamp",
+            "image_store_delete_time",
+            "model_id",
+            "image_decision",
+            "scores"
+        ])
+
+        # Convert Neo4j DateTime objects to Python datetime objects
+        date_columns = ["image_scoring_timestamp", "image_store_delete_time", "ingestion_timestamp"]
+        for col in date_columns:
+            if col in df.columns:
+                df[col] = df[col].apply(self.convert_to_native)
+
+        df.columns = ["Image", "Ground Truth", "Score Time", "Ingestion Time", "Delete Time", "Model",
+                      "Decision", "Scores"]
+        df.set_index("Ingestion Time", inplace=True)
+        return df
+
     def fetch_experiments(self, user_id):
         query = f"""
         MATCH (u:User {{user_id: '{user_id}' }})<-[:SUBMITTED_BY]-(e:Experiment)-[:EXECUTED_ON]->(d:EdgeDevice),
