@@ -1,6 +1,8 @@
 # IDE and editor files
 .idea/
 .vscode/
+.ruff_cache/
+.pytest_cache/
 
 # Virtual environment
 env/
