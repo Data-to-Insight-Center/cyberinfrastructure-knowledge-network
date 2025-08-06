@@ -493,7 +493,7 @@ if selected_experiment:
         # Detection Metrics (Collapsible)
         with st.expander("Detection Metrics", expanded=True):
             # First row - Basic counts
-            col1, col2, col3, col4 = st.columns(4)
+            col1, col2, col3 = st.columns(3)
 
             with col1:
                 st.metric(
@@ -516,49 +516,44 @@ if selected_experiment:
                     help="Total number of predictions made by the model"
                 )
 
-            with col4:
+            # Second row - Performance metrics
+            col1, col2, col3 = st.columns(3)
+
+            with col1:
                 st.metric(
                     label="True Positives",
                     value=dataset_metrics["true_positives"],
                     help="Correctly detected objects (IoU > 0.5)"
                 )
 
-            # Second row - Performance metrics
-            col1, col2, col3, col4 = st.columns(4)
-
-            with col1:
+            with col2:
                 st.metric(
                     label="False Positives",
                     value=dataset_metrics["false_positives"],
                     help="Incorrect detections"
                 )
 
-            with col2:
+            with col3:
                 st.metric(
                     label="False Negatives",
                     value=dataset_metrics["false_negatives"],
                     help="Missed ground truth objects"
                 )
 
-            with col3:
-                st.metric(
-                    label="Mean IoU",
-                    value=f"{dataset_metrics['mean_iou']:.3f}",
-                    help="Average Intersection over Union for true positives"
-                )
 
-            with col4:
+        # Precision & Recall (Collapsible)
+        with st.expander("Precision & Recall", expanded=False):
+            col1, col2, col3 = st.columns(3)
+
+            with col1:
                 st.metric(
                     label="Precision",
                     value=f"{dataset_metrics['precision']:.4f}",
                     help="TP / (TP + FP) - Accuracy of positive predictions"
                 )
+                st.progress(dataset_metrics['precision'])
 
-        # Precision & Recall (Collapsible)
-        with st.expander("Precision & Recall", expanded=False):
-            col1, col2 = st.columns(2)
-
-            with col1:
+            with col2:
                 st.metric(
                     label="Recall",
                     value=f"{dataset_metrics['recall']:.4f}",
@@ -566,7 +561,7 @@ if selected_experiment:
                 )
                 st.progress(dataset_metrics['recall'])
 
-            with col2:
+            with col3:
                 st.metric(
                     label="F1 Score",
                     value=f"{dataset_metrics['f1_score']:.4f}",
@@ -604,6 +599,7 @@ if selected_experiment:
 
         # Image Classification Metrics
         st.markdown("---")
+        st.markdown("Experiment Raw Data")
 
 
         # Display experiment raw data
