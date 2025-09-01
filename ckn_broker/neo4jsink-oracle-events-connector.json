@@ -15,32 +15,6 @@
     "neo4j.server.uri": "bolt://neo4j:7687",
     "neo4j.authentication.basic.username": "neo4j",
     "neo4j.authentication.basic.password": "PWD_HERE",
-    "neo4j.topic.cypher.oracle-events": "
-      MERGE (device:EdgeDevice {device_id: event.device_id})
-      MERGE (ex:Experiment {experiment_id: event.experiment_id}) ON CREATE SET ex.start_time = timestamp()
-      MERGE (depl:Deployment {deployment_id: event.experiment_id}) ON CREATE SET depl.start_time = timestamp()
-      MERGE (user:User {user_id: event.user_id})
-      MERGE (user)<-[exr:SUBMITTED_BY]-(ex) ON CREATE SET exr.submitted_time = timestamp()
-      MERGE (device)<-[dex:EXECUTED_ON]-(ex) ON CREATE SET dex.submitted_time = timestamp()
-      MERGE (device)<-[ddepl:DEPLOYED_IN]-(depl)
-      MERGE (model:Model {model_id: event.model_id})
-      MERGE (model)<-[mdex:USED]-(ex) ON CREATE SET mdex.start_time = timestamp()
-      MERGE (model)-[hd:HAS_DEPLOYMENT]->(depl)
-      MERGE (ri:RawImage {UUID: event.UUID})
-      ON CREATE SET
-        ri.image_name = event.image_name,
-        ri.ground_truth = event.ground_truth
-      MERGE (ex)<-[r:PROCESSED_BY]-(ri)
-      SET r = {
-        image_count: event.image_count,
-        image_receiving_timestamp: datetime(event.image_receiving_timestamp),
-        image_scoring_timestamp: datetime(event.image_scoring_timestamp),
-        model_id: event.model_id,
-        scores: event.flattened_scores,
-        image_store_delete_time: datetime(event.image_store_delete_time),
-        image_decision: event.image_decision,
-        ingestion_timestamp: datetime()
-      }
-    "
+    "neo4j.topic.cypher.oracle-events": "MERGE (device:EdgeDevice {device_id: event.device_id})\nMERGE (ex:Experiment {experiment_id: event.experiment_id})\n  ON CREATE SET ex.start_time = timestamp()\nMERGE (depl:Deployment {deployment_id: event.experiment_id})\n  ON CREATE SET depl.start_time = timestamp()\nMERGE (user:User {user_id: event.user_id})\nMERGE (user)<-[exr:SUBMITTED_BY]-(ex)\n  ON CREATE SET exr.submitted_time = timestamp()\nMERGE (device)<-[dex:EXECUTED_ON]-(ex)\n  ON CREATE SET dex.submitted_time = timestamp()\nMERGE (device)<-[ddepl:DEPLOYED_IN]-(depl)\nMERGE (model:Model {model_id: event.model_id})\nMERGE (model)<-[mdex:USED]-(ex)\n  ON CREATE SET mdex.start_time = timestamp()\nMERGE (model)-[hd:HAS_DEPLOYMENT]->(depl)\nMERGE (ri:RawImage {UUID: event.UUID})\n  ON CREATE SET ri.image_name = event.image_name,\n                ri.ground_truth = event.ground_truth\nMERGE (ex)<-[r:PROCESSED_BY]-(ri)\n  ON CREATE SET r.image_count = event.image_count,\n                r.image_receiving_timestamp = datetime(event.image_receiving_timestamp),\n                r.image_scoring_timestamp = datetime(event.image_scoring_timestamp),\n                r.model_id = event.model_id,\n                r.scores = event.flattened_scores,\n                r.image_store_delete_time = datetime(event.image_store_delete_time),\n                r.image_decision = event.image_decision,\n                r.label = event.label,\n                r.probability = event.probability,\n                r.ingestion_timestamp = datetime()\nSET ex.total_images = event.total_images,\n    ex.total_predictions = event.total_predictions,\n    ex.total_ground_truth_objects = event.total_ground_truth_objects,\n    ex.true_positives = event.true_positives,\n    ex.false_positives = event.false_positives,\n    ex.false_negatives = event.false_negatives,\n    ex.precision = event.precision,\n    ex.recall = event.recall,\n    ex.f1_score = event.f1_score,\n    ex.mean_iou = event.mean_iou,\n    ex.map_50 = event.map_50,\n    ex.map_50_95 = event.map_50_95"
   }
 }

@@ -8,4 +8,5 @@ COPY requirements.txt /app/
 
 RUN pip install -r /app/requirements.txt
 
-ENTRYPOINT [ "python", "-u", "/app/daemon.py"]
+# Default to running the daemon, but can be overridden
+CMD [ "python", "-u", "/app/daemon.py"]
