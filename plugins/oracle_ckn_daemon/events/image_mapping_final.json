@@ -10,7 +10,8 @@
     "score": [
       {
         "label": "vehicle",
-        "probability": 0.005289999768137932
+        "probability": 0.005289999768137932,
+        "bounding_box": [0.35, 0.45, 0.20, 0.25]
       }
     ],
     "image_delete_time": "2024-08-06T20:34:28.910339666+00:00",
@@ -27,7 +28,8 @@
     "score": [
       {
         "label": "animal",
-        "probability": 0.9240000247955322
+        "probability": 0.9240000247955322,
+        "bounding_box": [0.35, 0.45, 0.20, 0.25]
       }
     ],
     "image_store_delete_time": "2024-08-06T20:34:47.438858883+00:00",
@@ -44,27 +46,33 @@
     "score": [
       {
         "label": "vehicle",
-        "probability": 0.005119999870657921
+        "probability": 0.005119999870657921,
+        "bounding_box": [0.35, 0.45, 0.20, 0.25]
       },
       {
         "label": "vehicle",
-        "probability": 0.005950000137090683
+        "probability": 0.005950000137090683,
+        "bounding_box": [0.35, 0.45, 0.20, 0.25]
       },
       {
         "label": "vehicle",
-        "probability": 0.008919999934732914
+        "probability": 0.008919999934732914,
+        "bounding_box": [0.35, 0.45, 0.20, 0.25]
       },
       {
         "label": "vehicle",
-        "probability": 0.01209999993443489
+        "probability": 0.01209999993443489,
+        "bounding_box": [0.35, 0.45, 0.20, 0.25]
       },
       {
         "label": "vehicle",
-        "probability": 0.015300000086426735
+        "probability": 0.015300000086426735,
+        "bounding_box": [0.35, 0.45, 0.20, 0.25]
       },
       {
         "label": "vehicle",
-        "probability": 0.08139999955892563
+        "probability": 0.08139999955892563,
+        "bounding_box": [0.35, 0.45, 0.20, 0.25]
       }
     ],
     "image_delete_time": "2024-08-06T20:35:05.364311669+00:00",
@@ -81,11 +89,13 @@
     "score": [
       {
         "label": "animal",
-        "probability": 0.005950000137090683
+        "probability": 0.005950000137090683,
+        "bounding_box": [0.35, 0.45, 0.20, 0.25]
       },
       {
         "label": "animal",
-        "probability": 0.008100000210106373
+        "probability": 0.008100000210106373,
+        "bounding_box": [0.15, 0.22, 0.18, 0.31]
       }
     ],
     "image_delete_time": "2024-08-06T20:35:24.076661137+00:00",
@@ -102,19 +112,23 @@
     "score": [
       {
         "label": "animal",
-        "probability": 0.007000000216066837
+        "probability": 0.007000000216066837,
+        "bounding_box": [0.42, 0.38, 0.16, 0.29]
       },
       {
         "label": "animal",
-        "probability": 0.010300000198185444
+        "probability": 0.010300000198185444,
+        "bounding_box": [0.28, 0.51, 0.24, 0.19]
       },
       {
         "label": "animal",
-        "probability": 0.015599999576807022
+        "probability": 0.015599999576807022,
+        "bounding_box": [0.61, 0.33, 0.22, 0.36]
       },
       {
         "label": "animal",
-        "probability": 0.09179999679327011
+        "probability": 0.09179999679327011,
+        "bounding_box": [0.19, 0.64, 0.31, 0.14]
       }
     ],
     "image_delete_time": "2024-08-06T20:35:43.001081923+00:00",
@@ -131,7 +145,8 @@
     "score": [
       {
         "label": "empty",
-        "probability": 0.0
+        "probability": 0.0,
+        "bounding_box": [0.47, 0.29, 0.26, 0.42]
       }
     ],
     "image_delete_time": "2024-08-06T20:36:01.485590626+00:00",
@@ -148,7 +163,8 @@
     "score": [
       {
         "label": "empty",
-        "probability": 0.0
+        "probability": 0.0,
+        "bounding_box": [0.33, 0.58, 0.19, 0.27]
       }
     ],
     "image_delete_time": "2024-08-06T20:36:19.564788426+00:00",
@@ -165,7 +181,8 @@
     "score": [
       {
         "label": "animal",
-        "probability": 0.9549999833106995
+        "probability": 0.9549999833106995,
+        "bounding_box": [0.52, 0.16, 0.28, 0.39]
       }
     ],
     "image_store_delete_time": "2024-08-06T20:36:36.992538295+00:00",
@@ -182,7 +199,8 @@
     "score": [
       {
         "label": "animal",
-        "probability": 0.7059999704360962
+        "probability": 0.7059999704360962,
+        "bounding_box": [0.38, 0.43, 0.17, 0.34]
       }
     ],
     "image_store_delete_time": "2024-08-06T20:36:56.641497680+00:00",
@@ -199,43 +217,53 @@
     "score": [
       {
         "label": "human",
-        "probability": 0.005160000175237656
+        "probability": 0.005160000175237656,
+        "bounding_box": [0.12, 0.67, 0.21, 0.18]
       },
       {
         "label": "human",
-        "probability": 0.008030000142753124
+        "probability": 0.008030000142753124,
+        "bounding_box": [0.26, 0.41, 0.35, 0.23]
       },
       {
         "label": "human",
-        "probability": 0.008999999612569809
+        "probability": 0.008999999612569809,
+        "bounding_box": [0.59, 0.52, 0.14, 0.31]
       },
       {
         "label": "human",
-        "probability": 0.013199999928474426
+        "probability": 0.013199999928474426,
+        "bounding_box": [0.44, 0.28, 0.29, 0.37]
       },
       {
         "label": "animal",
-        "probability": 0.022099999710917473
+        "probability": 0.022099999710917473,
+        "bounding_box": [0.18, 0.63, 0.32, 0.16]
       },
       {
         "label": "human",
-        "probability": 0.07010000199079514
+        "probability": 0.07010000199079514,
+        "bounding_box": [0.73, 0.19, 0.15, 0.44]
       },
       {
         "label": "human",
-        "probability": 0.08060000091791153
+        "probability": 0.08060000091791153,
+        "bounding_box": [0.31, 0.56, 0.27, 0.21]
       },
       {
         "label": "animal",
-        "probability": 0.14900000393390656
+        "probability": 0.14900000393390656,
+        "bounding_box": [0.48, 0.34, 0.24, 0.38]
       },
       {
         "label": "animal",
-        "probability": 0.6600000262260437
+        "probability": 0.6600000262260437,
+        "bounding_box": [0.62, 0.47, 0.19, 0.26]
       },
       {
         "label": "human",
-        "probability": 0.699999988079071
+        "probability": 0.699999988079071,
+        "bounding_box": [0.37, 0.21, 0.33, 0.41]
       }
     ],
     "image_store_delete_time": "2024-08-06T20:37:16.713024883+00:00",
@@ -252,7 +280,8 @@
     "score": [
       {
         "label": "animal",
-        "probability": 0.8429999947547913
+        "probability": 0.8429999947547913,
+        "bounding_box": [0.55, 0.39, 0.23, 0.32]
       }
     ],
     "image_store_delete_time": "2024-08-06T20:37:35.875405170+00:00",
@@ -269,7 +298,8 @@
     "score": [
       {
         "label": "animal",
-        "probability": 0.9409999847412109
+        "probability": 0.9409999847412109,
+        "bounding_box": [0.41, 0.26, 0.36, 0.28]
       }
     ],
     "image_store_delete_time": "2024-08-06T20:37:54.381557345+00:00",
