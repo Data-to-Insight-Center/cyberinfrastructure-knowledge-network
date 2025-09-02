@@ -28,8 +28,6 @@ The primary objective of CKN is to provide a robust framework for optimising AIâ
 
 Refer to this paper for more information: [https://ieeexplore.ieee.org/document/10254827](https://ieeexplore.ieee.org/document/10254827).
 
-![CKN Design](docs/ckn-design.png)
-
 ---
 
 ## Howâ€‘To Guide
