@@ -1,4 +1,4 @@
-- id: CKN:0.1.0
+- id: CKN:0.2.0
   name: Cyberinfrastructure Knowledge Network
   status: ProductionRelease
   website: https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network
@@ -7,7 +7,7 @@
   primaryThrust: core/AI4CI
   sourceCodeUrl: https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network
   targetIcicleRelease: 2024-12
-  componentVersion: 0.1.0
+  componentVersion: 0.2.0
   licenseUrl: https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network/blob/main/LICENSE
   releaseNotesUrl:
   doi: https://doi.org/10.1109/e-Science58273.2023.10254827

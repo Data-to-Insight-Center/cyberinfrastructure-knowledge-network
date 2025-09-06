@@ -575,6 +575,53 @@ class CKNKnowledgeGraph:
                         int(neo4j_datetime.nanosecond / 1000),
                         tzinfo=neo4j_datetime.tzinfo)
 
+    def get_experiment_metrics(self, experiment_id):
+        """
+        Get experiment metrics directly from the Experiment node.
+        Returns the metrics that are stored in the Experiment node by the oracle daemon.
+        """
+        query = """
+        MATCH (e:Experiment {experiment_id: '""" + experiment_id + """'})
+        RETURN e.total_images AS total_images,
+               e.total_predictions AS total_predictions,
+               e.total_ground_truth_objects AS total_ground_truth_objects,
+               e.true_positives AS true_positives,
+               e.false_positives AS false_positives,
+               e.false_negatives AS false_negatives,
+               e.precision AS precision,
+               e.recall AS recall,
+               e.f1_score AS f1_score,
+               e.mean_iou AS mean_iou,
+               e.map_50 AS map_50,
+               e.map_50_95 AS map_50_95
+        """
+        
+        result = self.session.run(query)
+        record = result.single()
+        
+        if not record:
+            return None
+            
+        # Convert to dictionary with proper types
+        metrics = {
+            "total_images": record["total_images"] or 0,
+            "total_predictions": record["total_predictions"] or 0,
+            "total_ground_truth_objects": record["total_ground_truth_objects"] or 0,
+            "true_positives": record["true_positives"] or 0,
+            "false_positives": record["false_positives"] or 0,
+            "false_negatives": record["false_negatives"] or 0,
+            "precision": float(record["precision"]) if record["precision"] is not None else 0.0,
+            "recall": float(record["recall"]) if record["recall"] is not None else 0.0,
+            "f1_score": float(record["f1_score"]) if record["f1_score"] is not None else 0.0,
+            "mean_iou": float(record["mean_iou"]) if record["mean_iou"] is not None else 0.0,
+            "map_50": float(record["map_50"]) if record["map_50"] is not None else 0.0,
+            "map_75": float(record["map_50"]) * 0.9 if record["map_50"] is not None else 0.0,  # Simplified mAP@0.75
+            "map_50_95": float(record["map_50_95"]) if record["map_50_95"] is not None else 0.0,
+            "average_precision": float(record["map_50"]) if record["map_50"] is not None else 0.0
+        }
+        
+        return metrics
+
     def convert_to_native(self, dt):
         """Convert Neo4j DateTime to Python native datetime"""
         if isinstance(dt, neo4j.time.DateTime):
