@@ -1,0 +1,33 @@
+{
+  "name": "Neo4jSinkConnectorStartDeployment",
+  "config": {
+    "topics": "ckn_start_deployment",
+    "connector.class": "streams.kafka.connect.sink.Neo4jSinkConnector",
+    "errors.retry.timeout": "-1",
+    "errors.retry.delay.max.ms": "1000",
+    "errors.tolerance": "all",
+    "errors.log.enable": true,
+    "errors.log.include.messages": true,
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "key.converter.schemas.enable": false,
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": false,
+    "neo4j.server.uri": "bolt://neo4j:7687",
+    "neo4j.authentication.basic.username": "neo4j",
+    "neo4j.authentication.basic.password": "PWD_HERE",
+    "neo4j.topic.cypher.ckn_start_deployment": "
+        MERGE (server:Server {server_id: event.server_id})
+        MERGE (model:Model {model_id: event.model_id})
+        MERGE (device:Device {device_id: event.device_id})
+        MERGE (service:Service {service_id: event.service_id})
+        MERGE (depl:Deployment {deployment_id: event.deployment_id})
+        ON CREATE SET
+          depl.start_time = event.start_time,
+          depl.status = event.status
+        MERGE (depl)-[:deployed_in]->(server)
+        MERGE (model)-[:has_deployment]->(depl)
+        MERGE (depl)-[:requested_by]->(device)
+        MERGE (model)-[:model_of]->(service)
+    "
+  }
+}

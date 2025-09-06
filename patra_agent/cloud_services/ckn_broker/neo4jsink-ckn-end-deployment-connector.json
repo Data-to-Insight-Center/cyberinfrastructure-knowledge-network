@@ -1,0 +1,24 @@
+{
+  "name": "Neo4jSinkConnectorEndDeployment",
+  "config": {
+    "topics": "ckn_end_deployment",
+    "connector.class": "streams.kafka.connect.sink.Neo4jSinkConnector",
+    "errors.retry.timeout": "-1",
+    "errors.retry.delay.max.ms": "1000",
+    "errors.tolerance": "all",
+    "errors.log.enable": true,
+    "errors.log.include.messages": true,
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "key.converter.schemas.enable": false,
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": false,
+    "neo4j.server.uri": "bolt://neo4j:7687",
+    "neo4j.authentication.basic.username": "neo4j",
+    "neo4j.authentication.basic.password": "PWD_HERE",
+    "neo4j.topic.cypher.ckn_end_deployment": "
+        MATCH (prev_deployment:Deployment{deployment_id: event.deployment_id})
+        SET prev_deployment.end_time = event.end_time,
+            prev_deployment.status = event.status
+    "
+  }
+}

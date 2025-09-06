@@ -1,0 +1,8 @@
+services:
+  device:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: device
+    environment:
+      - SERVER_ADDRESS=127.0.0.1:5003

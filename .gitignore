@@ -20,3 +20,5 @@ env/
 ckn_kg/neo4j/
 neo4j/
 /docs/build/
+
+patra_agent/edge_device/data/images
