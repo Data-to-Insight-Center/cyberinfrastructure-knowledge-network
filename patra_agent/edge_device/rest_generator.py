@@ -11,7 +11,7 @@ load_dotenv(".env")
 This generates the REST requests along with the images to be sent to the EDGE REST interfaces. 
 """
 
-SERVER_ADDRESS = os.getenv("SERVER_ADDRESS", "127.0.0.1:5003")
+SERVER_ADDRESS = os.getenv("SERVER_ADDRESS", "http://127.0.0.1:5003")
 DEVICE_NAME = os.getenv("DEVICE_NAME")
 DATA_FILE = 'data/1_min_window_low_delay_high_rps.csv'
 IMAGE_DIRECTORY = './data/images'
@@ -106,8 +106,8 @@ def split_data_by_timestamp(data):
 
 
 def main(SERVER_ADDRESS):
-    URL = f"http://{SERVER_ADDRESS}/predict"
-    SIGNAL_URL = f"http://{SERVER_ADDRESS}/changetimestep"
+    URL = f"{SERVER_ADDRESS}/predict"
+    SIGNAL_URL = f"{SERVER_ADDRESS}/changetimestep"
     DATA_FILE = 'data/1_min_window_low_delay_high_rps.csv'
     IMAGE_DIRECTORY = './data/images'
 
@@ -148,4 +148,4 @@ def main(SERVER_ADDRESS):
 
 
 if __name__ == "__main__":
-    main(SERVER_ADDRESS)
+    main("http://127.0.0.1:5003")

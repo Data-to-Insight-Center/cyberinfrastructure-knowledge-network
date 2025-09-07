@@ -7,7 +7,14 @@ from torchvision import models
 MC_ID = os.getenv("MC_ID")
 
 model_mapping = {
-    f"{MC_ID}-model": "resnet152"
+"neelk_alexnet_1.0": "alexnet",
+"neelk_densenet201_1.0": "densenet201",
+"neelk_googlenet_1.0": "googlenet",
+"neelk_mobilenet_2.0": "mobilenet_v2",
+"neelk_mobilenet_3.0": "mobilenet_v3_small",
+"neelk_resnext50_1.0": "resnext50_32x4d",
+"neelk_shufflenet_1.0": "shufflenet_v2_x0_5",
+"neelk_squeezenet_1.0": "squeezenet1_1",
 }
 
 
