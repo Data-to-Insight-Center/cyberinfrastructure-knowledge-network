@@ -69,8 +69,8 @@ def get_large_language_model():
     # Try Ollama first (local, no API keys needed)
     try:
         ollama_host = os.getenv("OLLAMA_HOST", "http://ollama:11434")
-        print(f"Initializing Ollama llama3.2 model at {ollama_host}")
-        return init_chat_model(model="ollama:llama3.2", base_url=ollama_host)
+        print(f"Initializing Ollama llama3.2:1b model at {ollama_host}")
+        return init_chat_model(model="ollama:llama3.2:1b", base_url=ollama_host)
     except Exception as e:
         print(f"⚠️  Ollama failed: {e}")
     
