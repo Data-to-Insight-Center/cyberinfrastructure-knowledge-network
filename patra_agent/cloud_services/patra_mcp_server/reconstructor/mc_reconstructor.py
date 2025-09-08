@@ -1,4 +1,4 @@
-from ingester.database import GraphDB
+from .database import GraphDB
 import json
 from typing import Dict, Optional, Any
 
@@ -206,3 +206,39 @@ class MCReconstructor:
         headers['Content-Length'] = '0'
 
         return headers
+    
+    def get_average_compute_time(self, mc_id):
+        """
+        For a given model id, get all the connected Deployment nodes and calculate the average of the 'avg_compute_time' field.
+        Returns the average compute time as a float.
+        """
+        deployment_info = self.db.get_deployments(mc_id)
+        if deployment_info is None or len(deployment_info) == 0:
+            return None
+
+        # Extract avg_compute_time from each deployment record
+        compute_times = []
+        for deployment in deployment_info:
+            if 'avg_compute_time' in deployment and deployment['avg_compute_time'] is not None:
+                compute_times.append(deployment['avg_compute_time'])
+        
+        if len(compute_times) == 0:
+            return None
+            
+        average_compute_time = sum(compute_times) / len(compute_times)
+        return average_compute_time
+
+
+    def get_all_model_ids(self):
+        """
+        Get all model card IDs from the database.
+        Returns a list of model card IDs.
+        """
+        return self.db.get_all_model_ids()
+
+    def get_average_statistic_for_model(self, model_id, statistic):
+        """
+        Get the average of a specific statistic across all deployments for a given model.
+        Returns a dictionary with the model ID, statistic name, average value, and deployment count.
+        """
+        return self.db.get_average_statistic_for_model(model_id, statistic)

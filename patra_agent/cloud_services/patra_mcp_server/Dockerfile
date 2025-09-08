@@ -1,25 +1,41 @@
-FROM  --platform=linux/amd64 python:3.9-slim
+# Use Python 3.11 slim image
+FROM python:3.11-slim
 
+# Set working directory
 WORKDIR /app
 
-COPY ../ingester /app/ingester
-COPY ../reconstructor /app/reconstructor
-COPY server /app/server
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
 
-RUN pip install -r /app/server/requirements.txt
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
+# Copy requirements first for better caching
+COPY patra_mcp_server/server/requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY patra_mcp_server/ .
+
+# Add the current directory to Python path
+ENV PYTHONPATH=/app
+
+# Create a non-root user
+RUN useradd --create-home --shell /bin/bash app \
+    && chown -R app:app /app
+USER app
+
+# Expose port
 EXPOSE 5002
 
-ENV PYTHONPATH="${PYTHONPATH}:/app"
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:5002/ || exit 1
 
-ENV OPENAI_API_KEY=''
-ENV NEO4J_URI='bolt://locahost:7687'
-ENV NEO4J_USER=neo4j
-ENV NEO4J_PWD='pwd'
-ENV ENABLE_MC_SIMILARITY=False
-ENV HF_HUB_USERNAME=''
-ENV HF_HUB_TOKEN=''
-ENV GH_HUB_USERNAME=''
-ENV GH_HUB_TOKEN=''
-
-ENTRYPOINT [ "python", "-u", "/app/server/server.py"]
+# Default command - run the unified server
+CMD ["python", "server/server.py"]

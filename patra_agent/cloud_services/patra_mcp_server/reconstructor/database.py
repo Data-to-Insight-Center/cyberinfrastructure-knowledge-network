@@ -623,6 +623,22 @@ class GraphDB:
             records = list(result)
         return records
 
+    def get_all_model_ids(self):
+        """
+        Get all model card IDs from the knowledge graph.
+        Returns a list of external_id values from ModelCard nodes.
+        """
+        query = """
+            MATCH (mc:ModelCard)
+            RETURN mc.external_id as model_id
+            ORDER BY mc.external_id
+        """
+        
+        with self.driver.session() as session:
+            result = session.run(query)
+            model_ids = [record["model_id"] for record in result]
+            return model_ids
+
     def get_model_location(self, model_id):
         """
         Retrieve download location for a given model
