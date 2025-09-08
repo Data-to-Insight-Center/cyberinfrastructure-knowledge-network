@@ -7,7 +7,8 @@ This directory contains all cloud services for the Patra Knowledge Graph system,
 ### Core Services
 - **neo4j**: Graph database (ports 7474, 7687)
 - **patra-server**: Knowledge Graph API + LangGraph tools (port 5002)
-- **model-placement-agent**: AI agent using Patra tools
+- **patra-mcp-server**: MCP server for Patra tools (port 8001)
+- **model-placement-agent**: AI agent using Patra MCP tools
 - **ollama**: Local LLM server (port 11434)
 
 ### Infrastructure Services
@@ -80,6 +81,14 @@ OLLAMA_HOST=http://ollama:11434
   - `GET /modelcard/{id}` - Get specific model card
   - `GET /tools` - Get LangGraph tools information
 - **Dependencies**: Neo4j
+
+### Patra MCP Server
+- **Purpose**: MCP (Model Context Protocol) server for Patra Knowledge Graph tools
+- **Port**: 8001
+- **Protocol**: MCP over HTTP
+- **Tools**: All Patra Knowledge Graph tools available via MCP
+- **Dependencies**: Neo4j
+- **Usage**: Used by model-placement-agent for standardized tool access
 
 ### Model Recommendation Agent
 - **Purpose**: AI agent that provides model recommendations using Patra tools

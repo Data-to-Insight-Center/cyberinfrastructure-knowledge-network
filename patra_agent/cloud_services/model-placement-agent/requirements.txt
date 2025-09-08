@@ -14,3 +14,7 @@ ollama>=0.1.0
 pydantic>=2.0.0
 typing-extensions>=4.0.0
 httpx>=0.25.0
+
+# MCP (Model Context Protocol) support
+langchain-mcp-adapters>=0.1.0
+mcp>=1.0.0
