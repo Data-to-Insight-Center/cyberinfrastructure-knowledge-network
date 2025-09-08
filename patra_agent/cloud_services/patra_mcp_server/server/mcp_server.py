@@ -121,8 +121,6 @@ if __name__ == "__main__":
     logger.info("Starting Patra MCP Server...")
     logger.info(f"Neo4j URI: {NEO4J_URI}")
     
-    # Set environment variables for FastMCP server configuration
-    os.environ["MCP_HOST"] = "0.0.0.0"
-    os.environ["MCP_PORT"] = "8001"
-    
+    # Use default FastMCP run method - it will run on 127.0.0.1:8000
+    # We'll configure the client to connect to the correct port mapping
     mcp.run(transport="streamable-http")
