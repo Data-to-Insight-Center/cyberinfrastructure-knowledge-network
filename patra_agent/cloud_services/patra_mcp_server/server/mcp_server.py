@@ -120,4 +120,9 @@ async def get_average_statistic(model_id: str, statistic: str) -> str:
 if __name__ == "__main__":
     logger.info("Starting Patra MCP Server...")
     logger.info(f"Neo4j URI: {NEO4J_URI}")
-    mcp.run(transport="streamable-http", host="0.0.0.0", port=8001)
+    
+    # Set environment variables for FastMCP server configuration
+    os.environ["MCP_HOST"] = "0.0.0.0"
+    os.environ["MCP_PORT"] = "8001"
+    
+    mcp.run(transport="streamable-http")

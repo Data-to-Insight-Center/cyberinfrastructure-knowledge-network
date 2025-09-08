@@ -162,6 +162,8 @@ services:
       - NEO4J_USER=neo4j # ${NEO4J_USER:-neo4j}
       - NEO4J_PWD=PWD_HERE # ${NEO4J_PWD:-password}
       - ENABLE_MC_SIMILARITY=False # ${ENABLE_MC_SIMILARITY:-False}
+      - MCP_HOST=0.0.0.0
+      - MCP_PORT=8001
       - PYTHONUNBUFFERED=1
       - PYTHONDONTWRITEBYTECODE=1
     volumes:
