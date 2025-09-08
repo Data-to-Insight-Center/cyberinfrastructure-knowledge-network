@@ -63,10 +63,17 @@ def load_prompt_from_file(filename):
 
 def get_large_language_model():
     """
-    Get a LLM model with fallback options
-    Priority: Claude (Anthropic) > OpenAI > Ollama
+    Get a LLM model - prioritizing Ollama for local development
+    Priority: Ollama > Claude (Anthropic) > OpenAI
     """    
-    # Try Anthropic Claude first (best for tool use)
+    # Try Ollama first (local, no API keys needed)
+    try:
+        print("Initializing Ollama llama3.2 model")
+        return init_chat_model(model="ollama:llama3.2")
+    except Exception as e:
+        print(f"⚠️  Ollama failed: {e}")
+    
+    # Try Anthropic Claude as fallback
     anthropic_key = os.getenv("ANTHROPIC_API_KEY")
     if anthropic_key:
         try:
@@ -75,7 +82,7 @@ def get_large_language_model():
         except Exception as e:
             print(f"⚠️  Anthropic failed: {e}")
     
-    # Try OpenAI if available
+    # Try OpenAI as last resort
     openai_key = os.getenv("OPENAI_API_KEY")
     if openai_key:
         try:
@@ -84,15 +91,7 @@ def get_large_language_model():
         except Exception as e:
             print(f"⚠️  OpenAI failed: {e}")
     
-    # Try Ollama (may not support tools, but worth trying)
-    try:
-        print("Initializing Ollama 3.2 model")
-        print("⚠️  WARNING: Ollama models may not support tool binding required for LangGraph agents")
-        return init_chat_model(model="ollama:llama3.2")
-    except Exception as e:
-        print(f"⚠️  Ollama failed: {e}")
-    
-    raise Exception("No LLM provider available. Please set up Anthropic or OpenAI API key for full tool support.")
+    raise Exception("No LLM provider available. Please ensure Ollama is running or set up API keys.")
 
 def load_prompt_from_file(filename):
     """Load prompt from a text file"""

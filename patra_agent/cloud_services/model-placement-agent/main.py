@@ -78,12 +78,53 @@ def run_agent():
         except (NotImplementedError, AttributeError) as e:
             print(f"❌ Model does not support tool binding: {e}")
             print("⚠️  Current model (likely Ollama) does not support the tool binding required for LangGraph agents")
-            print("💡 To use the full agent functionality, please:")
-            print("   1. Set ANTHROPIC_API_KEY environment variable, or")
-            print("   2. Set OPENAI_API_KEY environment variable")
-            print("   3. Restart the container")
-            print("\n🔄 Exiting gracefully...")
-            sys.exit(0)
+            print("🔄 Switching to Ollama-compatible mode...")
+            
+            # Fallback mode for Ollama - call tools directly and provide context to the model
+            print("\n" + "="*60)
+            print("OLLAMA COMPATIBLE MODE")
+            print("="*60)
+            
+            # Call tools directly to get data
+            print("📊 Fetching model data from Patra server...")
+            model_cards = tools[0]()  # get_model_cards
+            model_deployments = tools[1]()  # get_model_deployments  
+            avg_compute_time = tools[2]()  # get_average_compute_time
+            
+            # Create a comprehensive prompt with the data
+            prompt = f"""
+You are a model placement agent. Based on the following data from the Patra knowledge graph, provide insights about model compute times and recommendations.
+
+MODEL CARDS DATA:
+{model_cards}
+
+MODEL DEPLOYMENTS DATA:
+{model_deployments}
+
+AVERAGE COMPUTE TIME DATA:
+{avg_compute_time}
+
+Please analyze this data and provide:
+1. Summary of the average compute times
+2. Any notable patterns or insights
+3. Recommendations for model placement based on compute efficiency
+
+Provide a clear, structured response.
+"""
+            
+            # Use the model directly without tool binding
+            print("🤖 Generating response with Ollama...")
+            response = model.invoke(prompt)
+            
+            print("\n" + "="*60)
+            print("MODEL PLACEMENT ANALYSIS")
+            print("="*60)
+            print(response.content)
+            print("="*60)
+            
+            print(f"\n✅ Successfully analyzed data using Ollama in compatible mode!")
+            print("💡 For full agent functionality with tool binding, consider using Anthropic or OpenAI models")
+            return
         
         result = agent.invoke({
             "messages": [

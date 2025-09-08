@@ -7,7 +7,7 @@ A containerized AI agent that provides model recommendations using the Patra Kno
 - **AI-Powered Recommendations**: Uses LangGraph and LangChain to provide intelligent model recommendations
 - **HTTP Integration**: Uses HTTP requests to connect to Patra Server for tool access
 - **Knowledge Graph Integration**: Accesses real model data through HTTP-based tools
-- **Multiple LLM Support**: Supports OpenAI, Anthropic, and Ollama models
+- **Ollama-First Design**: Prioritizes local Ollama models for development, with fallback to cloud APIs
 - **Containerized**: Fully containerized with Docker for easy deployment
 
 ## Quick Start
@@ -15,22 +15,22 @@ A containerized AI agent that provides model recommendations using the Patra Kno
 ### Prerequisites
 
 - Docker and Docker Compose
-- At least one LLM provider API key (OpenAI, Anthropic, or Ollama)
+- Ollama running locally (recommended) or API keys for cloud providers
 
 ### Environment Variables
 
 Create a `.env` file with the following variables:
 
 ```bash
-# LLM Provider API Keys (choose one or more)
-OPENAI_API_KEY=your_openai_api_key_here
-ANTHROPIC_API_KEY=your_anthropic_api_key_here
+# Ollama Configuration (recommended for local development)
+OLLAMA_HOST=http://localhost:11434
 
 # Patra Server Configuration
 PATRA_SERVER_URL=http://localhost:5002
 
-# Ollama Configuration (for local LLM)
-OLLAMA_HOST=http://localhost:11434
+# Optional: Cloud LLM Provider API Keys (fallback)
+OPENAI_API_KEY=your_openai_api_key_here
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
 
 # Neo4j Configuration (if using local Neo4j)
 NEO4J_URI=bolt://localhost:7687
@@ -53,9 +53,9 @@ docker-compose up model-placement-agent
 docker-compose --profile patra-server up
 ```
 
-#### Option 3: With Ollama (local LLM)
+#### Option 3: With Ollama (recommended for local development)
 ```bash
-# Run with Ollama for local LLM
+# Run with Ollama for local LLM (no API keys needed)
 docker-compose --profile ollama up
 ```
 
@@ -112,7 +112,7 @@ Add new prompt files to the `prompts/` directory and reference them in your code
 
 ### Common Issues
 
-1. **No LLM Provider Available**: Ensure at least one API key is set
+1. **No LLM Provider Available**: Ensure Ollama is running or at least one API key is set
 2. **Connection to Patra Server Failed**: Check PATRA_SERVER_URL and ensure the server is running
 3. **Ollama Connection Failed**: Ensure Ollama is running and accessible
 

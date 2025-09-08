@@ -155,9 +155,9 @@ services:
       dockerfile: ./model-placement-agent/Dockerfile
     container_name: model_placement_agent
     environment:
-      # LLM Provider Configuration
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      # LLM Provider Configuration (Ollama prioritized)
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       
       # Patra Server Configuration
       - PATRA_SERVER_URL=http://patra-server:5002
