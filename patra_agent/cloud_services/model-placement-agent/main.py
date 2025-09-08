@@ -1,39 +1,77 @@
 import os
-import asyncio
 import sys
+import httpx
 from dotenv import load_dotenv
 from langgraph.prebuilt import create_react_agent
-from langchain_mcp_adapters.client import MultiServerMCPClient
 from utils import get_large_language_model
 
 load_dotenv()
 
 
-async def create_mcp_tools():
-    """Create MCP-based tools that communicate with the Patra MCP server"""
-    patra_mcp_url = os.getenv('PATRA_MCP_SERVER_URL', 'http://patra-mcp-server:8001')
+def create_http_tools():
+    """Create HTTP-based tools that communicate with the Patra server"""
+    patra_server_url = os.getenv('PATRA_SERVER_URL', 'http://patra-server:5002')
     
-    # Configure MCP client to connect to Patra MCP server
-    client = MultiServerMCPClient({
-        "patra": {
-            "url": f"{patra_mcp_url}",
-            "transport": "streamable_http",
-        }
-    })
+    # Create tools that make HTTP requests to the Patra server
+    tools = []
     
-    # Get tools from the MCP server
-    tools = await client.get_tools()
-    return tools, client
+    # Get model cards tool
+    def get_model_cards():
+        try:
+            response = httpx.get(f"{patra_server_url}/tools/model_cards", timeout=10.0)
+            response.raise_for_status()
+            return response.text
+        except Exception as e:
+            return f"Error getting model cards: {str(e)}"
+    
+    # Get model deployments tool
+    def get_model_deployments():
+        try:
+            response = httpx.get(f"{patra_server_url}/tools/model_deployments", timeout=10.0)
+            response.raise_for_status()
+            return response.text
+        except Exception as e:
+            return f"Error getting model deployments: {str(e)}"
+    
+    # Get average compute time tool
+    def get_average_compute_time():
+        try:
+            response = httpx.get(f"{patra_server_url}/tools/average_compute_time", timeout=10.0)
+            response.raise_for_status()
+            return response.text
+        except Exception as e:
+            return f"Error getting average compute time: {str(e)}"
+    
+    # Add tools to the list
+    tools.extend([
+        type('GetModelCardsTool', (), {
+            'name': 'get_model_cards',
+            'description': 'Get all model cards from the Patra knowledge graph',
+            '_run': lambda **kwargs: get_model_cards()
+        })(),
+        type('GetModelDeploymentsTool', (), {
+            'name': 'get_model_deployments', 
+            'description': 'Get all model deployments from the Patra knowledge graph',
+            '_run': lambda **kwargs: get_model_deployments()
+        })(),
+        type('GetAverageComputeTimeTool', (), {
+            'name': 'get_average_compute_time',
+            'description': 'Get the average compute time for all models in the Patra knowledge graph',
+            '_run': lambda **kwargs: get_average_compute_time()
+        })()
+    ])
+    
+    return tools
 
 
-async def run_agent():
-    """Main agent execution function using MCP client"""
+def run_agent():
+    """Main agent execution function using HTTP-based tools"""
     
     try:
-        # Get Patra tools via MCP
-        print(f"Connecting to MCP server at: {os.getenv('PATRA_MCP_SERVER_URL', 'http://patra-mcp-server:8001')}")
-        tools, client = await create_mcp_tools()
-        print(f"Loaded {len(tools)} Patra tools via MCP")
+        # Get Patra tools via HTTP
+        print(f"Connecting to Patra server at: {os.getenv('PATRA_SERVER_URL', 'http://patra-server:5002')}")
+        tools = create_http_tools()
+        print(f"Loaded {len(tools)} Patra tools via HTTP")
         
         # Print tool names for debugging
         for i, tool in enumerate(tools):
@@ -47,7 +85,7 @@ async def run_agent():
             test_model = model.bind_tools([])
             print("✅ Model supports tool binding")
             
-            # Create a single agent with MCP tools
+            # Create a single agent with the working approach from simple_main.py
             agent = create_react_agent(
                 model=model,
                 tools=tools,
@@ -65,8 +103,7 @@ async def run_agent():
             print("\n🔄 Exiting gracefully...")
             sys.exit(0)
         
-        # Run the agent with async support
-        result = await agent.ainvoke({
+        result = agent.invoke({
             "messages": [
                 {
                     "role": "user", 
@@ -97,15 +134,15 @@ async def run_agent():
             print("\n❌ Agent did not use any tools!")
             
     except Exception as e:
-        print(f"❌ Error connecting to MCP server: {e}")
+        print(f"❌ Error connecting to Patra server: {e}")
         print(f"❌ Error type: {type(e).__name__}")
         import traceback
         print(f"❌ Full traceback: {traceback.format_exc()}")
-        print("💡 Make sure the Patra MCP server is running and accessible at the configured URL")
-        print("💡 Check that the MCP server is running on the correct port and host")
+        print("💡 Make sure the Patra server is running and accessible at the configured URL")
+        print("💡 Check that the Patra server is running on the correct port and host")
         print("\n🔄 Exiting gracefully...")
         sys.exit(1)
 
 
 if __name__ == "__main__":
-    asyncio.run(run_agent())
+    run_agent()

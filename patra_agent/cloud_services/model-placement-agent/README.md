@@ -1,12 +1,12 @@
 # Model Placement Agent
 
-A containerized AI agent that provides model recommendations using the Patra Knowledge Graph via MCP (Model Context Protocol).
+A containerized AI agent that provides model recommendations using the Patra Knowledge Graph via HTTP-based tools.
 
 ## Features
 
 - **AI-Powered Recommendations**: Uses LangGraph and LangChain to provide intelligent model recommendations
-- **MCP Integration**: Uses Model Context Protocol to connect to Patra MCP Server for standardized tool access
-- **Knowledge Graph Integration**: Accesses real model data through MCP tools
+- **HTTP Integration**: Uses HTTP requests to connect to Patra Server for tool access
+- **Knowledge Graph Integration**: Accesses real model data through HTTP-based tools
 - **Multiple LLM Support**: Supports OpenAI, Anthropic, and Ollama models
 - **Containerized**: Fully containerized with Docker for easy deployment
 
