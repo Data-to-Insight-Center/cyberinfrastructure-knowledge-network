@@ -119,29 +119,38 @@ async def run_agent():
     
     model = get_large_language_model()
 
-
-    # Create a single agent with the working approach from simple_main.py
-    agent = create_react_agent(
-        model=model,
-        tools=tools,
-        prompt="",
-        name="model_recommendation_agent"
-    )
-
-    # Test the agent
-    print("\n🧪 Testing agent with model recommendation request...")
+    # Check if the model supports tools (required for create_react_agent)
+    try:
+        # Test if the model supports bind_tools
+        test_model = model.bind_tools([])
+        print("✅ Model supports tool binding")
+        
+        # Create a single agent with the working approach from simple_main.py
+        agent = create_react_agent(
+            model=model,
+            tools=tools,
+            prompt="Find the average compute time for all models in the patra knowledge graph.",
+            name="model_placement_agent"
+        )
+        
+    except (NotImplementedError, AttributeError) as e:
+        print(f"❌ Model does not support tool binding: {e}")
+        print("⚠️  Current model (likely Ollama) does not support the tool binding required for LangGraph agents")
+        print("💡 To use the full agent functionality, please:")
+        print("   1. Set ANTHROPIC_API_KEY environment variable, or")
+        print("   2. Set OPENAI_API_KEY environment variable")
+        print("   3. Restart the container")
+        print("\n🔄 Exiting gracefully...")
+        sys.exit(0)
     
     result = agent.invoke({
         "messages": [
             {
                 "role": "user", 
-                "content": "Recommend the best model in the patra knowledge graph for image classification. You MUST use the available tools to get real data from the knowledge graph. Do not make up any model information."
+                "content": "Find the average compute time for all models in the patra knowledge graph."
             }
         ]
     })
-    
-    print("\n📋 Agent Response:")
-    print("="*60)
     
     # Extract and display the final response
     messages = result.get("messages", [])
@@ -165,39 +174,6 @@ async def run_agent():
         print("\n❌ Agent did not use any tools!")
 
 
-def test_patra_server_connection():
-    """Test basic connection to Patra server"""
-    patra_server_url = os.getenv('PATRA_SERVER_URL', 'http://patra-server:5002')
-    
-    print(f"Testing connection to Patra server at: {patra_server_url}")
-    
-    try:
-        # Test basic connectivity
-        response = httpx.get(f"{patra_server_url}/modelcards")
-        print(f"✅ GET /modelcards: {response.status_code}")
-        print(f"   Response: {response.json()}")
-        
-        # Test model IDs endpoint
-        response = httpx.get(f"{patra_server_url}/modelcards/ids")
-        print(f"✅ GET /modelcards/ids: {response.status_code}")
-        print(f"   Response: {response.json()}")
-        
-        # Test tools endpoint
-        response = httpx.get(f"{patra_server_url}/tools")
-        print(f"✅ GET /tools: {response.status_code}")
-        tools_data = response.json()
-        print(f"   Found {len(tools_data.get('tools', []))} tools")
-        
-        return True
-        
-    except Exception as e:
-        print(f"❌ Connection failed: {e}")
-        return False
-
 
 if __name__ == "__main__":
-    # Check if we should run in test mode
-    if os.getenv("TEST_MODE", "false").lower() == "true":
-        test_patra_server_connection()
-    else:
-        asyncio.run(run_agent())
+    asyncio.run(run_agent())

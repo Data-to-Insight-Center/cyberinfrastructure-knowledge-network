@@ -87,11 +87,12 @@ def get_large_language_model():
     # Try Ollama (may not support tools, but worth trying)
     try:
         print("Initializing Ollama 3.2 model")
+        print("⚠️  WARNING: Ollama models may not support tool binding required for LangGraph agents")
         return init_chat_model(model="ollama:llama3.2")
     except Exception as e:
         print(f"⚠️  Ollama failed: {e}")
     
-    raise Exception("No LLM provider available. Please set up Anthropic or OpenAI API key.")
+    raise Exception("No LLM provider available. Please set up Anthropic or OpenAI API key for full tool support.")
 
 def load_prompt_from_file(filename):
     """Load prompt from a text file"""
