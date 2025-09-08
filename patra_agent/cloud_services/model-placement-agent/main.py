@@ -16,7 +16,7 @@ async def create_mcp_tools():
     # Configure MCP client to connect to Patra MCP server
     client = MultiServerMCPClient({
         "patra": {
-            "url": f"{patra_mcp_url}/mcp/",
+            "url": f"{patra_mcp_url}",
             "transport": "streamable_http",
         }
     })
@@ -31,6 +31,7 @@ async def run_agent():
     
     try:
         # Get Patra tools via MCP
+        print(f"Connecting to MCP server at: {os.getenv('PATRA_MCP_SERVER_URL', 'http://patra-mcp-server:8001')}")
         tools, client = await create_mcp_tools()
         print(f"Loaded {len(tools)} Patra tools via MCP")
         
@@ -97,8 +98,11 @@ async def run_agent():
             
     except Exception as e:
         print(f"❌ Error connecting to MCP server: {e}")
-        print("💡 Make sure the Patra server is running and accessible at the configured URL")
-        print("💡 The Patra server needs to support MCP protocol at the /mcp/ endpoint")
+        print(f"❌ Error type: {type(e).__name__}")
+        import traceback
+        print(f"❌ Full traceback: {traceback.format_exc()}")
+        print("💡 Make sure the Patra MCP server is running and accessible at the configured URL")
+        print("💡 Check that the MCP server is running on the correct port and host")
         print("\n🔄 Exiting gracefully...")
         sys.exit(1)
 
