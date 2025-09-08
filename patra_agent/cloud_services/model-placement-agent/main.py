@@ -3,6 +3,7 @@ import sys
 import httpx
 from dotenv import load_dotenv
 from langgraph.prebuilt import create_react_agent
+from langchain_core.tools import tool
 from utils import get_large_language_model
 
 load_dotenv()
@@ -12,11 +13,9 @@ def create_http_tools():
     """Create HTTP-based tools that communicate with the Patra server"""
     patra_server_url = os.getenv('PATRA_SERVER_URL', 'http://patra-server:5002')
     
-    # Create tools that make HTTP requests to the Patra server
-    tools = []
-    
-    # Get model cards tool
-    def get_model_cards():
+    @tool
+    def get_model_cards() -> str:
+        """Get all model cards from the Patra knowledge graph"""
         try:
             response = httpx.get(f"{patra_server_url}/tools/model_cards", timeout=10.0)
             response.raise_for_status()
@@ -24,8 +23,9 @@ def create_http_tools():
         except Exception as e:
             return f"Error getting model cards: {str(e)}"
     
-    # Get model deployments tool
-    def get_model_deployments():
+    @tool
+    def get_model_deployments() -> str:
+        """Get all model deployments from the Patra knowledge graph"""
         try:
             response = httpx.get(f"{patra_server_url}/tools/model_deployments", timeout=10.0)
             response.raise_for_status()
@@ -33,8 +33,9 @@ def create_http_tools():
         except Exception as e:
             return f"Error getting model deployments: {str(e)}"
     
-    # Get average compute time tool
-    def get_average_compute_time():
+    @tool
+    def get_average_compute_time() -> str:
+        """Get the average compute time for all models in the Patra knowledge graph"""
         try:
             response = httpx.get(f"{patra_server_url}/tools/average_compute_time", timeout=10.0)
             response.raise_for_status()
@@ -42,26 +43,7 @@ def create_http_tools():
         except Exception as e:
             return f"Error getting average compute time: {str(e)}"
     
-    # Add tools to the list
-    tools.extend([
-        type('GetModelCardsTool', (), {
-            'name': 'get_model_cards',
-            'description': 'Get all model cards from the Patra knowledge graph',
-            '_run': lambda **kwargs: get_model_cards()
-        })(),
-        type('GetModelDeploymentsTool', (), {
-            'name': 'get_model_deployments', 
-            'description': 'Get all model deployments from the Patra knowledge graph',
-            '_run': lambda **kwargs: get_model_deployments()
-        })(),
-        type('GetAverageComputeTimeTool', (), {
-            'name': 'get_average_compute_time',
-            'description': 'Get the average compute time for all models in the Patra knowledge graph',
-            '_run': lambda **kwargs: get_average_compute_time()
-        })()
-    ])
-    
-    return tools
+    return [get_model_cards, get_model_deployments, get_average_compute_time]
 
 
 def run_agent():
