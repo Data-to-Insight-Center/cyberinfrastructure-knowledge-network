@@ -87,9 +87,9 @@ def run_agent():
             
             # Call tools directly to get data
             print("📊 Fetching model data from Patra server...")
-            model_cards = tools[0]()  # get_model_cards
-            model_deployments = tools[1]()  # get_model_deployments  
-            avg_compute_time = tools[2]()  # get_average_compute_time
+            model_cards = tools[0].invoke({})  # get_model_cards
+            model_deployments = tools[1].invoke({})  # get_model_deployments  
+            avg_compute_time = tools[2].invoke({})  # get_average_compute_time
             
             # Create a comprehensive prompt with the data
             prompt = f"""
