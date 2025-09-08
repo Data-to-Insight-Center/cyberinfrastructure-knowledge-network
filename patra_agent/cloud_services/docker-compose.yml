@@ -149,11 +149,11 @@ services:
       retries: 3
       start_period: 40s
 
-  model-recommendation-agent:
+  model-placement-agent:
     build:
       context: .
-      dockerfile: ./model-recommendation-agent/Dockerfile
-    container_name: model_recommendation_agent
+      dockerfile: ./model-placement-agent/Dockerfile
+    container_name: model_placement_agent
     environment:
       # LLM Provider Configuration
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
@@ -173,9 +173,9 @@ services:
       - TEST_MODE=${TEST_MODE:-true}
     volumes:
       # Mount prompts directory for easy updates
-      - ./model-recommendation-agent/prompts:/app/prompts:ro
+      - ./model-placement-agent/prompts:/app/prompts:ro
       # Mount logs directory
-      - ./model-recommendation-agent/logs:/app/logs
+      - ./model-placement-agent/logs:/app/logs
     networks:
       - ckn-network
     depends_on:

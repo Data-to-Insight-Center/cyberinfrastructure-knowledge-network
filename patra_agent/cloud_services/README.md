@@ -7,7 +7,7 @@ This directory contains all cloud services for the Patra Knowledge Graph system,
 ### Core Services
 - **neo4j**: Graph database (ports 7474, 7687)
 - **patra-server**: Knowledge Graph API + LangGraph tools (port 5002)
-- **model-recommendation-agent**: AI agent using Patra tools
+- **model-placement-agent**: AI agent using Patra tools
 - **ollama**: Local LLM server (port 11434)
 
 ### Infrastructure Services
@@ -40,7 +40,7 @@ docker-compose up -d neo4j patra-server
 ### Individual Services
 ```bash
 # Start specific services
-docker-compose up neo4j patra-server model-recommendation-agent
+docker-compose up neo4j patra-server model-placement-agent
 
 # Start with infrastructure services
 docker-compose up neo4j postgres kafka-connect
@@ -57,7 +57,7 @@ NEO4J_USER=neo4j
 NEO4J_PWD=your_password_here
 ENABLE_MC_SIMILARITY=False
 
-# LLM Provider API Keys (for model-recommendation-agent)
+# LLM Provider API Keys (for model-placement-agent)
 OPENAI_API_KEY=your_openai_key_here
 ANTHROPIC_API_KEY=your_anthropic_key_here
 
@@ -121,7 +121,7 @@ docker-compose logs
 
 # View specific service logs
 docker-compose logs patra-server
-docker-compose logs model-recommendation-agent
+docker-compose logs model-placement-agent
 ```
 
 ### Stopping Services
