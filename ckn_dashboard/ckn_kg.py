@@ -575,6 +575,48 @@ class CKNKnowledgeGraph:
                         int(neo4j_datetime.nanosecond / 1000),
                         tzinfo=neo4j_datetime.tzinfo)
 
+    def get_experiment_metrics(self, experiment_id):
+        """
+        Get experiment metrics directly from the Experiment node.
+        Returns the stored metrics like f1_score, precision, recall, etc.
+        """
+        query = """
+        MATCH (e:Experiment {experiment_id: '""" + experiment_id + """'})
+        RETURN e.f1_score as f1_score,
+               e.precision as precision,
+               e.recall as recall,
+               e.false_positives as false_positives,
+               e.false_negatives as false_negatives,
+               e.true_positives as true_positives,
+               e.total_ground_truth_objects as total_ground_truth_objects,
+               e.total_predictions as total_predictions,
+               e.total_images as total_images,
+               e.mean_iou as mean_iou,
+               e.map_50 as map_50,
+               e.map_50_95 as map_50_95
+        """
+        
+        result = self.session.run(query)
+        record = result.single()
+        
+        if record:
+            return {
+                "f1_score": record["f1_score"],
+                "precision": record["precision"],
+                "recall": record["recall"],
+                "false_positives": record["false_positives"],
+                "false_negatives": record["false_negatives"],
+                "true_positives": record["true_positives"],
+                "total_ground_truth_objects": record["total_ground_truth_objects"],
+                "total_predictions": record["total_predictions"],
+                "total_images": record["total_images"],
+                "mean_iou": record["mean_iou"],
+                "map_50": record["map_50"],
+                "map_50_95": record["map_50_95"]
+            }
+        else:
+            return None
+
     def convert_to_native(self, dt):
         """Convert Neo4j DateTime to Python native datetime"""
         if isinstance(dt, neo4j.time.DateTime):
