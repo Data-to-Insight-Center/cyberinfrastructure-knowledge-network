@@ -21,6 +21,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY model-placement-agent/ .
+# Copy Patra MCP server code for stdio spawning
+COPY ../patra_mcp_server/ ./patra_mcp_server/
 
 # Create a non-root user
 RUN useradd --create-home --shell /bin/bash app \

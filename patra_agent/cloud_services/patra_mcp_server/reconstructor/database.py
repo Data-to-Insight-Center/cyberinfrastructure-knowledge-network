@@ -448,7 +448,7 @@ class GraphDB:
 
             query = """
                                                 MATCH (m:Model {model_id: $model_id}), (dep:Deployment {deployment_id: $depl_id})
-                                                CREATE (m)-[:Deployed_On]->(dep)
+                                                CREATE (m)<-[:used]-(dep)
                                                 """
             session.run(query, deployment, model_id=deployment['model_id'], depl_id=deployment['id'])
 
@@ -607,31 +607,31 @@ class GraphDB:
 
     def get_all_modelcards(self, limit=1000):
         """
-        Retrieve all the model cards.
+        Retrieve all the models.
         :return:
         """
         query = """
-            MATCH (mc:ModelCard)
-            RETURN mc.external_id as mc_id, mc.name as name, mc.version as version, 
-            mc.short_description as short_description
+            MATCH (m:Model)
+            RETURN m.model_id as model_id, m.name as name, m.version as version,
+                   m.description as description
             LIMIT $limit
         """
 
         records = []
         with self.driver.session() as session:
-            result = session.run(query, query_embedding=query, limit=limit)
+            result = session.run(query, limit=limit)
             records = list(result)
         return records
 
     def get_all_model_ids(self):
         """
-        Get all model card IDs from the knowledge graph.
-        Returns a list of external_id values from ModelCard nodes.
+        Get all model IDs from the knowledge graph.
+        Returns a list of model_id values from Model nodes.
         """
         query = """
-            MATCH (mc:ModelCard)
-            RETURN mc.external_id as model_id
-            ORDER BY mc.external_id
+            MATCH (m:Model)
+            RETURN m.model_id as model_id
+            ORDER BY m.model_id
         """
         
         with self.driver.session() as session:
@@ -677,22 +677,7 @@ class GraphDB:
         return records
 
     def full_text_search(self, prompt, max_nodes=10):
-        """
-        Searches the knowledge graph using the full text indexes on Model Cards.
-        :return: list of model cards
-        """
-        query = """        
-                 CALL db.index.fulltext.queryNodes("mcFullIndex", $prompt) YIELD node, score
-                RETURN node.external_id as mc_id, node.name as name, node.version as version, 
-                node.short_description as short_description, score as score
-                LIMIT $num_nodes
-                """
-        version_search_start_time = time.time()
-        records = []
-        with self.driver.session() as session:
-            result = session.run(query, prompt=prompt, num_nodes=max_nodes)
-            records = list(result)
-        return records
+        return []
 
     def versioning_perf_test(self, model_card, threshold=0.95, max_nodes=3000):
         """
@@ -746,7 +731,7 @@ class GraphDB:
 
     def get_deployments(self, model_id):
         query = """
-            MATCH (m:Model {model_id: $model_id})-[:HAS_DEPLOYMENT]->(d:Deployment)
+            MATCH (m:Model {model_id: $model_id})<-[:used]-(d:Deployment)
             OPTIONAL MATCH (d)-[:DEPLOYED_IN]->(e:EdgeDevice)
             OPTIONAL MATCH (d)<-[:DEPLOYMENT_INFO]-(exp:Experiment)-[:SUBMITTED_BY]->(u:User)
             RETURN properties(d) AS deployment_info,
@@ -767,6 +752,136 @@ class GraphDB:
                 deployment["user"] = record.get("user", "")
                 records.append(deployment)
             return records
+
+    def get_deployment_ids(self, model_id):
+        query = """
+            MATCH (m:Model {model_id: $model_id})<-[:used]-(d:Deployment)
+            RETURN d.deployment_id as deployment_id
+        """
+        with self.driver.session() as session:
+            result = session.run(query, model_id=model_id)
+            return [record["deployment_id"] for record in result]
+
+    def get_average_compute_time(self, model_id):
+        query = """
+            MATCH (m:Model {model_id: $model_id})<-[:used]-(d:Deployment)
+            WHERE d.avg_compute_time IS NOT NULL
+            RETURN avg(d.avg_compute_time) as average_compute_time
+        """
+        with self.driver.session() as session:
+            result = session.run(query, model_id=model_id)
+            record = result.single()
+            return None if record is None else record["average_compute_time"]
+
+    def get_average_statistic_for_model(self, model_id, statistic):
+        """
+        Compute average of a numeric deployment field for a given model.
+        Accepts friendly stat names and maps to deployment field names.
+        """
+        # Map friendly names to deployment properties
+        stat_map = {
+            "avg_accuracy": "mean_accuracy",
+            "avg_req_acc": "mean_accuracy",
+            "avg_req_delay": "mean_latency_ms",
+            "avg_cpu_power": "cpu_consumption_average_percentage",
+            "avg_gpu_power": "gpu_consumption_average_percentage",
+            "avg_total_power": "power_consumption_average_watts",
+            # pass-throughs (assume fields exist on Deployment)
+            "avg_accuracy_qoe": "avg_accuracy_qoe",
+            "avg_compute_time": "avg_compute_time",
+            "avg_delay_qoe": "avg_delay_qoe",
+            "avg_probability": "avg_probability",
+            "avg_total_qoe": "avg_total_qoe",
+        }
+
+        field = stat_map.get(statistic, None)
+        if field is None:
+            return None
+
+        # Basic field name validation to prevent injection
+        import re
+        if not re.fullmatch(r"[A-Za-z0-9_]+", field):
+            return None
+
+        query = f"""
+            MATCH (m:Model {{model_id: $model_id}})<-[:used]-(d:Deployment)
+            WHERE d.{field} IS NOT NULL
+            RETURN avg(d.{field}) as average_value, count(d) as deployment_count
+        """
+        with self.driver.session() as session:
+            result = session.run(query, model_id=model_id)
+            record = result.single()
+            if not record:
+                return None
+            return {
+                "model_id": model_id,
+                "statistic": statistic,
+                "average_value": record["average_value"],
+                "deployment_count": record["deployment_count"]
+            }
+
+    def get_average_compute_time_all_models(self):
+        query = """
+            MATCH (m:Model)
+            OPTIONAL MATCH (m)<-[:used]-(d:Deployment)
+            WITH m, d
+            WHERE d IS NOT NULL AND d.avg_compute_time IS NOT NULL
+            WITH m.model_id AS model_id, avg(d.avg_compute_time) AS average_compute_time
+            RETURN model_id, average_compute_time
+            ORDER BY model_id
+        """
+        with self.driver.session() as session:
+            result = session.run(query)
+            return [
+                {
+                    "model_id": record["model_id"],
+                    "average_compute_time": record["average_compute_time"]
+                }
+                for record in result
+            ]
+
+    def get_average_cpu_gpu_all_models(self):
+        query = """
+            MATCH (m:Model)
+            OPTIONAL MATCH (m)<-[:used]-(d:Deployment)
+            WITH m, d
+            WHERE d IS NOT NULL AND (d.cpu_consumption_average_percentage IS NOT NULL OR d.gpu_consumption_average_percentage IS NOT NULL)
+            WITH m.model_id AS model_id,
+                 avg(d.cpu_consumption_average_percentage) AS avg_cpu_power,
+                 avg(d.gpu_consumption_average_percentage) AS avg_gpu_power
+            RETURN model_id, avg_cpu_power, avg_gpu_power
+            ORDER BY model_id
+        """
+        with self.driver.session() as session:
+            result = session.run(query)
+            return [
+                {
+                    "model_id": record["model_id"],
+                    "avg_cpu_power": record["avg_cpu_power"],
+                    "avg_gpu_power": record["avg_gpu_power"]
+                }
+                for record in result
+            ]
+
+    def get_average_accuracy_all_models(self):
+        query = """
+            MATCH (m:Model)
+            OPTIONAL MATCH (m)<-[:used]-(d:Deployment)
+            WITH m, d
+            WHERE d IS NOT NULL AND d.mean_accuracy IS NOT NULL
+            WITH m.model_id AS model_id, avg(d.mean_accuracy) AS avg_accuracy
+            RETURN model_id, avg_accuracy
+            ORDER BY model_id
+        """
+        with self.driver.session() as session:
+            result = session.run(query)
+            return [
+                {
+                    "model_id": record["model_id"],
+                    "avg_accuracy": record["avg_accuracy"]
+                }
+                for record in result
+            ]
 
     def set_model_location(self, model_id, location):
         query = """

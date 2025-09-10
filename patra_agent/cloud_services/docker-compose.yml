@@ -1,5 +1,5 @@
 services:
-  # Neo4j Service
+  # # Neo4j Service
   # neo4j:
   #   image: neo4j:5.21.0-community
   #   container_name: neo4j_server
@@ -24,35 +24,6 @@ services:
   #   networks:
   #     - ckn-network
 
-  # PostgreSQL and PgAdmin Services
-  # postgres:
-  #   image: postgres:14
-  #   environment:
-  #     POSTGRES_DB: d2i
-  #     POSTGRES_USER: d2i
-  #     POSTGRES_PASSWORD: d2i
-  #   volumes:
-  #     - postgres-data:/var/lib/postgresql/data
-  #   ports:
-  #     - "5432:5432"
-  #   restart: always
-  #   networks:
-  #     - ckn-network
-
-  # pgadmin:
-  #   image: dpage/pgadmin4
-  #   environment:
-  #     PGADMIN_DEFAULT_EMAIL: admin@example.com
-  #     PGADMIN_DEFAULT_PASSWORD: admin
-  #     PGADMIN_LISTEN_PORT: 80
-  #   ports:
-  #     - "8080:80"
-  #   depends_on:
-  #     - postgres
-  #   restart: always
-  #   networks:
-  #     - ckn-network
-
   # Kafka and Zookeeper Services
   # zookeeper:
   #   image: confluentinc/cp-zookeeper:latest
@@ -70,8 +41,6 @@ services:
   #   container_name: broker
   #   depends_on:
   #     - zookeeper
-  #     - neo4j
-  #     - postgres
   #   ports:
   #     - "9092:9092"
   #   healthcheck:
@@ -94,8 +63,6 @@ services:
   #   container_name: kafka-connect
   #   depends_on:
   #     - broker
-  #     - neo4j
-  #     - postgres
   #   ports:
   #     - "8083:8083"
   #   environment:
@@ -143,17 +110,36 @@ services:
       - ckn-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5002/"]
+      test: ["CMD", "curl", "-f", "http://localhost:5002/swagger"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+
+  patra-mcp-server:
+    build:
+      context: .
+      dockerfile: ./patra_mcp_server/Dockerfile
+    container_name: patra_mcp_server
+    command: ["python", "server/mcp_server.py"]
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+      - PATRA_SERVER_URL=http://patra-server:5002
+    ports:
+      - "8001:8000"
+    networks:
+      - ckn-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "exit 0"]
 
   model-placement-agent:
     build:
       context: .
       dockerfile: ./model-placement-agent/Dockerfile
     container_name: model_placement_agent
+    command: ["python", "main.py"]
     environment:
       # LLM Provider Configuration (Ollama prioritized)
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
@@ -161,6 +147,8 @@ services:
       
       # Patra Server Configuration
       - PATRA_SERVER_URL=http://patra-server:5002
+      - USE_MCP=true
+      - PATRA_MCP_URL=http://patra-mcp-server:8000/mcp
       
       # Ollama Configuration (if using local Ollama)
       - OLLAMA_HOST=${OLLAMA_HOST:-http://ollama:11434}
@@ -179,8 +167,11 @@ services:
     networks:
       - ckn-network
     depends_on:
-      - patra-server
-    restart: unless-stopped
+      patra-server:
+        condition: service_healthy
+      patra-mcp-server:
+        condition: service_started
+    restart: "no"
     healthcheck:
       test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
       interval: 30s
@@ -204,7 +195,4 @@ networks:
   ckn-network:
 
 volumes:
-  # postgres-data:
-  # neo4j-data:
-  # neo4j_logs:
   ollama_data:

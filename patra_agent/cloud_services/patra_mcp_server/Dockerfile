@@ -37,5 +37,5 @@ EXPOSE 5002
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:5002/ || exit 1
 
-# Default command - run the unified server
+# Default command - run the server
 CMD ["python", "server/server.py"]

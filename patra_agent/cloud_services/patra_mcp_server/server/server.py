@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Unified Patra Server
+Patra Server
 Combines Flask REST API with LangGraph-compatible sync tools
 """
 
@@ -19,8 +19,10 @@ from pydantic import BaseModel, Field
 from reconstructor.mc_reconstructor import MCReconstructor
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+level_name = os.getenv("LOG_LEVEL", "INFO").upper()
+logging.basicConfig(level=getattr(logging, level_name, logging.INFO),
+                    format="%(asctime)s %(levelname)s %(message)s")
+logger = logging.getLogger("patra_server")
 
 # Environment variables
 NEO4J_URI = os.getenv("NEO4J_URI")
@@ -32,8 +34,8 @@ mc_reconstructor = MCReconstructor(NEO4J_URI, NEO4J_USERNAME, NEO4J_PWD)
 
 # Flask app setup
 app = Flask(__name__)
-api = Api(app, version='1.0', title='Patra Unified API',
-          description='Unified API and LangGraph tools for Patra Knowledge Graph',
+api = Api(app, version='1.0', title='Patra API',
+          description='API and LangGraph tools for Patra Knowledge Graph',
           doc='/swagger')
 
 # =============================================================================
@@ -45,8 +47,8 @@ class ModelCardInput(BaseModel):
     model_id: str = Field(description="The model card ID to retrieve")
 
 class ModelSearchInput(BaseModel):
-    """Input for searching model cards."""
-    query: str = Field(description="Search query for model cards")
+    """(deprecated)"""
+    query: str = Field(description="Deprecated")
 
 class ModelStatisticInput(BaseModel):
     """Input for getting model statistics."""
@@ -97,18 +99,13 @@ class ListModelIdsTool(BaseTool):
             return f"Error listing model IDs: {str(e)}"
 
 class SearchModelCardsTool(BaseTool):
-    """Search for model cards using full-text search."""
+    """(deprecated)"""
     name: str = "search_model_cards"
-    description: str = "Search for model cards using full-text search"
+    description: str = "Deprecated"
     args_schema: type = ModelSearchInput
 
     def _run(self, query: str, **kwargs) -> str:
-        """Search model cards."""
-        try:
-            results = mc_reconstructor.search_kg(query)
-            return json.dumps(results, indent=2)
-        except Exception as e:
-            return f"Error searching model cards: {str(e)}"
+        return json.dumps([])
 
 class GetModelDeploymentsTool(BaseTool):
     """Get all deployments for a specific model."""
@@ -198,11 +195,12 @@ def get_langgraph_tools() -> List[BaseTool]:
 
 @app.route('/')
 def home():
-    return "Welcome to the Patra Unified Knowledge Base", 200
+    return "Welcome to the Patra Knowledge Graph", 200
 
 @api.route('/modelcard/<string:mc_id>')
 class ModelCardDetail(Resource):
     def get(self, mc_id):
+        logger.debug(f"GET /modelcard/{mc_id}")
         model_card = mc_reconstructor.reconstruct(str(mc_id))
         if model_card is None:
             return {"error": "Model card could not be found!"}, 400
@@ -211,53 +209,76 @@ class ModelCardDetail(Resource):
 @api.route('/modelcards/search')
 class SearchModelCards(Resource):
     def get(self):
-        query = request.args.get('q')
-        if not query:
-            return {"error": "Query (q) is required"}, 400
-        results = mc_reconstructor.search_kg(query)
-        return results, 200
+        return [], 200
 
 @api.route('/modelcard/<string:mc_id>/download_url')
 class ModelDownloadURL(Resource):
     def get(self, mc_id):
+        logger.debug(f"GET /modelcard/{mc_id}/download_url")
         model = mc_reconstructor.get_model_location(str(mc_id))
-        if model is None:
+        if model is None or "download_url" not in model:
             return {"error": "Model could not be found!"}, 400
-        return model, 200
+        return model["download_url"], 200
 
 @api.route('/modelcards')
 class ListModelCards(Resource):
     def get(self):
+        logger.debug("GET /modelcards")
         model_card_dict = mc_reconstructor.get_all_mcs()
         return model_card_dict, 200
 
 @api.route('/modelcard/<string:mc_id>/deployments')
 class ModelDeployments(Resource):
     def get(self, mc_id):
-        deployments = mc_reconstructor.get_deployments(mc_id)
-        if deployments is None:
+        logger.debug(f"GET /modelcard/{mc_id}/deployments")
+        deployments = mc_reconstructor.get_deployment_ids(mc_id)
+        if deployments is None or len(deployments) == 0:
             return {"error": "Deployments not found!"}, 400
         return deployments, 200
 
 @api.route('/modelcard/<string:mc_id>/average_compute_time')
 class AverageComputeTime(Resource):
     def get(self, mc_id):
+        logger.debug(f"GET /modelcard/{mc_id}/average_compute_time")
         average_compute_time = mc_reconstructor.get_average_compute_time(mc_id)
         return average_compute_time, 200
 
 @api.route('/modelcards/ids')
 class ListModelIds(Resource):
     def get(self):
+        logger.debug("GET /modelcards/ids")
         model_ids = mc_reconstructor.get_all_model_ids()
         return {"model_ids": model_ids}, 200
 
 @api.route('/modelcard/<string:mc_id>/average/<string:statistic>')
 class AverageStatisticForModel(Resource):
     def get(self, mc_id, statistic):
+        logger.debug(f"GET /modelcard/{mc_id}/average/{statistic}")
         result = mc_reconstructor.get_average_statistic_for_model(mc_id, statistic)
         if result is None:
             return {"error": f"No deployments found for model '{mc_id}' with statistic '{statistic}'"}, 404
         return result, 200
+
+@api.route('/models/average_compute_time')
+class AverageComputeTimeAllModels(Resource):
+    def get(self):
+        logger.debug("GET /models/average_compute_time")
+        results = mc_reconstructor.get_average_compute_time_all_models()
+        return results, 200
+
+@api.route('/models/average_cpu_gpu')
+class AverageCpuGpuAllModels(Resource):
+    def get(self):
+        logger.debug("GET /models/average_cpu_gpu")
+        results = mc_reconstructor.get_average_cpu_gpu_all_models()
+        return results, 200
+
+@api.route('/models/average_accuracy')
+class AverageAccuracyAllModels(Resource):
+    def get(self):
+        logger.debug("GET /models/average_accuracy")
+        results = mc_reconstructor.get_average_accuracy_all_models()
+        return results, 200
 
 # =============================================================================
 # LangGraph Tools Endpoint
@@ -282,7 +303,7 @@ class LangGraphTools(Resource):
 # =============================================================================
 
 if __name__ == '__main__':
-    logger.info("Starting Patra Unified Server...")
+    logger.info("Starting Patra Server...")
     logger.info(f"Neo4j URI: {NEO4J_URI}")
     logger.info(f"Available LangGraph tools: {len(get_langgraph_tools())}")
     

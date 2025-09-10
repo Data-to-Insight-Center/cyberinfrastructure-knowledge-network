@@ -20,54 +20,21 @@ class MCReconstructor:
             print("Error connecting to the Neo4j database:", str(e))
 
     def reconstruct(self, model_card_id):
+        # Treat the provided id as a Model id and return the Model node
         metadata = {
-            "mc_id": model_card_id,
-            "ai_model_id": str(model_card_id + "-model"),
-            "xai_id": str(model_card_id + "-xai"),
-            "bias_id": str(model_card_id + "-bias"),
+            "model_id": str(model_card_id)
         }
 
-        # retrieve the base model card
-        mc_query = '''
-            MATCH (mc:ModelCard {external_id: $mc_id})
-            RETURN mc
+        model_query = '''
+            MATCH (m:Model {model_id: $model_id})
+            RETURN m
             '''
-        base_mc = self.get_result_dict(mc_query, "mc", metadata)
+        base_model = self.get_result_dict(model_query, "m", metadata)
 
-        if base_mc is None:
+        if base_model is None:
             return None
 
-        # do not return the model embeddings
-        if 'embedding' in base_mc:
-            del base_mc["embedding"]
-
-        # retrieve the ai_model information
-        ai_model_query = '''
-            MATCH (ai:Model {model_id: $ai_model_id})
-            RETURN ai
-            '''
-        ai_model = self.get_result_dict(ai_model_query, "ai", metadata)
-        base_mc["ai_model"] = ai_model
-
-        # retrieve bias information if any
-        bias_query = '''
-            MATCH (ba:BiasAnalysis {external_id: $bias_id})
-            RETURN ba
-            '''
-        bias_analysis = self.get_result_dict(bias_query, "ba", metadata)
-        if bias_analysis is not None:
-            base_mc["bias_analysis"] = bias_analysis
-
-        # retrieve explainability information if any
-        xai_query = '''
-            MATCH (xai:ExplainabilityAnalysis {external_id: $xai_id})
-            RETURN xai
-            '''
-        xai_analysis = self.get_result_dict(xai_query, "xai", metadata)
-        if xai_analysis is not None:
-            base_mc["xai_analysis"] = xai_analysis
-
-        return base_mc
+        return base_model
 
     def get_result_dict(self, query, type, metadata):
         response = self.db.get_result_query(query, metadata)
@@ -85,39 +52,23 @@ class MCReconstructor:
         return result_dict
 
     def search_kg(self, query):
-        """
-        Search the KG using embeddings.
-        :param query:
-        :return:
-        """
-        results = self.db.full_text_search(query)
-        json_mcs = [
-            {
-                "mc_id": record["mc_id"],
-                "name": record["name"],
-                "version": record["version"],
-                "short_description": record["short_description"],
-                "score": record["score"]
-            }
-            for record in results
-        ]
-        return json_mcs
+        return []
 
     def get_all_mcs(self):
         """
         "Get all the model cards as a list"
         """
-        model_cards = self.db.get_all_modelcards()
-        json_mcs = [
+        models = self.db.get_all_modelcards()
+        json_models = [
             {
-                "mc_id": record["mc_id"],
+                "model_id": record["model_id"],
                 "name": record["name"],
-                "version": record["version"],
-                "short_description": record["short_description"]
+                "version": record.get("version"),
+                "description": record.get("description")
             }
-            for record in model_cards
+            for record in models
         ]
-        return json_mcs
+        return json_models
 
     def get_model_location(self, model_id):
         """
@@ -143,8 +94,13 @@ class MCReconstructor:
         deployment_info = self.db.get_deployments(model_id)
         if deployment_info is None:
             return None
-
         return deployment_info
+
+    def get_deployment_ids(self, model_id):
+        """
+        Get only the deployment IDs for a given model_id
+        """
+        return self.db.get_deployment_ids(model_id)
 
     def set_model_location(self, model_id, location):
         """
@@ -209,24 +165,9 @@ class MCReconstructor:
     
     def get_average_compute_time(self, mc_id):
         """
-        For a given model id, get all the connected Deployment nodes and calculate the average of the 'avg_compute_time' field.
-        Returns the average compute time as a float.
+        For a given model id, compute average of d.avg_compute_time over its deployments.
         """
-        deployment_info = self.db.get_deployments(mc_id)
-        if deployment_info is None or len(deployment_info) == 0:
-            return None
-
-        # Extract avg_compute_time from each deployment record
-        compute_times = []
-        for deployment in deployment_info:
-            if 'avg_compute_time' in deployment and deployment['avg_compute_time'] is not None:
-                compute_times.append(deployment['avg_compute_time'])
-        
-        if len(compute_times) == 0:
-            return None
-            
-        average_compute_time = sum(compute_times) / len(compute_times)
-        return average_compute_time
+        return self.db.get_average_compute_time(mc_id)
 
 
     def get_all_model_ids(self):
@@ -242,3 +183,21 @@ class MCReconstructor:
         Returns a dictionary with the model ID, statistic name, average value, and deployment count.
         """
         return self.db.get_average_statistic_for_model(model_id, statistic)
+
+    def get_average_compute_time_all_models(self):
+        """
+        Get list of all models with their average compute time across deployments.
+        """
+        return self.db.get_average_compute_time_all_models()
+
+    def get_average_cpu_gpu_all_models(self):
+        """
+        Get list of all models with average CPU and GPU power across deployments.
+        """
+        return self.db.get_average_cpu_gpu_all_models()
+
+    def get_average_accuracy_all_models(self):
+        """
+        Get list of all models with average accuracy across deployments.
+        """
+        return self.db.get_average_accuracy_all_models()
