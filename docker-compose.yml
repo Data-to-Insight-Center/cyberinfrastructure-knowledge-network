@@ -105,7 +105,7 @@ services:
       - ckn-network
 
   oracle-alert-processor:
-    image: iud2i/ckn-cameratraps-acc-alert:0.1.2
+    image: iud2i/ckn-cameratraps-acc-alert:latest
     depends_on:
       broker:
         condition: service_healthy
@@ -119,7 +119,7 @@ services:
       - ckn-network
 
   oracle-aggr-processor:
-    image: iud2i/ckn-cameratraps-agg:0.1.2
+    image: iud2i/ckn-cameratraps-agg:latest
     depends_on:
       broker:
         condition: service_healthy
