@@ -1,14 +1,14 @@
-FROM --platform=linux/amd64 python:3.9-slim
+FROM python:3.9-slim
 
 WORKDIR /app
 
-COPY Home.py /app/
-COPY ckn_kg.py /app/
-COPY llm_graph.py /app/
-COPY util.py /app/
-COPY modelcards /app/modelcards
-COPY requirements.txt /app/
-COPY /pages /app/pages
+COPY ckn_dashboard/Home.py /app/
+COPY ckn_dashboard/ckn_kg.py /app/
+COPY ckn_dashboard/llm_graph.py /app/
+COPY ckn_dashboard/util.py /app/
+COPY ckn_dashboard/modelcards /app/modelcards
+COPY ckn_dashboard/requirements.txt /app/
+COPY ckn_dashboard/pages /app/pages
 
 RUN pip install -r /app/requirements.txt
 

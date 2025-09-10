@@ -102,34 +102,33 @@ services:
     networks:
       - ckn-network
 
-# Temporarily commented out to test Confluent images
-#  oracle-alert-processor:
-#    image: iud2i/ckn-cameratraps-acc-alert:latest
-#    depends_on:
-#      broker:
-#        condition: service_healthy
-#    environment:
-#      - CKN_BROKERS=broker:29092
-#      - ORACLE_ACC_CRITICAL_THRESHOLD=0.5
-#      - ORACLE_INPUT_TOPIC=oracle-events
-#      - ORACLE_ACC_ALERT_TOPIC=oracle-alerts
-#      - APP_ID=ckn-camera-traps-oracle-processor
-#    networks:
-#      - ckn-network
+  oracle-alert-processor:
+    image: iud2i/ckn-cameratraps-acc-alert:latest
+    depends_on:
+      broker:
+        condition: service_healthy
+    environment:
+      - CKN_BROKERS=broker:29092
+      - ORACLE_ACC_CRITICAL_THRESHOLD=0.5
+      - ORACLE_INPUT_TOPIC=oracle-events
+      - ORACLE_ACC_ALERT_TOPIC=oracle-alerts
+      - APP_ID=ckn-camera-traps-oracle-processor
+    networks:
+      - ckn-network
 
-#  oracle-aggr-processor:
-#    image: iud2i/ckn-cameratraps-agg:latest
-#    depends_on:
-#      broker:
-#        condition: service_healthy
-#    environment:
-#      - CKN_BROKERS=broker:29092
-#      - CKN_ORACLE_WINDOW_TIME=1
-#      - ORACLE_INPUT_TOPIC=oracle-events
-#      - ORACLE_AGG_ALERT_TOPIC=oracle-aggregated
-#      - APP_ID=ckn-camera-traps-oracle-aggreg
-#    networks:
-#      - ckn-network
+  oracle-aggr-processor:
+    image: iud2i/ckn-cameratraps-agg:latest
+    depends_on:
+      broker:
+        condition: service_healthy
+    environment:
+      - CKN_BROKERS=broker:29092
+      - CKN_ORACLE_WINDOW_TIME=1
+      - ORACLE_INPUT_TOPIC=oracle-events
+      - ORACLE_AGG_ALERT_TOPIC=oracle-aggregated
+      - APP_ID=ckn-camera-traps-oracle-aggreg
+    networks:
+      - ckn-network
 
 networks:
   ckn-network:
