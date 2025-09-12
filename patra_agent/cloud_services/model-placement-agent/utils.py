@@ -1,104 +1,46 @@
-from langchain_core.messages import convert_to_messages
-from langchain.chat_models import init_chat_model
 import os
+import re
 
-def pretty_print_message(message, indent=False):
-    pretty_message = message.pretty_repr(html=True)
-    if not indent:
-        print(pretty_message)
+
+def load_prompt_from_file(filename):
+    """Load prompt from a text file in the local prompts/ directory."""
+    path = os.path.join("prompts", filename)
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        print(f"⚠️  Prompt file {filename} not found, using default prompt")
+        return "You are an AI agent. Please help the user with their request."
+
+
+def _read_text(path: str) -> str:
+    with open(path, "r", encoding="utf-8") as f:
+        return f.read()
+
+
+def _extract_last_content(resp):
+    content = None
+    try:
+        messages = resp.get("messages", []) if isinstance(resp, dict) else []
+        for m in reversed(messages):
+            c = getattr(m, "content", None)
+            if c:
+                content = c
+                break
+        if content is None and hasattr(resp, "content"):
+            content = resp.content
+    except Exception:
+        content = None
+    return content or ""
+
+
+def _print_last_url_or_content(resp) -> None:
+    content = _extract_last_content(resp)
+    if not content:
+        print("")
         return
-
-    indented = "\n".join("\t" + c for c in pretty_message.split("\n"))
-    print(indented)
-
-def pretty_print_messages(update, last_message=False):
-    is_subgraph = False
-    if isinstance(update, tuple):
-        ns, update = update
-        # skip parent graph updates in the printouts
-        if len(ns) == 0:
-            return
-
-        graph_id = ns[-1].split(":")[0]
-        is_subgraph = True
-
-    for node_name, node_update in update.items():
-        if node_update is None or "messages" not in node_update:
-            continue
-        messages = convert_to_messages(node_update["messages"])
-        if last_message:
-            messages = messages[-1:]
-
-        for m in messages:
-            # Only show human-readable messages, skip tool calls and internal transfers
-            if hasattr(m, 'content') and m.content and not m.content.startswith('{"name":'):
-                # Check if this is the final supervisor message with recommendations
-                if node_name == "supervisor" and "recommendation" in m.content.lower():
-                    print("\n" + "="*60)
-                    print("STOCK RECOMMENDATIONS")
-                    print("="*60)
-                    print(m.content)
-                    print("="*60)
-                elif node_name == "price_recommender_agent":
-                    print("\n" + "="*60)
-                    print("FINAL RECOMMENDATIONS")
-                    print("="*60)
-                    print(m.content)
-                    print("="*60)
-                elif hasattr(m, 'type') and m.type == 'human':
-                    # Show user messages
-                    print(f"\nUser: {m.content}")
-                elif hasattr(m, 'type') and m.type == 'ai' and not m.content.startswith('{"name":'):
-                    # Show AI responses that aren't tool calls
-                    print(f"\n{m.content}")
-
-def load_prompt_from_file(filename):
-    """Load prompt from a text file"""
-    try:
-        with open(f"prompts/{filename}", 'r') as f:
-            return f.read().strip()
-    except FileNotFoundError:
-        print(f"⚠️  Prompt file {filename} not found, using default prompt")
-        return "You are an AI agent. Please help the user with their request."
-
-def get_large_language_model():
-    """
-    Get a LLM model - prioritizing Ollama for local development
-    Priority: Ollama > Claude (Anthropic) > OpenAI
-    """    
-    # Try Ollama first (local, no API keys needed)
-    try:
-        ollama_host = os.getenv("OLLAMA_HOST", "http://ollama:11434")
-        print(f"Initializing Ollama llama3.2:1b model at {ollama_host}")
-        return init_chat_model(model="ollama:llama3.2:1b", base_url=ollama_host)
-    except Exception as e:
-        print(f"⚠️  Ollama failed: {e}")
-    
-    # Try Anthropic Claude as fallback
-    anthropic_key = os.getenv("ANTHROPIC_API_KEY")
-    if anthropic_key:
-        try:
-            print("Initializing Anthropic Claude 3.5 Sonnet model")
-            return init_chat_model(model="anthropic:claude-3-5-sonnet-20241022", api_key=anthropic_key)
-        except Exception as e:
-            print(f"⚠️  Anthropic failed: {e}")
-    
-    # Try OpenAI as last resort
-    openai_key = os.getenv("OPENAI_API_KEY")
-    if openai_key:
-        try:
-            print("Initializing OpenAI GPT-4o-mini model")
-            return init_chat_model(model="openai:gpt-4o-mini", api_key=openai_key)
-        except Exception as e:
-            print(f"⚠️  OpenAI failed: {e}")
-    
-    raise Exception("No LLM provider available. Please ensure Ollama is running or set up API keys.")
-
-def load_prompt_from_file(filename):
-    """Load prompt from a text file"""
-    try:
-        with open(f"prompts/{filename}", 'r') as f:
-            return f.read().strip()
-    except FileNotFoundError:
-        print(f"⚠️  Prompt file {filename} not found, using default prompt")
-        return "You are an AI agent. Please help the user with their request."
+    match = re.search(r"https?://\S+", str(content))
+    if match:
+        print(match.group(0))
+    else:
+        print(str(content))

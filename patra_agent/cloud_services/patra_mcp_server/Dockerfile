@@ -20,7 +20,7 @@ COPY patra_mcp_server/server/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY patra_mcp_server/ .
+COPY patra_mcp_server /app/patra_mcp_server
 
 # Add the current directory to Python path
 ENV PYTHONPATH=/app
@@ -38,4 +38,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:5002/ || exit 1
 
 # Default command - run the server
-CMD ["python", "server/server.py"]
+CMD ["python", "-m", "patra_mcp_server.server.server"]

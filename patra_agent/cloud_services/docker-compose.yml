@@ -96,7 +96,7 @@ services:
       dockerfile: ./patra_mcp_server/Dockerfile
     container_name: patra_server
     ports:
-      - "5002:5002"
+      - "8000:8000"
     environment:
       - NEO4J_URI=bolt://149.165.153.250:7688 # ${NEO4J_URI:-bolt://neo4j:7687}
       - NEO4J_USER=neo4j # ${NEO4J_USER:-neo4j}
@@ -116,68 +116,48 @@ services:
       retries: 3
       start_period: 40s
 
-  patra-mcp-server:
-    build:
-      context: .
-      dockerfile: ./patra_mcp_server/Dockerfile
-    container_name: patra_mcp_server
-    command: ["python", "server/mcp_server.py"]
-    environment:
-      - PYTHONUNBUFFERED=1
-      - PYTHONDONTWRITEBYTECODE=1
-      - PATRA_SERVER_URL=http://patra-server:5002
-    ports:
-      - "8001:8000"
-    networks:
-      - ckn-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "exit 0"]
-
-  model-placement-agent:
-    build:
-      context: .
-      dockerfile: ./model-placement-agent/Dockerfile
-    container_name: model_placement_agent
-    command: ["python", "main.py"]
-    environment:
-      # LLM Provider Configuration (Ollama prioritized)
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+  # model-placement-agent:
+  #   build:
+  #     context: .
+  #     dockerfile: ./model-placement-agent/Dockerfile
+  #   container_name: model_placement_agent
+  #   command: ["python", "main.py"]
+  #   environment:
+  #     # LLM Provider Configuration (Ollama prioritized)
+  #     - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+  #     - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       
-      # Patra Server Configuration
-      - PATRA_SERVER_URL=http://patra-server:5002
-      - USE_MCP=true
-      - PATRA_MCP_URL=http://patra-mcp-server:8000/mcp
+  #     # Patra Server Configuration
+  #     - PATRA_SERVER_URL=http://patra-server:5002
+  #     - USE_MCP=true
+  #     - PATRA_MCP_URL=http://patra-server:5002/mcp
       
-      # Ollama Configuration (if using local Ollama)
-      - OLLAMA_HOST=${OLLAMA_HOST:-http://ollama:11434}
+  #     # Ollama Configuration (if using local Ollama)
+  #     - OLLAMA_HOST=${OLLAMA_HOST:-http://ollama:11434}
       
-      # Python Configuration
-      - PYTHONUNBUFFERED=1
-      - PYTHONDONTWRITEBYTECODE=1
+  #     # Python Configuration
+  #     - PYTHONUNBUFFERED=1
+  #     - PYTHONDONTWRITEBYTECODE=1
       
-      # Test Mode
-      - TEST_MODE=${TEST_MODE:-true}
-    volumes:
-      # Mount prompts directory for easy updates
-      - ./model-placement-agent/prompts:/app/prompts:ro
-      # Mount logs directory
-      - ./model-placement-agent/logs:/app/logs
-    networks:
-      - ckn-network
-    depends_on:
-      patra-server:
-        condition: service_healthy
-      patra-mcp-server:
-        condition: service_started
-    restart: "no"
-    healthcheck:
-      test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+  #     # Test Mode
+  #     - TEST_MODE=${TEST_MODE:-true}
+  #   volumes:
+  #     # Mount prompts directory for easy updates
+  #     - ./model-placement-agent/prompts:/app/prompts:ro
+  #     # Mount logs directory
+  #     - ./model-placement-agent/logs:/app/logs
+  #   networks:
+  #     - ckn-network
+  #   depends_on:
+  #     patra-server:
+  #       condition: service_healthy
+  #   restart: "no"
+  #   healthcheck:
+  #     test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
 
   ollama:
     image: ollama/ollama:latest
