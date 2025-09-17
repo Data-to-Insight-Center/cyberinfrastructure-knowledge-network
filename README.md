@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="docs/ckn-logo.png" alt="CKN Logo" width="200"/>
+
 # Cyberinfrastructure Knowledge Network
 
 [![Documentation Status](https://img.shields.io/badge/docs-latest-blue.svg)](https://cyberinfrastructure-knowledge-network.readthedocs.io/en/latest/)
