@@ -12,15 +12,6 @@ from utils import (
 # -----------------------------------------------------------------------------
 # Configuration
 # -----------------------------------------------------------------------------
-PATRA_MCP_URL = os.getenv("PATRA_MCP_URL", "http://localhost:8000/sse")
-
-SERVERS_CFG = {
-    "patra": {
-        "url": PATRA_MCP_URL,
-        "transport": "sse",
-    },
-}
-
 REACT_GUIDE = (
     "\n\n"
     "Follow this exact ReAct format to use tools:\n"
@@ -30,26 +21,23 @@ REACT_GUIDE = (
     "(Repeat Action/Observation as needed)\n"
     "Final Answer: <only the final output as required by the prompt>\n"
     "- Do NOT add extra wording or explanation in Final Answer.\n"
-    "- If the output is a URL, Final Answer must be ONLY the raw URL string.\n"
     "Use ONLY these tools: list_model_ids, get_model_card, get_model_download_url,\n"
     "get_average_accuracy_all_models, get_average_compute_time_all_models,\n"
-    "get_average_cpu_gpu_all_models, get_average_statistic.\n"
+    "get_average_cpu_gpu_all_models, get_average_statistic, rank_by_accuracy,\n"
+    "rank_by_compute_time, rank_by_power, rank_by_resources,\n"
+    "rank_by_fairness_metrics, rank_by_dp_diff, rank_by_eo_diff.\n"
 )
 
-# -----------------------------------------------------------------------------
-"""
-Helper functions moved to utils.py
-"""
-
-
-# -----------------------------------------------------------------------------
-# Agent building
-# -----------------------------------------------------------------------------
 async def build_agents():
-    client = MultiServerMCPClient(SERVERS_CFG)
+    client = MultiServerMCPClient({
+        "patra": {
+            "url": os.getenv("PATRA_MCP_URL", "http://localhost:8000/sse"),
+            "transport": "sse",
+        },
+    })
     tools = await client.get_tools()
 
-    llm_model = os.getenv("OLLAMA_MODEL", "qwen2.5:0.5b-instruct")
+    llm_model = os.getenv("OLLAMA_MODEL", "llama3.2:1b")
     llm_base = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 
     num_ctx = int(os.getenv("OLLAMA_NUM_CTX", "1024"))
@@ -72,48 +60,54 @@ async def build_agents():
     p3 = _read_text(os.path.join(prompt_dir, "agent_3.txt")) + REACT_GUIDE
     porch = _read_text(os.path.join(prompt_dir, "orchestrator.txt")) + REACT_GUIDE
 
-    accuracy_agent = create_react_agent(model=llm, tools=tools, prompt=p1, name="accuracy_agent")
-    compute_agent = create_react_agent(model=llm, tools=tools, prompt=p2, name="compute_agent")
-    power_agent = create_react_agent(model=llm, tools=tools, prompt=p3, name="power_agent")
+    resources_agent = create_react_agent(model=llm, tools=tools, prompt=p1, name="resources_agent")
+    performance_agent = create_react_agent(model=llm, tools=tools, prompt=p2, name="performance_agent")
+    accountability_agent = create_react_agent(model=llm, tools=tools, prompt=p3, name="accountability_agent")
     orchestrator = create_react_agent(model=llm, tools=tools, prompt=porch, name="orchestrator")
 
-    return accuracy_agent, compute_agent, power_agent, orchestrator
+    return resources_agent, performance_agent, accountability_agent, orchestrator
 
 
 async def main():
-    accuracy_agent, compute_agent, power_agent, orchestrator = await build_agents()
+    resources_agent, performance_agent, accountability_agent, orchestrator = await build_agents()
 
-    acc_resp = await accuracy_agent.ainvoke({
+    res_resp = await resources_agent.ainvoke({
         "messages": [
             {"role": "user", "content": "Run your selection and output per your specified format only."}
         ]
     })
-    print("\n[accuracy_agent]")
-    print(_extract_last_content(acc_resp))
+    print("\n[resources_agent]")
+    import pprint
+    pprint.pprint(res_resp)
+    # print(_extract_last_content(res_resp))
 
-    cmp_resp = await compute_agent.ainvoke({
+    perf_resp = await performance_agent.ainvoke({
         "messages": [
             {"role": "user", "content": "Run your selection and output per your specified format only."}
         ]
     })
-    print("\n[compute_agent]")
-    print(_extract_last_content(cmp_resp))
+    print("\n[performance_agent]")
+    pprint.pprint(perf_resp)
+    # print(_extract_last_content(perf_resp))
 
-    pwr_resp = await power_agent.ainvoke({
+    acct_resp = await accountability_agent.ainvoke({
         "messages": [
             {"role": "user", "content": "Run your selection and output per your specified format only."}
         ]
     })
-    print("\n[power_agent]")
-    print(_extract_last_content(pwr_resp))
+    print("\n[accountability_agent]")
+    pprint.pprint(acct_resp)
+    # print(_extract_last_content(acct_resp))
 
     orch_resp = await orchestrator.ainvoke({
         "messages": [
-            {"role": "user", "content": "Return only the download URL for the best model."}
+            {"role": "user", "content": "Return only the final model_id for the best model."}
         ]
     })
     print("\n[orchestrator]")
-    _print_last_url_or_content(orch_resp)
+    # Orchestrator is asked to output only model_id; print directly
+    pprint.pprint(orch_resp)
+    # print(_extract_last_content(orch_resp))
 
 
 if __name__ == "__main__":

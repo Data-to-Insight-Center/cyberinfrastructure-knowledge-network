@@ -201,3 +201,9 @@ class MCReconstructor:
         Get list of all models with average accuracy across deployments.
         """
         return self.db.get_average_accuracy_all_models()
+
+    def get_fairness_metrics_all_models(self):
+        """
+        Get list of all models with fairness metrics across deployments.
+        """
+        return self.db.get_fairness_metrics_all_models()

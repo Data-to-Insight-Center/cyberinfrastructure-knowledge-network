@@ -823,13 +823,13 @@ class GraphDB:
     def get_average_compute_time_all_models(self):
         query = """
             MATCH (m:Model)
-            OPTIONAL MATCH (m)<-[:used]-(d:Deployment)
+            OPTIONAL MATCH (d:Deployment)<-[:used]-(m)
             WITH m, d
             WHERE d IS NOT NULL AND d.avg_compute_time IS NOT NULL
             WITH m.model_id AS model_id, avg(d.avg_compute_time) AS average_compute_time
             RETURN model_id, average_compute_time
             ORDER BY model_id
-        """
+            """
         with self.driver.session() as session:
             result = session.run(query)
             return [
@@ -843,12 +843,12 @@ class GraphDB:
     def get_average_cpu_gpu_all_models(self):
         query = """
             MATCH (m:Model)
-            OPTIONAL MATCH (m)<-[:used]-(d:Deployment)
+            OPTIONAL MATCH (d:Deployment)<-[:used]-(m)
             WITH m, d
-            WHERE d IS NOT NULL AND (d.cpu_consumption_average_percentage IS NOT NULL OR d.gpu_consumption_average_percentage IS NOT NULL)
+            WHERE d IS NOT NULL AND (d.avg_gpu_power IS NOT NULL OR d.avg_gpu_power IS NOT NULL)
             WITH m.model_id AS model_id,
-                 avg(d.cpu_consumption_average_percentage) AS avg_cpu_power,
-                 avg(d.gpu_consumption_average_percentage) AS avg_gpu_power
+                 avg(d.avg_cpu_power) AS avg_cpu_power,
+                 avg(d.avg_gpu_power) AS avg_gpu_power
             RETURN model_id, avg_cpu_power, avg_gpu_power
             ORDER BY model_id
         """
@@ -866,10 +866,10 @@ class GraphDB:
     def get_average_accuracy_all_models(self):
         query = """
             MATCH (m:Model)
-            OPTIONAL MATCH (m)<-[:used]-(d:Deployment)
+            OPTIONAL MATCH (d:Deployment)<-[:used]-(m)
             WITH m, d
-            WHERE d IS NOT NULL AND d.mean_accuracy IS NOT NULL
-            WITH m.model_id AS model_id, avg(d.mean_accuracy) AS avg_accuracy
+            WHERE d IS NOT NULL AND d.avg_accuracy IS NOT NULL
+            WITH m.model_id AS model_id, avg(d.avg_accuracy) AS avg_accuracy
             RETURN model_id, avg_accuracy
             ORDER BY model_id
         """
@@ -899,3 +899,21 @@ class GraphDB:
         with self.driver.session() as session:
             result = session.run(query, model_id=model_id)
             return True if result.single() else False
+    
+    def get_fairness_metrics_all_models(self):
+        query = """
+            MATCH (m:Model)<-[:aiModel]-(mc:ModelCard)-[:biasAnalysis]->(ba:BiasAnalysis)
+            WITH m.model_id AS model_id, ba.demographic_parity_difference AS dp_diff, ba.equal_odds_difference AS eo_diff
+            RETURN model_id, dp_diff, eo_diff
+            ORDER BY model_id
+        """
+        with self.driver.session() as session:
+            result = session.run(query)
+            return [
+                {
+                    "model_id": record["model_id"],
+                    "dp_diff": record["dp_diff"],
+                    "eo_diff": record["eo_diff"],
+                }
+                for record in result
+            ]
