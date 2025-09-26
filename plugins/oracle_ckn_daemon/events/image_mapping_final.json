@@ -1,309 +1,479 @@
 {
-  "91ff130e-feb8-5e86-b939-78e789561ae6": {
-    "image_count": 1,
-    "UUID": "91ff130e-feb8-5e86-b939-78e789561ae6",
-    "image_name": "/example_images/APL_Keyset_800x290.jpg",
-    "ground_truth": "unknown",
-    "model_id": "0",
-    "image_receiving_timestamp": "2024-08-06T20:46:13.839515798+00:00",
-    "image_scoring_timestamp": "2024-08-06T20:34:28.903813",
-    "score": [
-      {
-        "label": "vehicle",
-        "probability": 0.005289999768137932,
-        "bounding_box": [0.35, 0.45, 0.20, 0.25]
-      }
-    ],
-    "image_delete_time": "2024-08-06T20:34:28.910339666+00:00",
-    "image_decision": "Deleted"
-  },
-  "67b83445-2622-50a3-be3b-f7030259576e": {
-    "image_count": 2,
-    "UUID": "67b83445-2622-50a3-be3b-f7030259576e",
-    "image_name": "/example_images/baby-red-fox.jpg",
-    "ground_truth": "animal",
-    "model_id": "0",
-    "image_receiving_timestamp": "2024-08-06T20:46:14.130079257+00:00",
-    "image_scoring_timestamp": "2024-08-06T20:34:47.430327",
-    "score": [
-      {
-        "label": "animal",
-        "probability": 0.9240000247955322,
-        "bounding_box": [0.35, 0.45, 0.20, 0.25]
-      }
-    ],
-    "image_store_delete_time": "2024-08-06T20:34:47.438858883+00:00",
-    "image_decision": "Save"
-  },
   "1afc70d2-0205-562c-845b-55db8d4cd12d": {
-    "image_count": 3,
+    "image_count": 1,
     "UUID": "1afc70d2-0205-562c-845b-55db8d4cd12d",
     "image_name": "/example_images/blank01.jpeg",
     "ground_truth": "empty",
-    "model_id": "0",
-    "image_receiving_timestamp": "2024-08-06T20:46:14.171939424+00:00",
-    "image_scoring_timestamp": "2024-08-06T20:35:05.355686",
+    "model_id": "9103066540bd614ee580637971ff79ef385b8a9d19c3c99160acf8cc83da0952-model",
+    "image_receiving_timestamp": "2025-09-25T22:38:27.261927754+00:00",
+    "image_scoring_timestamp": "2025-09-25T22:38:41.197582",
     "score": [
       {
-        "label": "vehicle",
-        "probability": 0.005119999870657921,
-        "bounding_box": [0.35, 0.45, 0.20, 0.25]
+        "label": "animal",
+        "probability": 0.019999999552965164
       },
       {
-        "label": "vehicle",
-        "probability": 0.005950000137090683,
-        "bounding_box": [0.35, 0.45, 0.20, 0.25]
+        "label": "animal",
+        "probability": 0.019999999552965164
       },
       {
-        "label": "vehicle",
-        "probability": 0.008919999934732914,
-        "bounding_box": [0.35, 0.45, 0.20, 0.25]
+        "label": "person",
+        "probability": 0.019999999552965164
       },
       {
-        "label": "vehicle",
-        "probability": 0.01209999993443489,
-        "bounding_box": [0.35, 0.45, 0.20, 0.25]
+        "label": "person",
+        "probability": 0.009999999776482582
       },
       {
-        "label": "vehicle",
-        "probability": 0.015300000086426735,
-        "bounding_box": [0.35, 0.45, 0.20, 0.25]
+        "label": "animal",
+        "probability": 0.009999999776482582
       },
       {
-        "label": "vehicle",
-        "probability": 0.08139999955892563,
-        "bounding_box": [0.35, 0.45, 0.20, 0.25]
+        "label": "animal",
+        "probability": 0.009999999776482582
+      },
+      {
+        "label": "person",
+        "probability": 0.009999999776482582
       }
     ],
-    "image_delete_time": "2024-08-06T20:35:05.364311669+00:00",
+    "image_delete_time": "2025-09-25T22:38:41.198427528+00:00",
     "image_decision": "Deleted"
-  },
-  "15c5104f-20be-54c6-9624-66adcb91268b": {
-    "image_count": 4,
-    "UUID": "15c5104f-20be-54c6-9624-66adcb91268b",
-    "image_name": "/example_images/blank02.jpeg",
-    "ground_truth": "empty",
-    "model_id": "0",
-    "image_receiving_timestamp": "2024-08-06T20:46:14.217310257+00:00",
-    "image_scoring_timestamp": "2024-08-06T20:35:24.050806",
-    "score": [
-      {
-        "label": "animal",
-        "probability": 0.005950000137090683,
-        "bounding_box": [0.35, 0.45, 0.20, 0.25]
-      },
-      {
-        "label": "animal",
-        "probability": 0.008100000210106373,
-        "bounding_box": [0.15, 0.22, 0.18, 0.31]
-      }
-    ],
-    "image_delete_time": "2024-08-06T20:35:24.076661137+00:00",
-    "image_decision": "Deleted"
-  },
-  "6341c70f-9151-56d7-b16f-95f28bb93b9f": {
-    "image_count": 5,
-    "UUID": "6341c70f-9151-56d7-b16f-95f28bb93b9f",
-    "image_name": "/example_images/blank03.jpg",
-    "ground_truth": "empty",
-    "model_id": "0",
-    "image_receiving_timestamp": "2024-08-06T20:46:14.899806091+00:00",
-    "image_scoring_timestamp": "2024-08-06T20:35:42.994304",
-    "score": [
-      {
-        "label": "animal",
-        "probability": 0.007000000216066837,
-        "bounding_box": [0.42, 0.38, 0.16, 0.29]
-      },
-      {
-        "label": "animal",
-        "probability": 0.010300000198185444,
-        "bounding_box": [0.28, 0.51, 0.24, 0.19]
-      },
-      {
-        "label": "animal",
-        "probability": 0.015599999576807022,
-        "bounding_box": [0.61, 0.33, 0.22, 0.36]
-      },
-      {
-        "label": "animal",
-        "probability": 0.09179999679327011,
-        "bounding_box": [0.19, 0.64, 0.31, 0.14]
-      }
-    ],
-    "image_delete_time": "2024-08-06T20:35:43.001081923+00:00",
-    "image_decision": "Deleted"
-  },
-  "cb52dad5-372d-59de-8257-b3a316cd729c": {
-    "image_count": 6,
-    "UUID": "cb52dad5-372d-59de-8257-b3a316cd729c",
-    "image_name": "/example_images/blank04.jpeg",
-    "ground_truth": "empty",
-    "model_id": "0",
-    "image_receiving_timestamp": "2024-08-06T20:46:14.969231216+00:00",
-    "image_scoring_timestamp": "2024-08-06T20:36:01.478263",
-    "score": [
-      {
-        "label": "empty",
-        "probability": 0.0,
-        "bounding_box": [0.47, 0.29, 0.26, 0.42]
-      }
-    ],
-    "image_delete_time": "2024-08-06T20:36:01.485590626+00:00",
-    "image_decision": "Deleted"
-  },
-  "313f2ee4-e271-5d3b-9ba6-5303e5ed0561": {
-    "image_count": 7,
-    "UUID": "313f2ee4-e271-5d3b-9ba6-5303e5ed0561",
-    "image_name": "/example_images/blank05.jpeg",
-    "ground_truth": "empty",
-    "model_id": "0",
-    "image_receiving_timestamp": "2024-08-06T20:46:15.025145341+00:00",
-    "image_scoring_timestamp": "2024-08-06T20:36:19.558739",
-    "score": [
-      {
-        "label": "empty",
-        "probability": 0.0,
-        "bounding_box": [0.33, 0.58, 0.19, 0.27]
-      }
-    ],
-    "image_delete_time": "2024-08-06T20:36:19.564788426+00:00",
-    "image_decision": "Deleted"
-  },
-  "30d686e0-7da2-5057-9e3b-2e03844811eb": {
-    "image_count": 8,
-    "UUID": "30d686e0-7da2-5057-9e3b-2e03844811eb",
-    "image_name": "/example_images/cheetah-baby.jpg",
-    "ground_truth": "animal",
-    "model_id": "0",
-    "image_receiving_timestamp": "2024-08-06T20:46:15.117252007+00:00",
-    "image_scoring_timestamp": "2024-08-06T20:36:36.984640",
-    "score": [
-      {
-        "label": "animal",
-        "probability": 0.9549999833106995,
-        "bounding_box": [0.52, 0.16, 0.28, 0.39]
-      }
-    ],
-    "image_store_delete_time": "2024-08-06T20:36:36.992538295+00:00",
-    "image_decision": "Save"
-  },
-  "315cb62d-1877-5d21-a138-b282b9e25df4": {
-    "image_count": 9,
-    "UUID": "315cb62d-1877-5d21-a138-b282b9e25df4",
-    "image_name": "/example_images/german-shep-pup.jpg",
-    "ground_truth": "animal",
-    "model_id": "0",
-    "image_receiving_timestamp": "2024-08-06T20:46:15.531098757+00:00",
-    "image_scoring_timestamp": "2024-08-06T20:36:56.633440",
-    "score": [
-      {
-        "label": "animal",
-        "probability": 0.7059999704360962,
-        "bounding_box": [0.38, 0.43, 0.17, 0.34]
-      }
-    ],
-    "image_store_delete_time": "2024-08-06T20:36:56.641497680+00:00",
-    "image_decision": "Save"
-  },
-  "cbe2a668-d416-54fe-a3f3-1c51de7ac199": {
-    "image_count": 10,
-    "UUID": "cbe2a668-d416-54fe-a3f3-1c51de7ac199",
-    "image_name": "/example_images/golden-pup.jpg",
-    "ground_truth": "animal",
-    "model_id": "0",
-    "image_receiving_timestamp": "2024-08-06T20:46:15.677861799+00:00",
-    "image_scoring_timestamp": "2024-08-06T20:37:16.704368",
-    "score": [
-      {
-        "label": "human",
-        "probability": 0.005160000175237656,
-        "bounding_box": [0.12, 0.67, 0.21, 0.18]
-      },
-      {
-        "label": "human",
-        "probability": 0.008030000142753124,
-        "bounding_box": [0.26, 0.41, 0.35, 0.23]
-      },
-      {
-        "label": "human",
-        "probability": 0.008999999612569809,
-        "bounding_box": [0.59, 0.52, 0.14, 0.31]
-      },
-      {
-        "label": "human",
-        "probability": 0.013199999928474426,
-        "bounding_box": [0.44, 0.28, 0.29, 0.37]
-      },
-      {
-        "label": "animal",
-        "probability": 0.022099999710917473,
-        "bounding_box": [0.18, 0.63, 0.32, 0.16]
-      },
-      {
-        "label": "human",
-        "probability": 0.07010000199079514,
-        "bounding_box": [0.73, 0.19, 0.15, 0.44]
-      },
-      {
-        "label": "human",
-        "probability": 0.08060000091791153,
-        "bounding_box": [0.31, 0.56, 0.27, 0.21]
-      },
-      {
-        "label": "animal",
-        "probability": 0.14900000393390656,
-        "bounding_box": [0.48, 0.34, 0.24, 0.38]
-      },
-      {
-        "label": "animal",
-        "probability": 0.6600000262260437,
-        "bounding_box": [0.62, 0.47, 0.19, 0.26]
-      },
-      {
-        "label": "human",
-        "probability": 0.699999988079071,
-        "bounding_box": [0.37, 0.21, 0.33, 0.41]
-      }
-    ],
-    "image_store_delete_time": "2024-08-06T20:37:16.713024883+00:00",
-    "image_decision": "Save"
-  },
-  "804f22de-8a90-52af-8baf-cda2cd66385f": {
-    "image_count": 11,
-    "UUID": "804f22de-8a90-52af-8baf-cda2cd66385f",
-    "image_name": "/example_images/labrador-pup.jpg",
-    "ground_truth": "animal",
-    "model_id": "0",
-    "image_receiving_timestamp": "2024-08-06T20:46:15.832333466+00:00",
-    "image_scoring_timestamp": "2024-08-06T20:37:35.865961",
-    "score": [
-      {
-        "label": "animal",
-        "probability": 0.8429999947547913,
-        "bounding_box": [0.55, 0.39, 0.23, 0.32]
-      }
-    ],
-    "image_store_delete_time": "2024-08-06T20:37:35.875405170+00:00",
-    "image_decision": "Save"
   },
   "4b5d738e-9c8a-5097-96e7-3c78a00e0f31": {
-    "image_count": 12,
+    "image_count": 2,
     "UUID": "4b5d738e-9c8a-5097-96e7-3c78a00e0f31",
     "image_name": "/example_images/panda-cub.jpg",
     "ground_truth": "animal",
-    "model_id": "0",
-    "image_receiving_timestamp": "2024-08-06T20:46:16.003685758+00:00",
-    "image_scoring_timestamp": "2024-08-06T20:37:54.345183",
+    "model_id": "9103066540bd614ee580637971ff79ef385b8a9d19c3c99160acf8cc83da0952-model",
+    "image_receiving_timestamp": "2025-09-25T22:38:27.342374929+00:00",
+    "image_scoring_timestamp": "2025-09-25T22:38:49.553792",
     "score": [
       {
         "label": "animal",
-        "probability": 0.9409999847412109,
-        "bounding_box": [0.41, 0.26, 0.36, 0.28]
+        "probability": 0.6100000143051147
+      },
+      {
+        "label": "animal",
+        "probability": 0.05000000074505806
+      },
+      {
+        "label": "animal",
+        "probability": 0.029999999329447746
+      },
+      {
+        "label": "animal",
+        "probability": 0.029999999329447746
+      },
+      {
+        "label": "animal",
+        "probability": 0.019999999552965164
+      },
+      {
+        "label": "animal",
+        "probability": 0.009999999776482582
+      },
+      {
+        "label": "animal",
+        "probability": 0.009999999776482582
+      },
+      {
+        "label": "person",
+        "probability": 0.009999999776482582
+      },
+      {
+        "label": "animal",
+        "probability": 0.009999999776482582
+      },
+      {
+        "label": "animal",
+        "probability": 0.009999999776482582
       }
     ],
-    "image_store_delete_time": "2024-08-06T20:37:54.381557345+00:00",
-    "image_decision": "Save"
+    "image_store_delete_time": "2025-09-25T22:38:49.554444230+00:00",
+    "image_decision": "ReduceSave"
+  },
+  "91ff130e-feb8-5e86-b939-78e789561ae6": {
+    "image_count": 3,
+    "UUID": "91ff130e-feb8-5e86-b939-78e789561ae6",
+    "image_name": "/example_images/APL_Keyset_800x290.jpg",
+    "ground_truth": "empty",
+    "model_id": "9103066540bd614ee580637971ff79ef385b8a9d19c3c99160acf8cc83da0952-model",
+    "image_receiving_timestamp": "2025-09-25T22:38:27.556339500+00:00",
+    "image_scoring_timestamp": "2025-09-25T22:38:54.412116",
+    "score": [
+      {
+        "label": "person",
+        "probability": 0.009999999776482582
+      }
+    ],
+    "image_delete_time": "2025-09-25T22:38:54.414563198+00:00",
+    "image_decision": "Deleted"
+  },
+  "313f2ee4-e271-5d3b-9ba6-5303e5ed0561": {
+    "image_count": 4,
+    "UUID": "313f2ee4-e271-5d3b-9ba6-5303e5ed0561",
+    "image_name": "/example_images/blank05.jpeg",
+    "ground_truth": "empty",
+    "model_id": "9103066540bd614ee580637971ff79ef385b8a9d19c3c99160acf8cc83da0952-model",
+    "image_receiving_timestamp": "2025-09-25T22:38:27.591053314+00:00",
+    "image_scoring_timestamp": "2025-09-25T22:39:02.672341",
+    "score": [
+      {
+        "label": "animal",
+        "probability": 0.029999999329447746
+      },
+      {
+        "label": "animal",
+        "probability": 0.009999999776482582
+      }
+    ],
+    "image_delete_time": "2025-09-25T22:39:02.673199858+00:00",
+    "image_decision": "Deleted"
+  },
+  "804f22de-8a90-52af-8baf-cda2cd66385f": {
+    "image_count": 5,
+    "UUID": "804f22de-8a90-52af-8baf-cda2cd66385f",
+    "image_name": "/example_images/labrador-pup.jpg",
+    "ground_truth": "animal",
+    "model_id": "9103066540bd614ee580637971ff79ef385b8a9d19c3c99160acf8cc83da0952-model",
+    "image_receiving_timestamp": "2025-09-25T22:38:27.745481954+00:00",
+    "image_scoring_timestamp": "2025-09-25T22:39:14.538668",
+    "score": [
+      {
+        "label": "animal",
+        "probability": 0.1899999976158142
+      },
+      {
+        "label": "animal",
+        "probability": 0.029999999329447746
+      },
+      {
+        "label": "animal",
+        "probability": 0.019999999552965164
+      },
+      {
+        "label": "animal",
+        "probability": 0.009999999776482582
+      },
+      {
+        "label": "animal",
+        "probability": 0.009999999776482582
+      }
+    ],
+    "image_delete_time": "2025-09-25T22:39:14.539494724+00:00",
+    "image_decision": "Deleted"
+  },
+  "6341c70f-9151-56d7-b16f-95f28bb93b9f": {
+    "image_count": 6,
+    "UUID": "6341c70f-9151-56d7-b16f-95f28bb93b9f",
+    "image_name": "/example_images/blank03.jpg",
+    "ground_truth": "empty",
+    "model_id": "9103066540bd614ee580637971ff79ef385b8a9d19c3c99160acf8cc83da0952-model",
+    "image_receiving_timestamp": "2025-09-25T22:38:28.370733113+00:00",
+    "image_scoring_timestamp": "2025-09-25T22:39:22.756427",
+    "score": [
+      {
+        "label": "animal",
+        "probability": 0.3499999940395355
+      },
+      {
+        "label": "animal",
+        "probability": 0.05999999865889549
+      },
+      {
+        "label": "animal",
+        "probability": 0.03999999910593033
+      },
+      {
+        "label": "animal",
+        "probability": 0.029999999329447746
+      },
+      {
+        "label": "animal",
+        "probability": 0.019999999552965164
+      },
+      {
+        "label": "animal",
+        "probability": 0.009999999776482582
+      },
+      {
+        "label": "animal",
+        "probability": 0.009999999776482582
+      }
+    ],
+    "image_delete_time": "2025-09-25T22:39:22.758929274+00:00",
+    "image_decision": "Deleted"
+  },
+  "cb52dad5-372d-59de-8257-b3a316cd729c": {
+    "image_count": 7,
+    "UUID": "cb52dad5-372d-59de-8257-b3a316cd729c",
+    "image_name": "/example_images/blank04.jpeg",
+    "ground_truth": "empty",
+    "model_id": "9103066540bd614ee580637971ff79ef385b8a9d19c3c99160acf8cc83da0952-model",
+    "image_receiving_timestamp": "2025-09-25T22:38:28.401627015+00:00",
+    "image_scoring_timestamp": "2025-09-25T22:39:31.513037",
+    "score": [
+      {
+        "label": "person",
+        "probability": 0.029999999329447746
+      },
+      {
+        "label": "animal",
+        "probability": 0.019999999552965164
+      }
+    ],
+    "image_delete_time": "2025-09-25T22:39:31.516847342+00:00",
+    "image_decision": "Deleted"
+  },
+  "15c5104f-20be-54c6-9624-66adcb91268b": {
+    "image_count": 8,
+    "UUID": "15c5104f-20be-54c6-9624-66adcb91268b",
+    "image_name": "/example_images/blank02.jpeg",
+    "ground_truth": "empty",
+    "model_id": "9103066540bd614ee580637971ff79ef385b8a9d19c3c99160acf8cc83da0952-model",
+    "image_receiving_timestamp": "2025-09-25T22:38:28.422495648+00:00",
+    "image_scoring_timestamp": "2025-09-25T22:39:39.765426",
+    "score": [
+      {
+        "label": "person",
+        "probability": 0.009999999776482582
+      },
+      {
+        "label": "animal",
+        "probability": 0.009999999776482582
+      }
+    ],
+    "image_delete_time": "2025-09-25T22:39:39.766309223+00:00",
+    "image_decision": "Deleted"
+  },
+  "cbe2a668-d416-54fe-a3f3-1c51de7ac199": {
+    "image_count": 9,
+    "UUID": "cbe2a668-d416-54fe-a3f3-1c51de7ac199",
+    "image_name": "/example_images/golden-pup.jpg",
+    "ground_truth": "animal",
+    "model_id": "9103066540bd614ee580637971ff79ef385b8a9d19c3c99160acf8cc83da0952-model",
+    "image_receiving_timestamp": "2025-09-25T22:38:28.561226605+00:00",
+    "image_scoring_timestamp": "2025-09-25T22:39:51.617961",
+    "score": [
+      {
+        "label": "animal",
+        "probability": 0.1899999976158142
+      },
+      {
+        "label": "animal",
+        "probability": 0.12999999523162842
+      },
+      {
+        "label": "animal",
+        "probability": 0.07999999821186066
+      },
+      {
+        "label": "animal",
+        "probability": 0.05000000074505806
+      },
+      {
+        "label": "animal",
+        "probability": 0.05000000074505806
+      },
+      {
+        "label": "animal",
+        "probability": 0.029999999329447746
+      },
+      {
+        "label": "animal",
+        "probability": 0.029999999329447746
+      },
+      {
+        "label": "animal",
+        "probability": 0.019999999552965164
+      },
+      {
+        "label": "animal",
+        "probability": 0.009999999776482582
+      },
+      {
+        "label": "animal",
+        "probability": 0.009999999776482582
+      },
+      {
+        "label": "animal",
+        "probability": 0.009999999776482582
+      },
+      {
+        "label": "vehicle",
+        "probability": 0.009999999776482582
+      },
+      {
+        "label": "animal",
+        "probability": 0.009999999776482582
+      },
+      {
+        "label": "animal",
+        "probability": 0.009999999776482582
+      },
+      {
+        "label": "person",
+        "probability": 0.009999999776482582
+      },
+      {
+        "label": "animal",
+        "probability": 0.009999999776482582
+      },
+      {
+        "label": "animal",
+        "probability": 0.009999999776482582
+      },
+      {
+        "label": "animal",
+        "probability": 0.009999999776482582
+      },
+      {
+        "label": "animal",
+        "probability": 0.009999999776482582
+      },
+      {
+        "label": "person",
+        "probability": 0.009999999776482582
+      },
+      {
+        "label": "person",
+        "probability": 0.009999999776482582
+      }
+    ],
+    "image_delete_time": "2025-09-25T22:39:51.619587901+00:00",
+    "image_decision": "Deleted"
+  },
+  "315cb62d-1877-5d21-a138-b282b9e25df4": {
+    "image_count": 10,
+    "UUID": "315cb62d-1877-5d21-a138-b282b9e25df4",
+    "image_name": "/example_images/german-shep-pup.jpg",
+    "ground_truth": "animal",
+    "model_id": "9103066540bd614ee580637971ff79ef385b8a9d19c3c99160acf8cc83da0952-model",
+    "image_receiving_timestamp": "2025-09-25T22:38:28.947234186+00:00",
+    "image_scoring_timestamp": "2025-09-25T22:40:03.430452",
+    "score": [
+      {
+        "label": "animal",
+        "probability": 0.5899999737739563
+      },
+      {
+        "label": "animal",
+        "probability": 0.49000000953674316
+      },
+      {
+        "label": "animal",
+        "probability": 0.05000000074505806
+      },
+      {
+        "label": "animal",
+        "probability": 0.019999999552965164
+      },
+      {
+        "label": "animal",
+        "probability": 0.019999999552965164
+      },
+      {
+        "label": "animal",
+        "probability": 0.009999999776482582
+      },
+      {
+        "label": "animal",
+        "probability": 0.009999999776482582
+      }
+    ],
+    "image_store_delete_time": "2025-09-25T22:40:03.432018596+00:00",
+    "image_decision": "ReduceSave"
+  },
+  "30d686e0-7da2-5057-9e3b-2e03844811eb": {
+    "image_count": 11,
+    "UUID": "30d686e0-7da2-5057-9e3b-2e03844811eb",
+    "image_name": "/example_images/cheetah-baby.jpg",
+    "ground_truth": "animal",
+    "model_id": "9103066540bd614ee580637971ff79ef385b8a9d19c3c99160acf8cc83da0952-model",
+    "image_receiving_timestamp": "2025-09-25T22:38:29.012816494+00:00",
+    "image_scoring_timestamp": "2025-09-25T22:40:09.864887",
+    "score": [
+      {
+        "label": "animal",
+        "probability": 0.6800000071525574
+      },
+      {
+        "label": "animal",
+        "probability": 0.36000001430511475
+      },
+      {
+        "label": "animal",
+        "probability": 0.18000000715255737
+      },
+      {
+        "label": "animal",
+        "probability": 0.07999999821186066
+      },
+      {
+        "label": "animal",
+        "probability": 0.029999999329447746
+      }
+    ],
+    "image_store_delete_time": "2025-09-25T22:40:09.865740117+00:00",
+    "image_decision": "ReduceSave"
+  },
+  "67b83445-2622-50a3-be3b-f7030259576e": {
+    "image_count": 12,
+    "UUID": "67b83445-2622-50a3-be3b-f7030259576e",
+    "image_name": "/example_images/baby-red-fox.jpg",
+    "ground_truth": "animal",
+    "model_id": "9103066540bd614ee580637971ff79ef385b8a9d19c3c99160acf8cc83da0952-model",
+    "image_receiving_timestamp": "2025-09-25T22:38:29.180059221+00:00",
+    "image_scoring_timestamp": "2025-09-25T22:40:18.133023",
+    "score": [
+      {
+        "label": "animal",
+        "probability": 0.11999999731779099
+      },
+      {
+        "label": "animal",
+        "probability": 0.10000000149011612
+      },
+      {
+        "label": "animal",
+        "probability": 0.07999999821186066
+      },
+      {
+        "label": "animal",
+        "probability": 0.019999999552965164
+      },
+      {
+        "label": "animal",
+        "probability": 0.019999999552965164
+      },
+      {
+        "label": "animal",
+        "probability": 0.019999999552965164
+      },
+      {
+        "label": "animal",
+        "probability": 0.009999999776482582
+      },
+      {
+        "label": "animal",
+        "probability": 0.009999999776482582
+      },
+      {
+        "label": "animal",
+        "probability": 0.009999999776482582
+      },
+      {
+        "label": "animal",
+        "probability": 0.009999999776482582
+      },
+      {
+        "label": "animal",
+        "probability": 0.009999999776482582
+      }
+    ],
+    "image_delete_time": "2025-09-25T22:40:18.134951007+00:00",
+    "image_decision": "Deleted"
   },
   "6e153711-9823-4ee6-b608-58e2e801db51": {}
 }

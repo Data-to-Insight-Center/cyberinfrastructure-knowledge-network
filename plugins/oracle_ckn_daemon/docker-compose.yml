@@ -11,10 +11,10 @@ services:
       - CKN_LOG_FILE=/oracle_logs/ckn.log
       - CKN_KAFKA_BROKER=broker:29092
       - CKN_KAFKA_TOPIC=oracle-events
-      - CAMERA_TRAPS_DEVICE_ID=sachith-macbook
-      - USER_ID=swithana
+      - CAMERA_TRAPS_DEVICE_ID=test-device
+      - USER_ID=neelesh
       - EXPERIMENT_ID=tapis-docker-power-test1
-      - EXPERIMENT_END_SIGNAL=6e153711-9823-4ee6-b608-58e2e801db51
+      - EXPERIMENT_END_SIGNAL=test-end-signal
       - POWER_SUMMARY_FILE=/power_logs/power_summary_report.json
       - POWER_SUMMARY_TOPIC=cameratraps-power-summary
       - ENABLE_POWER_MONITORING=false
