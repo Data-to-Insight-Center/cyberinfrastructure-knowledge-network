@@ -598,7 +598,6 @@ if selected_experiment:
                 st.progress(dataset_metrics['map_50_95'])
 
         # Image Classification Metrics
-        st.markdown("---")
         st.markdown("Experiment Raw Data")
 
 
