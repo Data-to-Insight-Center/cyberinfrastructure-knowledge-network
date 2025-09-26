@@ -20,23 +20,23 @@ kg = CKNKnowledgeGraph(NEO4J_URI, NEO4J_USER, NEO4J_PWD)
 mc_util = MCReconstructor(kg)
 
 st.set_page_config(
-    page_title="Model Cards",
+    page_title="Patra Model Cards",
     page_icon="🪙",
     layout="wide")
 
-st.header("Model Cards")
+st.header("Patra Model Cards")
 
 model_card_ids = kg.get_model_card_ids()
 if model_card_ids.empty:
     st.write("No model cards found.")
     st.stop()
 
-text_search = st.text_input("Search Model Cards", value="")
+text_search = st.text_input("Search Patra Model Cards", value="")
 if text_search:
     if text_search != "":
         model_card_ids = search_kg(text_search, PATRA_SERVER)
 
-selected_model_card = st.selectbox("Select Model Card", model_card_ids)
+selected_model_card = st.selectbox("Select Patra Model Card", model_card_ids)
 
 if selected_model_card:
     result = retrieve_mc(selected_model_card, PATRA_SERVER)
