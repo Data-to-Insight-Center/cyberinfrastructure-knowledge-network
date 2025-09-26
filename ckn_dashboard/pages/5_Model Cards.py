@@ -24,7 +24,7 @@ st.set_page_config(
     page_icon="🪙",
     layout="wide")
 
-st.header("Patra Model Cards")
+st.image("docs/patra-logo.png", width=250)
 
 model_card_ids = kg.get_model_card_ids()
 if model_card_ids.empty:

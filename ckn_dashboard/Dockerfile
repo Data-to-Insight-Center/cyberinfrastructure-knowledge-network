@@ -7,6 +7,7 @@ COPY ckn_kg.py /app/
 COPY llm_graph.py /app/
 COPY util.py /app/
 COPY modelcards /app/modelcards
+COPY docs /app/docs
 COPY requirements.txt /app/
 COPY /pages /app/pages
 

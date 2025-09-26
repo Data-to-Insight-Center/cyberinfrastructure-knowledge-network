@@ -6,6 +6,7 @@ st.set_page_config(
     page_icon="👋",
     layout="wide"
 )
+st.image("docs/ckn-logo.png", width=150)
 
 st.header("CKN Streaming Analytics Dashboard")
 
