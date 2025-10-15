@@ -82,43 +82,38 @@ class CKNKnowledgeGraph:
                     WITH e.experiment_id AS experimentId, e.start_time AS startTime, 
                          COUNT(img) AS numberOfRawImages, 
                          SUM(CASE WHEN r.image_decision = 'Save' THEN 1 ELSE 0 END) AS numSavedImages, 
-                         u.user_id AS userId, m.model_id AS modelId, d.device_id AS deviceId
-                    RETURN experimentId, userId, modelId, deviceId, startTime, numberOfRawImages, numSavedImages
+                         e.precision AS precision,
+                         e.recall AS recall,
+                         e.f1_score AS f1_score,
+                         u.user_id AS userId,
+                         m.model_id AS modelId,
+                         d.device_id AS deviceId
+                    RETURN experimentId, userId, modelId, deviceId, startTime, numberOfRawImages, numSavedImages, precision, recall, f1_score
                     """
 
-        query_save_accuracy = f"""
-                    MATCH (ri:RawImage)-[pb:PROCESSED_BY]->(e:Experiment)-[:SUBMITTED_BY]->(u:User {{user_id: '{user_id}'}})
-                    WITH ri, pb, e, apoc.convert.fromJsonList(pb.scores) AS scoresList
-                    UNWIND scoresList AS score
-                    WITH ri, e, score.label AS label, score.probability AS probability
-                    ORDER BY probability DESC
-                    WITH ri, e, 
-                        CASE WHEN collect(probability)[0] < 0.2 THEN 'empty' ELSE collect(label)[0] END AS predicted_label,
-                        CASE WHEN ri.ground_truth IS NULL OR ri.ground_truth = 'unknown' THEN 'empty' ELSE ri.ground_truth END AS ground_truth
-                    WITH ri, e, predicted_label, ground_truth, 
-                        CASE WHEN ground_truth = predicted_label THEN 1 ELSE 0 END AS accuracy
-                    WITH e, avg(accuracy) AS avg_accuracy, collect({{predicted_label: predicted_label, ground_truth: ground_truth}}) AS labels
-                    RETURN e.experiment_id AS experimentId, avg_accuracy * 100 AS averageAccuracy
-            """
 
         # get experiment info
         result = self.session.run(query_experiment_info)
         experiment_info_records = [record.data() for record in result]
         df_experiment_info = pd.DataFrame(experiment_info_records)
 
-        # calculate accuracy per experiment
-        result = self.session.run(query_save_accuracy)
-        save_accuracy_records = [record.data() for record in result]
-        df_save_accuracy = pd.DataFrame(save_accuracy_records)
+        # Use experiment info directly since we removed precision/recall calculation
+        df_combined = df_experiment_info
 
-        df_combined = pd.merge(df_experiment_info, df_save_accuracy, on='experimentId')
-        print(df_combined)
-        # Rename columns as per your requirement
-        df_combined.columns = ["Experiment", "User", "Model", "Device", "Start Time", "Total Images", "Saved Images", "Accuracy [%]"]
+        df_combined.columns = [
+            "Experiment",
+            "User",
+            "Model",
+            "Device",
+            "Start Time",
+            "Total Images",
+            "Saved Images",
+            "Precision",
+            "Recall",
+            "F1 Score",
+        ]
 
-        # Convert Start Time to datetime
         df_combined['Start Time'] = pd.to_datetime(df_combined['Start Time'], unit='ms')
-        # Convert the timezone to EDT
         df_combined['Start Time'] = df_combined['Start Time'].dt.tz_localize('UTC')
         df_combined['Start Time'] = df_combined['Start Time'].dt.tz_convert('America/New_York')
 
@@ -265,14 +260,14 @@ class CKNKnowledgeGraph:
         WITH experimentId, startTime, NumberOfRawImages, NumberOfSavedImages, userId, modelId, deviceId, apoc.convert.fromJsonList(r.scores) AS scores
         UNWIND scores AS score
         WITH experimentId, startTime, NumberOfRawImages, NumberOfSavedImages, userId, modelId, deviceId, toFloat(score.probability) AS probability
-        RETURN experimentId, userId, modelId, deviceId, AVG(probability)*100 AS average_accuracy, startTime, NumberOfRawImages, NumberOfSavedImages
+        RETURN experimentId, userId, modelId, deviceId, startTime, NumberOfRawImages, NumberOfSavedImages
         """
 
         result = self.session.run(query)
 
         records = [record.data() for record in result]
         df = pd.DataFrame(records)
-        df.columns = ["Experiment", "User", "Model", "Device", "Accuracy [%]", "Start Time", "Total Images",
+        df.columns = ["Experiment", "User", "Model", "Device", "Start Time", "Total Images",
                       "Saved Images"]
         df['Start Time'] = pd.to_datetime(df['Start Time'], unit='ms')  # Convert to datetime
         df.set_index("Experiment", inplace=True)  # Set experiment_id as the index
@@ -542,7 +537,12 @@ class CKNKnowledgeGraph:
             RETURN m.name + ':' + m.version AS name_version
         """
         result = self.session.run(query)
-        name_version = result.single()["name_version"]
+        single_result = result.single()
+        
+        if single_result is None:
+            return None
+            
+        name_version = single_result["name_version"]
 
         # Returning the 'name:version' string
         return name_version
@@ -564,6 +564,25 @@ class CKNKnowledgeGraph:
 
         df = pd.DataFrame(records, columns=['Model Card ID'])
         return df
+
+    def get_experiment_metrics(self, experiment_id):
+        """
+        Fetch precomputed experiment-level detection metrics from the graph.
+        Returns a dict with keys matching Experiment node properties such as
+        total_predictions, total_images, true_positives, false_positives,
+        false_negatives, precision, recall, f1_score, total_ground_truth_objects,
+        and mean_iou/map_* if present.
+        """
+        query = """
+            MATCH (e:Experiment {experiment_id: $experiment_id})
+            RETURN properties(e) AS props
+        """
+        result = self.session.run(query, experiment_id=experiment_id).single()
+        if not result:
+            return {}
+        props = result.get("props", {})
+        # Ensure numeric types are python primitives where possible
+        return dict(props)
 
     def convert_to_datetime(self, neo4j_datetime):
         return datetime(neo4j_datetime.year,
