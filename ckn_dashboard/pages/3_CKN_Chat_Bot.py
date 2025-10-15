@@ -1,8 +1,8 @@
 import time
+import os
 from collections import deque
 
 import streamlit as st
-from llm_graph import run_langraph
 
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = deque(maxlen=3)
@@ -14,7 +14,11 @@ def get_llm_response(query):
     """
     if query is None:
         answer = "How can I help you today?"
+    elif not os.getenv("OPENAI_API_KEY"):
+        answer = "OpenAI API key not configured. Set OPENAI_API_KEY to enable chat."
     else:
+        # Lazy import to avoid initializing LLM when key is missing
+        from llm_graph import run_langraph
         answer = run_langraph(query, format_chat_history(st.session_state.chat_history))
         st.session_state.chat_history.append({"human": query, "agent": answer})
     for word in answer.split(" "):
@@ -44,6 +48,9 @@ st.set_page_config(
     layout="centered")
 
 st.header("CKN Analytics Bot")
+
+if not os.getenv("OPENAI_API_KEY"):
+    st.info("OpenAI API key is not configured. The chat bot will respond with a setup hint.")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
