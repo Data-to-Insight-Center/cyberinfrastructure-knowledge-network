@@ -55,12 +55,8 @@ def get_experiment_indicators(experiment_id, experiment_df, model_id):
     date_str = start_time.strftime("%Y-%m-%d")
     time_str = start_time.strftime("%H:%M:%S")
 
-    average_accuracy = selected_experiment['Accuracy [%]']
-
-    if average_accuracy is None:
-        average_accuracy = 'N/A'
-    else:
-        average_accuracy = round(average_accuracy, 2)
+    # Set average_accuracy to N/A since we removed the accuracy column
+    average_accuracy = 'N/A'
 
     model_name = kg.get_mode_name_version(model_id)
     if model_name is None:
@@ -71,61 +67,18 @@ def get_experiment_indicators(experiment_id, experiment_df, model_id):
 
     return date_str, time_str, model_name, device_info, average_accuracy
 
-def calculate_accuracy_from_experiment(experiment_details):
-    """
-    Calculate the accuracy of model predictions against ground truth labels.
-    """
+def _is_number(value):
+    return isinstance(value, (int, float))
 
-    total = 0
-    correct = 0
-    missing_ground_truth = 0
-    missing_or_invalid_scores = 0
 
-    for index, row in experiment_details.iterrows():
-        ground_truth = row.get("Ground Truth")
-        scores_str = row.get("Scores", "")
+def _fmt_dec(value, decimals=4):
+    return f"{value:.{decimals}f}" if _is_number(value) else "-"
 
-        # Check for missing Ground Truth
-        if pd.isna(ground_truth):
-            missing_ground_truth += 1
-            continue
 
-        # Check for missing or empty Scores
-        if pd.isna(scores_str) or not isinstance(scores_str, str) or not scores_str.strip():
-            missing_or_invalid_scores += 1
-            continue
-
-        try:
-            # Parse the JSON string in Scores
-            scores = json.loads(scores_str)
-        except json.JSONDecodeError:
-            missing_or_invalid_scores += 1
-            continue
-
-        # Aggregate probabilities per label
-        label_prob = {}
-        for entry in scores:
-            label = entry.get("label")
-            probability = entry.get("probability", 0)
-            if label:
-                label_prob[label] = label_prob.get(label, 0) + probability
-
-        if not label_prob:
-            missing_or_invalid_scores += 1
-            continue
-
-        # Determine the predicted label with the highest aggregated probability
-        predicted_label = max(label_prob, key=label_prob.get)
-
-        # Update total and correct counts
-        total += 1
-        if predicted_label.lower() == ground_truth.lower():
-            correct += 1
-
-    # Calculate accuracy
-    accuracy = (correct / total) * 100 if total > 0 else 0
-
-    return accuracy
+def _progress_if_number(value):
+    if _is_number(value):
+        v = max(0.0, min(1.0, float(value)))
+        st.progress(v)
 
 
 def calculate_iou(box1, box2):
@@ -150,214 +103,25 @@ def calculate_iou(box1, box2):
     return intersection / union if union > 0 else 0
 
 
-def calculate_object_detection_metrics(experiment_details):
-    """
-    Calculate comprehensive object detection metrics for camera traps experiments.
-    Returns both dataset-level and image-level classification metrics.
-    """
-
-    # Initialize counters for dataset metrics
-    total_images = 0
-    total_ground_truth_objects = 0
-    total_predictions = 0
-    true_positives = 0
-    false_positives = 0
-    false_negatives = 0
-    iou_scores = []
-
-    # Initialize counters for image classification metrics
-    correct_predictions = 0
-    incorrect_predictions = 0
-
-    # Debug: Print first few rows to understand data structure (only in debug mode)
-    debug_mode = False  # Set to True to see debug output
-    if debug_mode:
-        print("DEBUG: First few rows of experiment_details:")
-        for idx, row in experiment_details.head(3).iterrows():
-            print(f"Row {idx}:")
-            print(f"  Ground Truth: {row.get('Ground Truth')}")
-            print(f"  Scores: {row.get('Scores')[:200]}...")  # First 200 chars
-            print(f"  Ground Truth BBox: {row.get('Ground Truth BBox', 'Not available')}")
-            print()
-
-    for index, row in experiment_details.iterrows():
-        ground_truth = row.get("Ground Truth")
-        scores_str = row.get("Scores", "")
-        ground_truth_bbox = row.get("Ground Truth BBox", None)
-
-        # Skip if missing ground truth or scores
-        if pd.isna(ground_truth) or pd.isna(scores_str) or not isinstance(scores_str, str):
-            continue
-
-        try:
-            scores = json.loads(scores_str)
-        except json.JSONDecodeError:
-            continue
-
-        total_images += 1
-
-        # Parse predictions from scores
-        predictions = []
-        if debug_mode:
-            print(f"DEBUG: Processing {len(scores)} scores for image {total_images + 1}")
-
-        for i, entry in enumerate(scores):
-            label = entry.get("label")
-            probability = entry.get("probability", 0)
-            bbox = entry.get("bbox", [])  # [x1, y1, x2, y2] format
-
-            if debug_mode:
-                print(f"  Score {i}: label='{label}', probability={probability}, bbox={bbox}")
-
-            # Accept predictions with valid labels (bbox is optional)
-            if label:
-                # If bbox is missing or invalid, use placeholder
-                if not isinstance(bbox, list) or len(bbox) != 4:
-                    bbox = [0, 0, 100, 100]  # Placeholder bbox
-
-                predictions.append({
-                    "label": label,
-                    "probability": probability,
-                    "bbox": bbox
-                })
-                if debug_mode:
-                    print(f"    -> Added to predictions")
-            else:
-                if debug_mode:
-                    print(f"    -> Skipped (no valid label)")
-
-        if debug_mode:
-            print(f"DEBUG: Found {len(predictions)} valid predictions")
-
-        # Sort predictions by probability (highest first)
-        predictions.sort(key=lambda x: x["probability"], reverse=True)
-
-        # For image classification, use the highest confidence prediction
-        if predictions:
-            best_prediction = predictions[0]
-            predicted_label = best_prediction["label"]
-
-            # Compare with ground truth for image classification
-            if predicted_label.lower() == ground_truth.lower():
-                correct_predictions += 1
-            else:
-                incorrect_predictions += 1
-
-        # For object detection metrics, parse ground truth bounding boxes
-        gt_objects = []
-        if ground_truth and ground_truth.lower() != "empty":
-            if ground_truth_bbox and not pd.isna(ground_truth_bbox):
-                try:
-                    # Try to parse ground truth bounding box if available
-                    if isinstance(ground_truth_bbox, str):
-                        gt_bbox = json.loads(ground_truth_bbox)
-                    else:
-                        gt_bbox = ground_truth_bbox
-
-                    if isinstance(gt_bbox, list) and len(gt_bbox) == 4:
-                        gt_objects.append({
-                            "label": ground_truth,
-                            "bbox": gt_bbox
-                        })
-                    else:
-                        # Fallback to placeholder bbox
-                        gt_objects.append({
-                            "label": ground_truth,
-                            "bbox": [0, 0, 100, 100]
-                        })
-                except (json.JSONDecodeError, TypeError):
-                    # Fallback to placeholder bbox
-                    gt_objects.append({
-                        "label": ground_truth,
-                        "bbox": [0, 0, 100, 100]
-                    })
-            else:
-                # No bounding box data available, use placeholder
-                gt_objects.append({
-                    "label": ground_truth,
-                    "bbox": [0, 0, 100, 100]
-                })
-
-        total_ground_truth_objects += len(gt_objects)
-
-        # Match predictions to ground truth objects using IoU
-        matched_gt = set()
-        matched_pred = set()
-
-        for pred_idx, prediction in enumerate(predictions):
-            best_iou = 0
-            best_gt_idx = -1
-
-            for gt_idx, gt_object in enumerate(gt_objects):
-                if gt_idx in matched_gt:
-                    continue
-
-                if prediction["label"].lower() == gt_object["label"].lower():
-                    iou = calculate_iou(prediction["bbox"], gt_object["bbox"])
-                    if iou > best_iou and iou > 0.5:  # IoU threshold
-                        best_iou = iou
-                        best_gt_idx = gt_idx
-
-            if best_gt_idx >= 0:
-                true_positives += 1
-                matched_gt.add(best_gt_idx)
-                matched_pred.add(pred_idx)
-                iou_scores.append(best_iou)
-            else:
-                false_positives += 1
-
-        # Count unmatched ground truth objects as false negatives
-        false_negatives += len(gt_objects) - len(matched_gt)
-
-        # Total predictions is the sum of predictions with valid bounding boxes
-        total_predictions += len(predictions)
-
-    # Calculate dataset metrics
-    precision = true_positives / (true_positives + false_positives) if (true_positives + false_positives) > 0 else 0
-    recall = true_positives / (true_positives + false_negatives) if (true_positives + false_negatives) > 0 else 0
-    f1_score = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
-    mean_iou = sum(iou_scores) / len(iou_scores) if iou_scores else 0
-
-    # Calculate mAP (simplified - in practice you'd need per-class AP calculations)
-    map_50 = precision  # Simplified mAP@0.5
-    map_75 = precision * 0.9  # Simplified mAP@0.75 (assume 90% of mAP@0.5)
-    map_50_95 = (map_50 + map_75) / 2  # Simplified mAP@[0.5:0.95]
-
-    # Calculate image classification accuracy
-    image_accuracy = correct_predictions / total_images if total_images > 0 else 0
-
-    dataset_metrics = {
-        "total_images": total_images,
-        "total_ground_truth_objects": total_ground_truth_objects,
-        "total_predictions": total_predictions,
-        "true_positives": true_positives,
-        "false_positives": false_positives,
-        "false_negatives": false_negatives,
-        "mean_iou": round(mean_iou, 3),
-        "precision": round(precision, 4),
-        "recall": round(recall, 4),
-        "f1_score": round(f1_score, 4),
-        "average_precision": round(map_50, 3),
-        "map_50": round(map_50, 3),
-        "map_75": round(map_75, 3),
-        "map_50_95": round(map_50_95, 3)
-    }
-
-    image_classification_metrics = {
-        "total_images": total_images,
-        "correct_predictions": correct_predictions,
-        "incorrect_predictions": incorrect_predictions,
-        "accuracy": round(image_accuracy, 2)
-    }
-
-    return dataset_metrics, image_classification_metrics
-
-
 def get_power_info(deployment_info):
     """
-    Retrieve and show power information for a given experiment.
-    :param deployment_info:
-    :return:
+    Parameters
+    ----------
+    deployment_info : dict
+        Deployment information for an experiment.
+
+    Returns
+    -------
+    total_cpu : float
+        Total CPU power consumption.
+    total_gpu : float
+        Total GPU power consumption.
+    end_date : str
+        End date of the experiment.
+    end_time : str
+        End time of the experiment.
+    plugins_df : pd.DataFrame
+        DataFrame containing plugin information.
     """
     if deployment_info is None:
         return None, None, None, None, None
@@ -422,8 +186,25 @@ if selected_experiment:
         except:
             experiment_info = kg.get_exp_info_raw(selected_experiment)
 
-        # Calculate object detection metrics
-        dataset_metrics, image_classification_metrics = calculate_object_detection_metrics(experiment_info)
+        # Fetch experiment-level detection metrics from DB
+        db_metrics = kg.get_experiment_metrics(selected_experiment) or {}
+
+        # Normalize dataset metrics expected by the UI using DB values
+        dataset_metrics = {
+            "total_images": db_metrics.get("total_images"),
+            "total_ground_truth_objects": db_metrics.get("total_ground_truth_objects"),
+            "total_predictions": db_metrics.get("total_predictions"),
+            "true_positives": db_metrics.get("true_positives"),
+            "false_positives": db_metrics.get("false_positives"),
+            "false_negatives": db_metrics.get("false_negatives"),
+            "mean_iou": db_metrics.get("mean_iou"),
+            "precision": db_metrics.get("precision"),
+            "recall": db_metrics.get("recall"),
+            "f1_score": db_metrics.get("f1_score"),
+            "map_50": db_metrics.get("map_50"),
+            "map_75": db_metrics.get("map_75"),
+            "map_50_95": db_metrics.get("map_50_95"),
+        }
 
         # extracting model id and drop
         model_id = experiment_info['Model'].iloc[0]
@@ -447,155 +228,116 @@ if selected_experiment:
         if end_date and end_time:
             columns[-1].metric(label="End time", value=f"{end_date} {end_time} EDT")
 
-        # Object Detection Metrics Section
-
-        # Performance Summary with Progress Bars
-        if dataset_metrics["total_predictions"] > 0:
-            overall_accuracy = (dataset_metrics["true_positives"] / dataset_metrics["total_predictions"]) * 100
-
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.metric(
-                    label="Overall Detection Accuracy",
-                    value=f"{overall_accuracy:.1f}%",
-                    delta=f"{dataset_metrics['true_positives']}/{dataset_metrics['total_predictions']} correct",
-                    help="Percentage of correct predictions out of all predictions made by the model (True Positives / Total Predictions)"
-                )
-                st.progress(overall_accuracy / 100)
-
-            with col2:
-                if dataset_metrics["total_ground_truth_objects"] > 0:
-                    detection_rate = (dataset_metrics["true_positives"] / dataset_metrics["total_ground_truth_objects"]) * 100
-                    st.metric(
-                        label="Detection Rate",
-                        value=f"{detection_rate:.1f}%",
-                        delta=f"{dataset_metrics['true_positives']}/{dataset_metrics['total_ground_truth_objects']} detected",
-                        help="Percentage of ground truth objects that were successfully detected by the model (True Positives / Ground Truth Objects)"
-                    )
-                    st.progress(detection_rate / 100)
-
-            with col3:
-                if image_classification_metrics["total_images"] > 0:
-                    classification_accuracy = image_classification_metrics["accuracy"] * 100
-
-                    # Single accuracy metric with progress bar
-                    st.metric(
-                        label="Classification Accuracy",
-                        value=f"{classification_accuracy:.1f}%",
-                        delta=f"{image_classification_metrics['correct_predictions']}/{image_classification_metrics['total_images']} correct",
-                        help="Percentage of images correctly classified by selecting the highest-confidence prediction per image"
-                    )
-                    st.progress(classification_accuracy / 100)
-
-        else:
-            st.warning("No predictions found in the data")
 
         # Detection Metrics (Collapsible)
-        with st.expander("Detection Metrics", expanded=True):
-            # First row - Basic counts
-            col1, col2, col3 = st.columns(3)
+        if dataset_metrics["true_positives"] and dataset_metrics["total_images"] and dataset_metrics["total_ground_truth_objects"] and dataset_metrics["total_predictions"] is not None:
+            with st.expander("Detection Metrics", expanded=True):
+                # First row - Basic counts
+                col1, col2, col3 = st.columns(3)
 
-            with col1:
-                st.metric(
-                    label="Total Images",
-                    value=dataset_metrics["total_images"],
-                    help="Number of images processed in this experiment"
-                )
+                with col1:
+                    st.metric(
+                        label="Total Images",
+                        value=str(dataset_metrics["total_images"]) if dataset_metrics["total_images"] is not None else "-",
+                        help="Number of images processed in this experiment"
+                    )
 
-            with col2:
-                st.metric(
-                    label="Ground Truth Objects",
-                    value=dataset_metrics["total_ground_truth_objects"],
-                    help="Number of objects in ground truth annotations"
-                )
+                with col2:
+                    st.metric(
+                        label="Ground Truth Objects",
+                        value=str(dataset_metrics["total_ground_truth_objects"]) if dataset_metrics["total_ground_truth_objects"] is not None else "-",
+                        help="Number of objects in ground truth annotations"
+                    )
 
-            with col3:
-                st.metric(
-                    label="Total Predictions",
-                    value=dataset_metrics["total_predictions"],
-                    help="Total number of predictions made by the model"
-                )
+                with col3:
+                    st.metric(
+                        label="Total Predictions",
+                        value=str(dataset_metrics["total_predictions"]) if dataset_metrics["total_predictions"] is not None else "-",
+                        help="Total number of predictions made by the model"
+                    )
 
-            # Second row - Performance metrics
-            col1, col2, col3 = st.columns(3)
+                # Second row - Performance metrics
+                col1, col2, col3 = st.columns(3)
 
-            with col1:
-                st.metric(
-                    label="True Positives",
-                    value=dataset_metrics["true_positives"],
-                    help="Correctly detected objects (IoU > 0.5)"
-                )
+                with col1:
+                    st.metric(
+                        label="True Positives",
+                        value=str(dataset_metrics["true_positives"]) if dataset_metrics["true_positives"] is not None else "-",
+                        help="Correctly detected objects (IoU > 0.5)"
+                    )
 
-            with col2:
-                st.metric(
-                    label="False Positives",
-                    value=dataset_metrics["false_positives"],
-                    help="Incorrect detections"
-                )
+                with col2:
+                    st.metric(
+                        label="False Positives",
+                        value=str(dataset_metrics["false_positives"]) if dataset_metrics["false_positives"] is not None else "-",
+                        help="Incorrect detections"
+                    )
 
-            with col3:
-                st.metric(
-                    label="False Negatives",
-                    value=dataset_metrics["false_negatives"],
-                    help="Missed ground truth objects"
-                )
+                with col3:
+                    st.metric(
+                        label="False Negatives",
+                        value=str(dataset_metrics["false_negatives"]) if dataset_metrics["false_negatives"] is not None else "-",
+                        help="Missed ground truth objects"
+                    )
 
 
         # Precision & Recall (Collapsible)
-        with st.expander("Precision & Recall", expanded=False):
-            col1, col2, col3 = st.columns(3)
+        if dataset_metrics["precision"] and dataset_metrics["recall"] and dataset_metrics["f1_score"] is not None:
+            with st.expander("Precision & Recall", expanded=False):
+                col1, col2, col3 = st.columns(3)
 
-            with col1:
-                st.metric(
-                    label="Precision",
-                    value=f"{dataset_metrics['precision']:.4f}",
-                    help="TP / (TP + FP) - Accuracy of positive predictions"
-                )
-                st.progress(dataset_metrics['precision'])
+                with col1:
+                    st.metric(
+                        label="Precision",
+                        value=_fmt_dec(dataset_metrics.get('precision'), 4),
+                        help="TP / (TP + FP) - Accuracy of positive predictions"
+                    )
+                    _progress_if_number(dataset_metrics.get('precision'))
 
-            with col2:
-                st.metric(
-                    label="Recall",
-                    value=f"{dataset_metrics['recall']:.4f}",
-                    help="TP / (TP + FN) - Ability to find all positive instances"
-                )
-                st.progress(dataset_metrics['recall'])
+                with col2:
+                    st.metric(
+                        label="Recall",
+                        value=_fmt_dec(dataset_metrics.get('recall'), 4),
+                        help="TP / (TP + FN) - Ability to find all positive instances"
+                    )
+                    _progress_if_number(dataset_metrics.get('recall'))
 
-            with col3:
-                st.metric(
-                    label="F1 Score",
-                    value=f"{dataset_metrics['f1_score']:.4f}",
-                    help="Harmonic mean of precision and recall"
-                )
-                st.progress(dataset_metrics['f1_score'])
+                with col3:
+                    st.metric(
+                        label="F1 Score",
+                        value=_fmt_dec(dataset_metrics.get('f1_score'), 4),
+                        help="Harmonic mean of precision and recall"
+                    )
+                    _progress_if_number(dataset_metrics.get('f1_score'))
 
         # mAP Metrics (Collapsible)
-        with st.expander("mAP Metrics", expanded=False):
-            col1, col2, col3 = st.columns(3)
+        if dataset_metrics["map_50"] and dataset_metrics["map_75"] and dataset_metrics["map_50_95"] is not None:
+                with st.expander("mAP Metrics", expanded=False):
+                    col1, col2, col3 = st.columns(3)
 
-            with col1:
-                st.metric(
-                    label="mAP@0.5",
-                    value=f"{dataset_metrics['map_50']:.3f}",
-                    help="Mean Average Precision at IoU threshold 0.5"
-                )
-                st.progress(dataset_metrics['map_50'])
+                    with col1:
+                        st.metric(
+                            label="mAP@0.5",
+                            value=_fmt_dec(dataset_metrics.get('map_50'), 3),
+                            help="Mean Average Precision at IoU threshold 0.5"
+                        )
+                        _progress_if_number(dataset_metrics.get('map_50'))
 
-            with col2:
-                st.metric(
-                    label="mAP@0.75",
-                    value=f"{dataset_metrics['map_75']:.3f}",
-                    help="Mean Average Precision at IoU threshold 0.75"
-                )
-                st.progress(dataset_metrics['map_75'])
+                    with col2:
+                        st.metric(
+                            label="mAP@0.75",
+                            value=_fmt_dec(dataset_metrics.get('map_75'), 3),
+                            help="Mean Average Precision at IoU threshold 0.75"
+                        )
+                        _progress_if_number(dataset_metrics.get('map_75'))
 
-            with col3:
-                st.metric(
-                    label="mAP@[0.5:0.95]",
-                    value=f"{dataset_metrics['map_50_95']:.3f}",
-                    help="Mean Average Precision across IoU thresholds 0.5 to 0.95"
-                )
-                st.progress(dataset_metrics['map_50_95'])
+                    with col3:
+                        st.metric(
+                            label="mAP@[0.5:0.95]",
+                            value=_fmt_dec(dataset_metrics.get('map_50_95'), 3),
+                            help="Mean Average Precision across IoU thresholds 0.5 to 0.95"
+                        )
+                        _progress_if_number(dataset_metrics.get('map_50_95'))
 
         # Image Classification Metrics
         st.markdown("Experiment Raw Data")
