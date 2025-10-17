@@ -24,7 +24,10 @@ st.set_page_config(
     page_icon="🪙",
     layout="wide")
 
-st.image("docs/patra-logo.png", width=250)
+col1, col2, col3 = st.columns(3)
+
+with col2:
+    st.image("docs/patra-logo.png", width=250)
 
 model_card_ids = kg.get_model_card_ids()
 if model_card_ids.empty:
