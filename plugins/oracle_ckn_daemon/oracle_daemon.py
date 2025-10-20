@@ -437,7 +437,7 @@ if __name__ == "__main__":
         time.sleep(1)
 
     # Configure Kafka producer.
-    kafka_conf = {'bootstrap.servers': KAFKA_BROKER, 'log_level': 0}
+    kafka_conf = {'bootstrap.servers': KAFKA_BROKER, 'log_level': 0, 'security.protocol': 'SSL'}
 
     logging.info("Connecting to the CKN broker at %s", KAFKA_BROKER)
 
