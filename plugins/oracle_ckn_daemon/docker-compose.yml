@@ -7,11 +7,11 @@ services:
     environment:
       - ORACLE_CSV_PATH=/oracle_logs/image_mapping_final.json
       - CKN_LOG_FILE=/oracle_logs/ckn.log
-      - CKN_KAFKA_BROKER=broker:29092
+      - CKN_KAFKA_BROKER=cknbroker.pods.icicleai.tapis.io:443
       - CKN_KAFKA_TOPIC=oracle-events
       - CAMERA_TRAPS_DEVICE_ID=test-device
       - USER_ID=neelesh
-      - EXPERIMENT_ID=tapis-docker-power-test1
+      - EXPERIMENT_ID=tapis-pods-test
       - EXPERIMENT_END_SIGNAL=test-end-signal
       - POWER_SUMMARY_FILE=/power_logs/power_summary_report.json
       - POWER_SUMMARY_TOPIC=cameratraps-power-summary
